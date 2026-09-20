@@ -246,6 +246,10 @@ def _pass(p: PlayRow, rng: random.Random, pos_of: PosOf, air_est: Callable[[Play
     cx = K.THIRD_X.get(p.pass_location or "middle", K.CENTER_X) + rng.uniform(-3, 3)
     if p.pass_location in (None, "middle"):
         cx = bx + (cx - K.CENTER_X) * 0.6
+    # A receiver can only be where his alignment lets him get to by the throw:
+    # keep the ball in the charted third when possible, never drag him across the field.
+    reach = 13.0 if back else 5.0 + 0.7 * max(0.0, air) if air < 15 else 8.0 + 0.4 * air
+    cx = min(target.start[0] + reach, max(target.start[0] - reach, cx))
     if air <= 0.5 and not back:
         cx = target.start[0] - (1.5 if target.start[0] > bx else -1.5)
     catch: Pt = (min(K.FIELD_W - 1.5, max(1.5, cx)), los + air)
@@ -534,43 +538,105 @@ def _punt_or_kickoff(p: PlayRow, rng: random.Random) -> Compiled:
         t_kick, hang, cam = 0.9, K.KICK_HANG, 60.0
         ball = Actor("ball", "BALL", "ball", "WR", [Key(0, *origin), Key(t_kick, *origin)])
         land_y = 45.0 + kd
-    land: Pt = (K.CENTER_X + rng.uniform(-13, 13), min(118.0, land_y))
-    ret = Actor("d-PR", "RET", "def", "WR", [Key(0, land[0] + rng.uniform(-4, 4), min(108.0, land[1] - 1))])
-    if p.play_type == "kickoff":
+    desc = p.desc.lower()
+    kickoff = p.play_type == "kickoff"
+    returned = bool(p.return_yards > 0 or (p.returner_id and p.touchdown))
+    fate = "return" if returned else next((v for k, v in (
+        ("blocked", "blocked"), ("touchback", "touchback"), ("fair catch", "fair catch"),
+        ("out of bounds", "oob"), ("downed", "downed")) if k in desc), "dead")
+    land_x = K.CENTER_X + rng.uniform(-13, 13)
+    if fate == "oob":
+        land_x = rng.choice((0.7, K.FIELD_W - 0.7))
+    land: Pt = (land_x, min(118.0, land_y))
+    if fate == "touchback":
+        land = (land_x, max(land[1], 112.0))
+    ret = Actor("d-PR", "RET", "def", "WR", [Key(0, K.CENTER_X + (land[0] - K.CENTER_X) * 0.5 + rng.uniform(-3, 3),
+                                                  min(108.0, land[1] - rng.uniform(0, 3)))])
+    if kickoff:
         defs.append(Actor("d-PR2", "RET2", "def", "WR", [Key(0, K.FIELD_W - ret.start[0], ret.start[1])]))
     t_land = t_kick + hang
+    cover = [a for a in off if a is not kicker]
+    blockers = [d for d in defs if not d.role.startswith("RET")]
+
+    if fate == "blocked":
+        hit = (bx + rng.uniform(-2, 2), los - 3.0)
+        t_land = t_kick + 0.35
+        _fly(ball, origin, hit, t_kick, t_land, 1.5)
+        ball.keys.append(Key(t_land + 1.1, hit[0] + rng.uniform(-4, 4), los - rng.uniform(5, 11), 0))
+        blocker = min(blockers, key=lambda d: abs(d.start[0] - hit[0]))
+        blocker.run_until([hit], 0.3, t_land)
+        for d in blockers:
+            if d is not blocker:
+                d.move((d.start[0] * 0.85 + bx * 0.15, los - rng.uniform(0.5, 4)), t_kick)
+        kicker.move((origin[0] + rng.uniform(-2, 2), origin[1] + 1.5), t_land + 1.0)
+        return Compiled(off + [kicker] + defs + [ret, ball], t_land + 1.7, cam, None, template="punt/blocked")
+
     _fly(ball, origin, land, t_kick, t_land, 7 + kd * 0.12)
-    t_end = t_land + 0.4
-    returned = p.return_yards > 0 or (p.returner_id and p.touchdown)
-    if returned and land[1] < 119:
+    t_end = t_land + 0.5
+    if returned:
         ret.run_until([land], t_kick, t_land)
         ret.involved, ret.player_id = True, p.returner_id
-        end = (land[0] + rng.uniform(-8, 8), 8.0 if p.touchdown else max(10.5, land[1] - p.return_yards))
+        end = (min(K.FIELD_W - 1.5, max(1.5, land[0] + rng.uniform(-8, 8))), 8.0 if p.touchdown else max(10.5, land[1] - p.return_yards))
         t_end = ret.run(_weave(land, end, rng), t_land, K.SPEED["WR"] * K.CARRY_FACTOR, accel=False)
         _follow(ball, ret, t_land, t_end)
+    elif fate == "fair catch":
+        ret.run_until([land], t_kick, t_land - 0.5)                     # camped under it
+        ret.involved, ret.player_id = True, p.returner_id
+        ball.keys.append(Key(t_end, *land))
     else:
-        ret.run_until([(land[0], min(land[1], 112))], t_kick, t_land)
-        ball.keys.append(Key(t_end, land[0], min(119.5, land[1] + 1.5), 0))
-    for a in off:                                           # coverage runs downfield
-        if a is kicker:
-            continue
-        a.run([(a.start[0] * 0.7 + land[0] * 0.3, min(land[1] - 6, a.start[1] + K.SPEED["LB"] * (t_land - t_kick)))], t_kick if p.play_type == "kickoff" else t_kick - 0.3, K.SPEED["LB"] * 0.9)
-    for d in defs:
-        if d.role.startswith("RET"):
-            continue
-        d.run([(d.start[0], d.start[1] + rng.uniform(6, 14))], t_kick, K.SPEED["LB"] * 0.6)
-    cover = [a for a in off if a is not kicker]
-    spot = ret.at(t_end)
+        bounce = 0.0 if fate == "oob" else rng.uniform(2, 6)
+        rest = (min(K.FIELD_W - 0.3, max(0.3, land[0] + rng.uniform(-1.5, 1.5))), min(119.5 if fate in ("touchback", "dead") else 109.4, land[1] + bounce))
+        t_end = t_land + 0.4 + bounce * 0.18
+        ball.keys.append(Key(t_end, *rest, 0))
+        away = (K.CENTER_X + (land[0] - K.CENTER_X) * 0.6, min(land[1] - 4, 108.0))      # lets it go
+        ret.run_until([away], t_kick, t_land)
+
+    # coverage: fan out into lanes, then squeeze toward the ball. Under the dynamic
+    # kickoff nobody on the line may move until the ball is fielded or lands.
+    t_go = t_land if kickoff else t_kick - 0.25
+    spot = ret.at(t_end) if returned else ball.at(t_end)
+    n = len(cover)
+    for i, a in enumerate(sorted(cover, key=lambda a: a.start[0])):
+        lane = 3.5 + i * (K.FIELD_W - 7) / max(1, n - 1)
+        if a.role in ("G1", "G2"):                          # gunners win outside, then hunt
+            lane = a.start[0]
+        speed = K.SPEED["WR" if a.role in ("G1", "G2") else "LB"] * rng.uniform(0.84, 0.97)
+        release = t_go + (0 if a.role in ("G1", "G2") or kickoff else rng.uniform(0.3, 0.9))   # linemen hold their block
+        squeeze = (land[0] + (lane - land[0]) * 0.55, land[1] - 7 - abs(i - (n - 1) / 2) * 1.2)
+        mid = (a.start[0] + (lane - a.start[0]) * 0.8, a.start[1] + (squeeze[1] - a.start[1]) * 0.45)
+        if squeeze[1] > a.start[1] + 1:
+            a.run([mid, squeeze], release, speed)
+    # return team: drop with the coverage, set a wall in front of the returner
+    for j, d in enumerate(blockers):
+        wall_y = land[1] - rng.uniform(9, 20)
+        tx = d.start[0] + (land[0] - d.start[0]) * rng.uniform(0.15, 0.45)
+        if wall_y > d.start[1] + 1 and not kickoff:
+            d.run([(tx, wall_y)], t_go + rng.uniform(0.1, 0.6), K.SPEED["LB"] * rng.uniform(0.7, 0.85))
+        if d.end_t > t_land:
+            d.cut(t_land)
+        if returned:                                        # lead the return a few steps
+            here = d.at(t_land)
+            d.hold(t_land)
+            dy = rng.uniform(1, 4) if kickoff else -min(6.0, p.return_yards * 0.4)      # kickoff: step up and engage
+            d.move((here[0] + (spot[0] - here[0]) * 0.25, here[1] + dy), t_end)
+
     tackler = None
     if returned and not p.touchdown and p.tackler_ids:
         tackler = min(cover, key=lambda a: dist(a.at(t_land), spot))
         tackler.cut(t_land) if tackler.end_t > t_land else tackler.hold(t_land)
+        tackler.move(toward(tackler.at(t_land), spot, dist(tackler.at(t_land), spot) * 0.5), (t_land + t_end) / 2)
         tackler.move(spot, t_end)
         tackler.involved, tackler.player_id = True, p.tackler_ids[0]
-    if returned:
-        _pursue(cover, spot, t_land, t_end, tackler)
-    return Compiled(off + [kicker] + defs + [ret, ball], t_end + 0.5, cam, None, los_line=p.play_type == "punt",
-                    template=f"{p.play_type}/{'return' if returned else 'dead'}")
+    if returned or fate in ("downed", "fair catch"):
+        ranked = sorted((a for a in cover if a is not tackler), key=lambda a: dist(a.at(t_land), spot))
+        for rank, a in enumerate(ranked):                   # nearest close in; the rest keep leverage
+            a.cut(t_land) if a.end_t > t_land else a.hold(t_land)
+            here = a.at(t_land)
+            reach = K.SPEED["LB"] * 0.85 * (t_end - t_land)
+            go = min(reach, max(0.0, dist(here, spot) - (2.0 + rank * 1.6)))
+            a.move(toward(here, spot, go), t_end) if go > 0.3 else a.hold(t_end)
+    return Compiled(off + [kicker] + defs + [ret, ball], t_end + 0.5, cam, None, los_line=not kickoff,
+                    template=f"{p.play_type}/{fate}")
 
 
 # ── entry point ────────────────────────────────────────────────────────────
@@ -586,8 +652,10 @@ def compile_play(p: PlayRow, pos_of: PosOf = lambda _id: None,
     for a in c.actors:
         if not a.keys:
             a.keys = [Key(0, K.CENTER_X, c.los)]
-        a.hold(c.duration)
         a.keys.sort(key=lambda k: k.t)
+        if a.end_t > c.duration:                        # the whistle stops everyone
+            a.cut(c.duration)
+        a.hold(c.duration)
         for k in a.keys:
             k.y = min(121.5, max(-1.5, k.y))
     return c

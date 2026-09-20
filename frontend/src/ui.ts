@@ -25,8 +25,8 @@ export class Ui {
   private youScore = new PixelLabel(4, "you");
   private themScore = new PixelLabel(4, "them");
   private delta = new PixelLabel(5, "gain");
-  private gtYou = { name: new PixelLabel(3, "you"), pts: new PixelLabel(4, "you") };
-  private gtThem = { name: new PixelLabel(3, "them"), pts: new PixelLabel(4, "them") };
+  private gtYou = { name: new PixelLabel(3, "you"), meta: new PixelLabel(2, "dim"), pts: new PixelLabel(4, "you") };
+  private gtThem = { name: new PixelLabel(3, "them"), meta: new PixelLabel(2, "dim"), pts: new PixelLabel(4, "them") };
   private cardName = new PixelLabel(4, "hot");
   private cardPts = new PixelLabel(5, "hot");
   private cardDelta = new PixelLabel(5, "gain");
@@ -40,8 +40,8 @@ export class Ui {
     $("you-score").appendChild(this.youScore.el);
     $("them-score").appendChild(this.themScore.el);
     $("delta").appendChild(this.delta.el);
-    $("gt-you").append(this.gtYou.name.el, this.gtYou.pts.el);
-    $("gt-them").append(this.gtThem.name.el, this.gtThem.pts.el);
+    $("gt-you").append(this.gtYou.name.el, this.gtYou.meta.el, this.gtYou.pts.el);
+    $("gt-them").append(this.gtThem.name.el, this.gtThem.meta.el, this.gtThem.pts.el);
     this.logo.set("RETRO//FFB");
     this.bust.className = "bust"; this.bust.width = this.bust.height = SP;
     $("scope").onclick = () => h.toggleScope();
@@ -51,7 +51,7 @@ export class Ui {
 
   private repaint(): void {
     for (const l of [this.logo, this.youScore, this.themScore, this.delta, this.gtYou.name, this.gtYou.pts,
-      this.gtThem.name, this.gtThem.pts, this.cardName, this.cardPts, this.cardDelta]) l.refresh();
+      this.gtThem.name, this.gtThem.pts, this.gtYou.meta, this.gtThem.meta, this.cardName, this.cardPts, this.cardDelta]) l.refresh();
     this.bustKey = "";
     if (this.state) this.render(this.state);
   }
@@ -140,8 +140,8 @@ export class Ui {
     $("lineup").innerHTML = rows.join("");
   }
 
-  private ghostTag(tag: { name: PixelLabel; pts: PixelLabel }, g: GhostInfo | null): void {
-    tag.name.set(g ? g.name : ""); tag.pts.set(g ? signed(g.points) : "");
+  private ghostTag(tag: { name: PixelLabel; meta: PixelLabel; pts: PixelLabel }, g: GhostInfo | null): void {
+    tag.name.set(g ? g.name : ""); tag.meta.set(g ? g.meta : ""); tag.pts.set(g ? signed(g.points) : "");
   }
 
   private active(a: ActiveCard | null): void {

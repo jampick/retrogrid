@@ -35,6 +35,8 @@ export class Field {
   private camTarget = 20;
   private wall = 0;                 // free-running seconds, for blinks
   scale = 3;
+  badge = "";                       // "REPLAY 2/5" — anything on screen that is not the live play says so
+  glow = true;                      // light-model pass; the contact sheet turns it off for density
 
   constructor(private canvas: HTMLCanvasElement) {
     this.buf.width = BW; this.buf.height = BH;
@@ -53,9 +55,17 @@ export class Field {
     this.play = play;
     this.t = settled ? play.duration + 30 : -PRE_ROLL;
     this.camY = this.camTarget = this.baseCam(play);
+    if (settled) {                     // land where the live camera would have ended up
+      const end = this.t;
+      for (this.t = 0; this.t < play.duration; ) this.tick(0.1);
+      this.t = end; this.camY = this.camTarget;
+    }
   }
 
   get current(): PlayFrame | null { return this.play; }
+  /** Seconds since the snap (negative during the pre-roll). */
+  get elapsed(): number { return this.t; }
+  seek(t: number): void { this.t = t; }
   get finished(): boolean { return !this.play || this.t >= this.play.duration; }
 
   private baseCam(p: PlayFrame): number {
@@ -229,6 +239,11 @@ export class Field {
     this.b.fillStyle = rgba(palette.role("bg"), 0.75); this.b.fillRect(0, 0, BW, 9);
     drawText(this.b, p.label, 3, 2, hot);
     drawText(this.b, p.situation, BW - 3 - textWidth(p.situation), 2, dim);
+    if (this.badge && (this.wall * 1.5) % 1 < 0.75) {
+      const w = textWidth(this.badge);
+      this.b.fillStyle = rgba(palette.role("bg"), 0.8); this.b.fillRect(BW - w - 7, 11, w + 6, 9);
+      drawText(this.b, this.badge, BW - w - 4, 13, palette.role("alert"));
+    }
     if (this.t >= p.duration && p.result) {
       const since = this.t - p.duration;
       const blink = since > 2.4 || (since * 5) % 1 < 0.6;
@@ -276,6 +291,7 @@ export class Field {
     o.globalCompositeOperation = "source-over"; o.globalAlpha = 1; o.filter = "none";
     o.drawImage(this.buf, 0, 0, w, h);
     o.imageSmoothingEnabled = true;
+    if (!this.glow) return;
     if (palette.light) {                       // PRINTOUT: ink bleed
       o.globalCompositeOperation = "multiply";
       o.filter = `blur(${Math.max(1, s * 0.5)}px)`; o.globalAlpha = 0.55;

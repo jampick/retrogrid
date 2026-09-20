@@ -78,6 +78,42 @@ def api_theme_poke() -> dict:
     return {"ok": True}
 
 
+@app.get("/api/plays/sample")
+def api_plays_sample(n: int = 24, seed: int = 0, family: str | None = None, viewer: str = "t01",
+                     play: str | None = None) -> JSONResponse:
+    from .console import sample_plays
+    return JSONResponse(sample_plays(max(1, min(n, 96)), seed, family, viewer, play))
+
+
+FLAGS = ROOT / "data" / "grammar_flags.json"
+
+
+def _flags() -> dict:
+    try:
+        return json.loads(FLAGS.read_text())
+    except (OSError, ValueError):
+        return {}
+
+
+@app.get("/api/plays/flags")
+def api_plays_flags() -> JSONResponse:
+    return JSONResponse(_flags())
+
+
+@app.post("/api/plays/flag")
+def api_plays_flag(body: dict) -> JSONResponse:
+    """The eyeball's worklist: plays whose animation looks wrong, with a note."""
+    flags = _flags()
+    pid = str(body.get("play_id", ""))
+    if body.get("on") and pid:
+        flags[pid] = {k: str(body.get(k, ""))[:400] for k in ("template", "desc", "note")}
+    else:
+        flags.pop(pid, None)
+    FLAGS.parent.mkdir(parents=True, exist_ok=True)
+    FLAGS.write_text(json.dumps(flags, indent=1))
+    return JSONResponse(flags)
+
+
 @app.websocket("/ws")
 async def ws_endpoint(ws: WebSocket) -> None:
     await ws.accept()
@@ -115,6 +151,11 @@ def index() -> FileResponse:
 @app.get("/themes")
 def sheet() -> FileResponse:
     return FileResponse(FRONTEND / "sheet.html")
+
+
+@app.get("/plays")
+def plays_sheet() -> FileResponse:
+    return FileResponse(FRONTEND / "plays.html")
 
 
 app.mount("/dist", StaticFiles(directory=FRONTEND / "dist", check_dir=False), name="dist")

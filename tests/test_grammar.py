@@ -47,3 +47,34 @@ def test_whole_slate_compiles_with_sane_timelines():
             ts = [k.t for k in a.keys]
             assert ts == sorted(ts) and all(0 <= k.x <= 53.4 for k in a.keys)
     assert fallbacks == 0
+
+
+@pytest.mark.skipif(not slate_available(), reason="no slate data")
+def test_kicks_have_a_fate_and_the_whistle_stops_everyone():
+    fates = set()
+    for p in load_slate().plays:
+        if p.play_type not in ("punt", "kickoff"):
+            continue
+        c = compile_play(p)
+        if c.template.endswith("/flag"):                    # no-play penalty on the kick
+            continue
+        fates.add(c.template)
+        assert all(abs(a.end_t - c.duration) < 1e-6 for a in c.actors), c.template
+    assert fates <= {f"{t}/{f}" for t in ("punt", "kickoff")
+                     for f in ("return", "touchback", "fair catch", "oob", "downed", "dead", "blocked")}
+    assert {"punt/return", "punt/fair catch", "kickoff/return", "kickoff/touchback"} <= fates
+
+
+@pytest.mark.skipif(not slate_available(), reason="no slate data")
+def test_short_targets_are_not_dragged_across_the_field():
+    for p in load_slate().plays:
+        if p.play_type != "pass" or p.sack or p.qb_scramble or not p.complete or p.interception:
+            continue
+        c = compile_play(p)
+        tgt = next((a for a in c.actors if a.involved and a.team == "off" and a.role != "QB"), None)
+        ball = next(a for a in c.actors if a.team == "ball")
+        if tgt is None or (p.air_yards or 0) >= 15 or tgt.role in ("RB", "FB"):
+            continue
+        apex = max(ball.keys, key=lambda k: k.z)
+        catch_x = next(k.x for k in ball.keys if k.t > apex.t and k.z <= 0.61)
+        assert abs(catch_x - tgt.start[0]) <= 5.0 + 0.7 * 15 + 0.1, c.template

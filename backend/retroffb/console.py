@@ -304,7 +304,7 @@ class Engine:
         return f"{p.yards_gained:+d}" + (" 1ST DOWN" if p.first_down else "")
 
     def heat_pick(self, s: Session, side: str, roster_key: str, now: float) -> dict | None:
-        best, best_score = None, -1.0
+        best, best_score, best_slot = None, -1.0, ""
         for slot in self.rosters[roster_key].starters():
             score = sum(abs(pts) * 0.5 ** ((now - t) / RECENT_HALF_LIFE) for t, pts in self.recent.get(slot.player_id, []) if t <= now)
             if slot.player_id.startswith("DEF-"):
@@ -314,12 +314,15 @@ class Engine:
             if slot.player_id == s.ghost[side]:
                 score *= 1.3                                  # hysteresis: ghosts should not flap
             if score > best_score:
-                best, best_score = slot.player_id, score
+                best, best_score, best_slot = slot.player_id, score, slot.slot
         if best is None:
             return None
         s.ghost[side] = best
         pts = self.state.points(best)
-        return {"player_id": best, "name": self.name(best), "points": round(pts, 1),
+        pl = self.directory.player(best)
+        pos = pl.position if pl else ""
+        meta = [best_slot if best_slot != pos else "", pos, pl.team if pl else "", f"#{pl.number}" if pl and pl.number else ""]
+        return {"player_id": best, "name": self.name(best), "points": round(pts, 1), "meta": " · ".join(m for m in meta if m),
                 "heat": max(0.0, min(1.0, pts / 24.0)), "sprite": self.sprite(best)}
 
     def statline(self, pid: str) -> str:
@@ -435,6 +438,59 @@ class Engine:
             elif a == "skip" and isinstance(v, (int, float)):
                 self.clock.seek(self.clock.now() + float(v))
             await s.send(self.state_frame(s))
+
+
+# ── grammar contact sheet (DESIGN §8 Validation) ───────────────────────────
+def play_family(p: PlayRow) -> str:
+    """Coarse bucket for the contact sheet's filter — one per choreography."""
+    t = p.play_type
+    if t == "no_play" or (p.penalty and "no play" in p.desc.lower()):
+        return "flag"
+    if t in ("punt", "kickoff", "qb_kneel", "qb_spike"):
+        return t.removeprefix("qb_")
+    if t in ("field_goal", "extra_point"):
+        return "placekick"
+    if p.sack:
+        return "sack"
+    if p.interception:
+        return "int"
+    if p.qb_scramble:
+        return "scramble"
+    if t == "pass":
+        air = p.air_yards if p.air_yards is not None else (20 if p.pass_length == "deep" else 5)
+        return "screen" if air <= 0.5 else "deep" if air >= 15 else "short"
+    if t == "run":
+        return "run"
+    return "other"
+
+
+def sample_plays(n: int = 24, seed: int = 0, family: str | None = None, viewer: str = "t01",
+                 only: str | None = None) -> dict:
+    """N seeded-random compiled plays from the slate, as ordinary PlayFrames."""
+    import random
+    if not engine:
+        return {"plays": [], "families": {}}
+    counts: dict[str, int] = {}
+    pool = []
+    for p in engine.slate.plays:
+        f = play_family(p)
+        if p.touchdown:
+            counts["td"] = counts.get("td", 0) + 1
+        counts[f] = counts.get(f, 0) + 1
+        if only:
+            if p.play_id == only:
+                pool.append(p)
+        elif family in (None, "", "all", f) or (family == "td" and p.touchdown):
+            pool.append(p)
+    rng = random.Random(seed)
+    picks = pool if len(pool) <= n else rng.sample(pool, n)
+    s = Session(ws=None, viewer=viewer if viewer in engine.teams else "t01")    # type: ignore[arg-type]
+    frames = []
+    for p in picks:
+        f = engine.play_frame(s, p, focus=False, alert=False)
+        f["family"] = play_family(p)
+        frames.append(f)
+    return {"plays": frames, "families": dict(sorted(counts.items())), "pool": len(pool)}
 
 
 engine: Engine | None = None

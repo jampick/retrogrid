@@ -2,8 +2,8 @@
   "name": "retroffb-frontend",
   "private": true,
   "scripts": {
-    "build": "esbuild frontend/src/main.ts --bundle --sourcemap --target=es2022 --outfile=frontend/dist/app.js",
-    "watch": "esbuild frontend/src/main.ts --bundle --sourcemap --target=es2022 --outfile=frontend/dist/app.js --watch=forever",
+    "build": "esbuild app=frontend/src/main.ts sheet=frontend/src/sheet.ts --bundle --sourcemap --target=es2022 --outdir=frontend/dist",
+    "watch": "esbuild app=frontend/src/main.ts sheet=frontend/src/sheet.ts --bundle --sourcemap --target=es2022 --outdir=frontend/dist --watch=forever",
     "check": "tsc --noEmit -p frontend"
   },
   "devDependencies": {

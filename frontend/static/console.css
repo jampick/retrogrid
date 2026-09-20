@@ -92,9 +92,7 @@ h2 em { font-style: normal; order: 2; letter-spacing: .12em; cursor: pointer; }
 /* ── stage ──────────────────────────────────────────────────────────── */
 #stage { grid-area: stage; position: relative; min-width: 0; min-height: 0; }
 #field { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); image-rendering: pixelated; }
-.ghost-tag { position: absolute; bottom: 10px; display: flex; flex-direction: column; gap: 6px; }
-.ghost-tag.you { left: 8px; align-items: flex-start; }
-.ghost-tag.them { right: 8px; align-items: flex-end; }
+.ghost-tag { position: absolute; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; white-space: nowrap; pointer-events: none; }
 
 #banner {
   position: absolute; z-index: 5; top: 10px; left: 50%; transform: translate(-50%, -140%);

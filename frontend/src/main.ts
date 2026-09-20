@@ -18,6 +18,14 @@ let state: ConsoleState | null = null;
 let pendingThreat: Threat | null = null;
 const queue: PlayFrame[] = [];
 
+
+// Recent plays, so the dead time between snaps can be spent re-watching (CYCLE).
+const HISTORY = 8, LINGER_LIVE = 5, LINGER_REPLAY = 2.2;
+const recent: PlayFrame[] = [];
+let cycle = localStorage.getItem("ffb.cycle") !== "0";
+let replayAt = -1;                      // index into recent; -1 = showing live
+let idle = 0;
+
 const send = (m: object) => ws?.readyState === 1 && ws.send(JSON.stringify(m));
 
 const field = new Field($("field") as HTMLCanvasElement);
@@ -84,6 +92,39 @@ function viewerPicker(): void {
     (k) => { localStorage.setItem("ffb.viewer", k); send({ type: "viewer", team_key: k }); });
 }
 
+// ── live + replay ────────────────────────────────────────────────────────────
+const DULL = /\/(flag|kneel|spike|hold)$|^fallback$/;
+
+function present(f: PlayFrame): void {
+  if (f.settled) recent.length = 0;                            // focus moved: old game's plays are stale
+  const dup = recent.findIndex((r) => r.play_id === f.play_id);
+  if (dup >= 0) recent.splice(dup, 1);
+  recent.push(f); while (recent.length > HISTORY) recent.shift();
+  replayAt = -1; idle = 0; field.badge = "";
+  field.show(f, f.settled);
+}
+
+function replay(step: number, auto = false): void {
+  if (!recent.length) return;
+  let i = replayAt < 0 ? recent.length - 1 : replayAt;
+  for (let n = 0; n < recent.length; n++) {
+    i = (i + step + recent.length) % recent.length;
+    if (!auto || !DULL.test(recent[i].template)) break;
+  }
+  if (auto && DULL.test(recent[i].template)) return;
+  replayAt = i; idle = 0;
+  field.badge = `REPLAY ${recent.length - i}/${recent.length}`;
+  field.show(recent[i]);
+}
+
+function backToLive(): void {
+  if (replayAt < 0 || !recent.length) return;
+  replayAt = -1; idle = 0; field.badge = "";
+  field.show(recent[recent.length - 1], true);
+}
+
+function cycleLabel(): void { $("cycle").textContent = cycle ? "ON" : "OFF"; }
+
 // ── frames ───────────────────────────────────────────────────────────────────
 function onFrame(f: Frame): void {
   switch (f.type) {
@@ -103,9 +144,8 @@ function onFrame(f: Frame): void {
       break;
     case "play":
       if (!f.focus) break;
-      if (f.settled) { queue.length = 0; field.show(f, true); }
-      else if (f.alert) { queue.length = 0; field.show(f); }          // tapped or auto-directed
-      else if (field.finished) field.show(f);
+      if (f.settled || f.alert) { queue.length = 0; present(f); }     // catch-up, tapped or auto-directed
+      else if (field.finished || replayAt >= 0) present(f);           // live always pre-empts a replay
       else { queue.push(f); while (queue.length > 2) queue.shift(); }
       break;
     case "banner":
@@ -132,6 +172,11 @@ function layout(): void {
   const cy = stage.top + stage.height * 0.5;
   ghosts.anchors.you = { x: stage.left + margin * 0.42, y: cy };
   ghosts.anchors.them = { x: stage.right - margin * 0.42, y: cy };
+  for (const side of ["you", "them"] as const) {             // name plate rides under its hologram
+    const tag = $(`gt-${side}`);
+    tag.style.left = `${ghosts.anchors[side].x - stage.left}px`;
+    tag.style.top = `${stage.height * 0.5 + 48 * ghosts.scale + 10}px`;
+  }
 }
 
 let last = performance.now();
@@ -139,7 +184,11 @@ function frame(now: number): void {
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
   requestAnimationFrame(frame);
   if (!palette.theme) return;                 // nothing may draw before a palette exists
-  if (field.finished && queue.length) field.show(queue.shift()!);
+  if (field.finished && queue.length) present(queue.shift()!);
+  else if (field.finished && cycle && !pickerOpen()) {
+    idle += dt;
+    if (idle > (replayAt < 0 ? LINGER_LIVE : LINGER_REPLAY)) replay(-1, true);
+  }
   field.tick(dt); ghosts.tick(dt);
   field.draw(); ghosts.draw();
 }
@@ -162,6 +211,10 @@ window.addEventListener("keydown", (e) => {
   else if (k === "arrowright") send({ type: "sim", action: "skip", value: 300 });
   else if (k === "arrowleft") send({ type: "sim", action: "skip", value: -300 });
   else if (k === "a") send({ type: "auto" });
+  else if (k === "c") { cycle = !cycle; localStorage.setItem("ffb.cycle", cycle ? "1" : "0"); cycleLabel(); if (!cycle) backToLive(); }
+  else if (k === "[" || k === ",") replay(-1);
+  else if (k === "]" || k === ".") replay(1);
+  else if (k === "\\" || k === "/") backToLive();
   else if (k === "m") sting(toggleMute() ? "hurt" : "help");
   else if (k === "enter" && bannerVisible() && pendingThreat) { send({ type: "focus_play", play_id: pendingThreat.play_id }); hideBanner(); }
   else if (k === "escape") hideBanner();
@@ -169,6 +222,7 @@ window.addEventListener("keydown", (e) => {
 $("clockbox").addEventListener("dblclick", themePicker);
 
 palette.subscribe(layout);
+cycleLabel();
 connect();
 layout();
 requestAnimationFrame(frame);

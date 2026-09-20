@@ -41,7 +41,7 @@ export interface Threat {
 export interface LineupCell { player_id: string; name: string; points: number; live: boolean }
 export interface LineupRow { slot: string; you: LineupCell; them: LineupCell; losing: boolean }
 
-export interface GhostInfo { player_id: string; name: string; points: number; heat: number; sprite: string | null }
+export interface GhostInfo { player_id: string; name: string; meta: string; points: number; heat: number; sprite: string | null }
 
 export interface ActiveCard {
   player_id: string;

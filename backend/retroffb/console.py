@@ -100,15 +100,26 @@ class Engine:
         self.deltas_by_play[play.play_id] = deltas
         self.last_by_game[play.game_id] = play
         for d in deltas:
-            if d.points:
-                self.recent.setdefault(d.player_id, []).append((play.sim_time, d.points))
+            pts = self.event_points(d)
+            if pts:
+                self.recent.setdefault(d.player_id, []).append((play.sim_time, pts))
         if play.play_type == "pass" and play.receiver_id and not play.sack:
             a = self.aux.setdefault(play.receiver_id, {"tgt": 0, "air": 0.0})
             a["tgt"] += 1
             a["air"] += play.air_yards or 0.0
         flipped = {k for k, b in self.boards.items() if b.update()}
-        real = [d for d in deltas if d.stats.keys() - {"pts_allowed"} or abs(d.points) < 9.9 or play.desc]
+        real = [d for d in deltas if self.event_points(d)]    # no "game open +10" / "allows 3" noise
         return self.hub.ingest(play, real, play.sim_time, flipped)
+
+    DEF_EVENTS = ("def_sack", "def_int", "def_fum_rec", "def_td", "def_safety", "def_block")
+
+    def event_points(self, d: StatDelta) -> float:
+        """Points from things that *happened*. A defence's points-allowed tier is
+        bookkeeping: it moves the score but is not a play anyone made."""
+        if not d.player_id.startswith("DEF-"):
+            return d.points
+        rules = self.league.league().scoring_rules
+        return sum(rules.get(k, 0.0) * d.stats.get(k, 0.0) for k in self.DEF_EVENTS)
 
     def rebuild(self) -> None:
         now = self.clock.now()
@@ -296,7 +307,10 @@ class Engine:
         best, best_score = None, -1.0
         for slot in self.rosters[roster_key].starters():
             score = sum(abs(pts) * 0.5 ** ((now - t) / RECENT_HALF_LIFE) for t, pts in self.recent.get(slot.player_id, []) if t <= now)
-            score += self.state.points(slot.player_id) * 0.04
+            if slot.player_id.startswith("DEF-"):
+                score *= 0.5                                  # a shield is a poor ghost; faces first
+            else:
+                score += self.state.points(slot.player_id) * 0.04
             if slot.player_id == s.ghost[side]:
                 score *= 1.3                                  # hysteresis: ghosts should not flap
             if score > best_score:

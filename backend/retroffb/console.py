@@ -142,7 +142,14 @@ class Engine:
     async def ticker(self) -> None:
         while True:
             await asyncio.sleep(0.5)
+            status = {g.id: g.status for g in self.provider.games_at(self.clock.now())}
             for s in list(self.sessions):
+                if s.auto and status.get(s.focus or "") != "live" and "live" in status.values():
+                    nxt = self.pick_focus(s, live_only=True)       # don't sit on a halftime feed
+                    if nxt and nxt != s.focus:
+                        s.focus = nxt
+                        await self.catch_up(s)
+                        continue
                 await s.send(self.state_frame(s))
 
     # ── per-viewer delivery ───────────────────────────────────────────────
@@ -170,7 +177,7 @@ class Engine:
             await s.send(self.play_frame(s, last, focus=True, alert=False, settled=True))
         await s.send(self.state_frame(s))
 
-    def pick_focus(self, s: Session) -> str | None:
+    def pick_focus(self, s: Session, live_only: bool = False) -> str | None:
         """Start on the live game carrying the most of the viewer's matchup."""
         now, stake = self.clock.now(), {}
         mine = self.rosters[s.viewer].starters() + self.rosters[self.opponent[s.viewer]].starters()
@@ -179,7 +186,7 @@ class Engine:
             g = self.team_game.get(p.team) if p else None
             if g:
                 stake[g] = stake.get(g, 0) + 1
-        live = [g for g in self.provider.games_at(now) if g.status in ("live", "half")]
+        live = [g for g in self.provider.games_at(now) if g.status in (("live",) if live_only else ("live", "half"))]
         pool = live or self.provider.games_at(now)
         return max(pool, key=lambda g: (stake.get(g.id, 0), -g.kickoff)).id if pool else None
 

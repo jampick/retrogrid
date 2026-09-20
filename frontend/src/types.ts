@@ -1,4 +1,4 @@
-// Wire types. Mirrors backend/retroffb/console.py frames.
+// Wire types. Mirrors backend/retrogrid/console.py frames.
 
 export type RoleName = "bg" | "rail" | "grid" | "you" | "them" | "alert" | "gain" | "hot" | "dim";
 

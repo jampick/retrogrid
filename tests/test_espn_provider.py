@@ -2,11 +2,11 @@
 import asyncio
 
 from conftest import needs_nflverse
-from retroffb.models import Game
-from retroffb.providers import espn
-from retroffb.providers.directory import NflversePlayerDirectory
-from retroffb.providers.slate import Slate
-from retroffb.sim.clock import SimClock
+from retrogrid.models import Game
+from retrogrid.providers import espn
+from retrogrid.providers.directory import NflversePlayerDirectory
+from retrogrid.providers.slate import Slate
+from retrogrid.sim.clock import SimClock
 
 G = {"event": "1", "id": "2026_02_DET_BUF", "home": "BUF", "away": "DET", "status": "live", "teams": {"2": "BUF", "8": "DET"}}
 

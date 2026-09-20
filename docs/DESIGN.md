@@ -1,4 +1,4 @@
-# RETRO//FFB — Design Document
+# RETRO//GRID — Design Document
 
 *Last updated 2026-09-20 (Week 3). Status: design settled; Phases 0–6 have a working first pass (see README).*
 
@@ -15,7 +15,7 @@ you would never otherwise watch is the single highest-value event on the
 entire slate, for you, at that moment. No existing product tells you that
 as it happens, in a form you can read in half a second.
 
-RETRO//FFB does. It watches every live game, ranks every play by its impact
+RETRO//GRID does. It watches every live game, ranks every play by its impact
 on *your* matchup, and renders the ones that matter as neon tactical
 diagrams. Everything on screen is denominated in fantasy points, never in
 the actual game score.
@@ -188,8 +188,8 @@ console mock, one page. Same doctrine as §8 — the eyeball is the metric.
 
 ### Hand-tuned overrides
 
-The resolver is the floor, not the ceiling. An optional `retroffb.toml`
-beside a theme's `colors.toml` (or in `~/.config/retroffb/themes/<slug>.toml`)
+The resolver is the floor, not the ceiling. An optional `retrogrid.toml`
+beside a theme's `colors.toml` (or in `~/.config/retrogrid/themes/<slug>.toml`)
 pins any role to a hex or to another key. Omarchy keeps unknown files in
 theme directories, so theme authors can ship one.
 
@@ -251,10 +251,10 @@ bundled pixel face — they live on the 240×256 grid and must not reflow.
 
 ### Window
 
-Runs as a chromeless app window (`chromium --app`, class `retroffb`) so it
+Runs as a chromeless app window (`chromium --app`, class `retrogrid`) so it
 tiles like a native Omarchy app, no tabs or URL bar. Hyprland's default
 window opacity lets wallpaper bleed through near-black; a one-line opacity
-window rule for class `retroffb` is documented but left to the user —
+window rule for class `retrogrid` is documented but left to the user —
 some will prefer the bleed.
 
 ---
@@ -264,7 +264,7 @@ some will prefer the bleed.
 Desktop first. Phone layout deferred (see §11).
 
 ```
-┌─ RETRO//FFB ──────────────────────────────────  WK3 · SUN 16:42 ┐
+┌─ RETRO//GRID ──────────────────────────────────  WK3 · SUN 16:42 ┐
 │ jampick 78.4 ████████████░░░░░░░░ 91.2 DOOMSDAY_DEVICE  ▼12.8              │
 ├──────────────┬──────────────────────────────────────┬──────────────────────┤
 │ FEEDS        │░▒▒▒░                            ░▒▒▒░│ YOU          THEM    │
@@ -694,7 +694,7 @@ from React.
 - **TV cast mode.** Same renderer with rails dropped and type scaled up.
   Cheap, and the version where the aesthetic lands hardest.
 - **Punt rendering.** Low priority.
-- **`retroffb-neon` Omarchy theme.** The inverse trick: package the `NEON`
+- **`retrogrid-neon` Omarchy theme.** The inverse trick: package the `NEON`
   palette as an installable Omarchy theme so the whole desktop can match the
   console on Sundays.
 

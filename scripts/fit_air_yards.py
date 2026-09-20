@@ -3,7 +3,7 @@
     PYTHONPATH=backend .venv/bin/python scripts/fit_air_yards.py \
         --train 2019 2020 2021 2022 2023 2024 --holdout 2025
 
-Writes backend/retroffb/parser/air_yards_prior.json: for every backoff cell
+Writes backend/retrogrid/parser/air_yards_prior.json: for every backoff cell
 with at least --min-n plays, the median charted air yards and the cell count.
 Missing seasons are downloaded into data/nflverse/.  Reports MAE on the
 held-out season against two baselines.
@@ -22,7 +22,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from retroffb.parser import air_yards as ay  # noqa: E402
+from retrogrid.parser import air_yards as ay  # noqa: E402
 
 URL = "https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_{y}.parquet"
 COLS = ["play_type", "two_point_attempt", "sack", "air_yards", "pass_length", "pass_location",

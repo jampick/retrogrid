@@ -1,11 +1,11 @@
-"""Focused cases for retroffb.parser — real NFL play descriptions, no data files."""
+"""Focused cases for retrogrid.parser — real NFL play descriptions, no data files."""
 from __future__ import annotations
 
 import pytest
 
-from retroffb.models import PlayRow
-from retroffb.parser import ParsedDesc, apply_to_row, estimate_air_yards, parse_desc
-from retroffb.parser.air_yards import cell_keys, yards_bucket
+from retrogrid.models import PlayRow
+from retrogrid.parser import ParsedDesc, apply_to_row, estimate_air_yards, parse_desc
+from retrogrid.parser.air_yards import cell_keys, yards_bucket
 
 
 def test_design_doc_example():

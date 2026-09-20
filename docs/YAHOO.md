@@ -17,15 +17,15 @@ app may read the Fantasy API. Nothing to fix on our side until that is approved.
 # .env (gitignored)
 YAHOO_CLIENT_ID=...
 YAHOO_CLIENT_SECRET=...
-RETROFFB_LEAGUE=yahoo             # or export it per run
+RETROGRID_LEAGUE=yahoo             # or export it per run
 # YAHOO_REDIRECT_URI=https://localhost:8443/callback   (default: oob)
 
-scripts/yahoo_auth.py             # once: sign in, pick the league
-scripts/yahoo_auth.py --check --week 2   # print league, rules, lineups, join misses
+retrogrid yahoo-auth             # once: sign in, pick the league
+retrogrid yahoo-auth --check --week 2   # print league, rules, lineups, join misses
 scripts/live.sh                   # console on your real league
 ```
 
-`RETROFFB_YAHOO_REPLAY=1` serves everything from `data/yahoo/raw/` (offline dev).
+`RETROGRID_YAHOO_REPLAY=1` serves everything from `data/yahoo/raw/` (offline dev).
 Pieces: `providers/yahoo_api.py` (flattener, token, cached GET),
 `providers/yahoo.py` (provider, stat map, player join), `providers/league.py`
 (factory + default viewer), `Engine.load_league / league_pump / log_drift`.
@@ -55,7 +55,7 @@ user's actual Yahoo league. DESIGN §9 and §12 are the contract — read them f
 
 ## Build order (stubs first, as always)
 
-1. `scripts/yahoo_auth.py` — one-time OAuth2 authorization-code flow; stores
+1. `retrogrid yahoo-auth` — one-time OAuth2 authorization-code flow; stores
    `data/yahoo/token.json` (access + refresh). Access tokens last 1 h; refresh
    on 401 and ahead of expiry. **One token pulls the whole league** (§12).
 2. `providers/yahoo.py` — `YahooLeagueProvider` implementing `LeagueProvider`
@@ -78,7 +78,7 @@ user's actual Yahoo league. DESIGN §9 and §12 are the contract — read them f
    through `PlayerDirectory`. DEF: Yahoo team-defence players -> `DEF-<TEAM>`
    by editorial team abbr (mind WAS/WSH, LA/LAR, JAX/JAC). Report unmatched
    players loudly at startup; a silent miss is a player who never scores.
-4. Wire-up: `RETROFFB_LEAGUE=yahoo` picks the provider in `console.Engine`.
+4. Wire-up: `RETROGRID_LEAGUE=yahoo` picks the provider in `console.Engine`.
    Viewer default becomes the user's own team (`is_owned_by_current_login`).
    Today `USER_TEAM = "t01"` and `Session.viewer = "t01"` are hardcoded —
    those need to come from the provider.

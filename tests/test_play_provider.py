@@ -5,10 +5,10 @@ from typing import AsyncIterator
 
 import pytest
 
-from retroffb.models import PlayRow
-from retroffb.providers.nflverse_plays import SlatePlayProvider
-from retroffb.providers.slate import Slate, load_slate
-from retroffb.sim.clock import SimClock
+from retrogrid.models import PlayRow
+from retrogrid.providers.nflverse_plays import SlatePlayProvider
+from retrogrid.providers.slate import Slate, load_slate
+from retrogrid.sim.clock import SimClock
 
 from conftest import needs_slate
 

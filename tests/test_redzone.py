@@ -4,8 +4,8 @@ from __future__ import annotations
 import asyncio
 
 from conftest import needs_slate
-from retroffb.models import PlayRow
-from retroffb.scoring.drive import DriveTracker
+from retrogrid.models import PlayRow
+from retrogrid.scoring.drive import DriveTracker
 
 
 def play(seq: int, yl: int, gain: int = 0, team: str = "KC", **kw) -> PlayRow:
@@ -45,9 +45,9 @@ def test_drive_resolutions():
 
 @needs_slate
 def test_director_rides_a_drive_then_cuts(monkeypatch):
-    monkeypatch.setenv("RETROFFB_LEAGUE", "")
-    monkeypatch.setenv("RETROFFB_START", "5400")
-    from retroffb import console
+    monkeypatch.setenv("RETROGRID_LEAGUE", "")
+    monkeypatch.setenv("RETROGRID_START", "5400")
+    from retrogrid import console
 
     async def go():
         e = console.Engine()

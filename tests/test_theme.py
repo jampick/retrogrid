@@ -4,9 +4,9 @@ import tomllib
 
 import pytest
 
-from retroffb.theme import color as c
-from retroffb.theme.provider import BUNDLED_DIR, BundledThemeProvider, OmarchyThemeProvider
-from retroffb.theme.resolver import ROLES, resolve
+from retrogrid.theme import color as c
+from retrogrid.theme.provider import BUNDLED_DIR, BundledThemeProvider, OmarchyThemeProvider
+from retrogrid.theme.resolver import ROLES, resolve
 
 THEMES = sorted(BUNDLED_DIR.glob("*.toml"))
 

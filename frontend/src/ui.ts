@@ -48,7 +48,7 @@ export class Ui {
     $("delta").appendChild(this.delta.el);
     $("gt-you").append(this.gtYou.name.el, this.gtYou.meta.el, this.gtYou.pts.el);
     $("gt-them").append(this.gtThem.name.el, this.gtThem.meta.el, this.gtThem.pts.el);
-    this.logo.set("RETRO//NFL");
+    this.logo.set("RETRO//GRID");
     this.bust.className = "bust"; this.bust.width = this.bust.height = SP;
     $("scope").onclick = () => h.toggleScope();
     $("scrub").onclick = (e) => h.seek(e.clientX / window.innerWidth);
@@ -65,7 +65,7 @@ export class Ui {
   render(s: ConsoleState): void {
     this.state = s;
     const root = document.documentElement;
-    if (root.dataset.mode !== s.mode) { root.dataset.mode = s.mode; this.logo.set(s.mode === "ffb" ? "RETRO//FFB" : "RETRO//NFL"); }
+    if (root.dataset.mode !== s.mode) { root.dataset.mode = s.mode; this.logo.set(s.mode === "ffb" ? "RETRO//GRID" : "RETRO//GRID"); }
     root.dataset.rail = s.mode === "ffb" ? this.rail : "chatter";
     this.status(s); this.feeds(s); this.threats(s); this.lineup(s); this.chatter(s); this.keys(s);
     this.ghostTag(this.gtYou, s.ghosts.you); this.ghostTag(this.gtThem, s.ghosts.them);

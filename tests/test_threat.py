@@ -3,10 +3,10 @@ from __future__ import annotations
 
 import pytest
 
-from retroffb.models import Game, Matchup, Player, PlayRow, Roster, RosterSlot, StatDelta
-from retroffb.scoring.engine import ScoringState
-from retroffb.scoring.matchup import MatchupBoard
-from retroffb.scoring.threat import (HEADLINE_MAX, LeagueIndex, ThreatBoard, ThreatHub,
+from retrogrid.models import Game, Matchup, Player, PlayRow, Roster, RosterSlot, StatDelta
+from retrogrid.scoring.engine import ScoringState
+from retrogrid.scoring.matchup import MatchupBoard
+from retrogrid.scoring.threat import (HEADLINE_MAX, LeagueIndex, ThreatBoard, ThreatHub,
                                      headline)
 
 _seq = iter(range(1, 10_000))

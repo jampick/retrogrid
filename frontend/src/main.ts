@@ -271,5 +271,5 @@ cycleLabel();
 connect();
 layout();
 requestAnimationFrame(frame);
-if (!MINI) void boot(["RETRO//NFL  TACTICAL GAMEDAY CONSOLE", "PHOSPHOR ............ OK", "FEED UPLINK ......... OK", "CROWD TAP ........... OK", "ACTION MATRIX ....... ARMED"]);
+if (!MINI) void boot(["RETRO//GRID  TACTICAL GAMEDAY CONSOLE", "PHOSPHOR ............ OK", "FEED UPLINK ......... OK", "CROWD TAP ........... OK", "ACTION MATRIX ....... ARMED"]);
 else $("boot").remove();

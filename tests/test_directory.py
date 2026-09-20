@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from retroffb.providers.directory import NflversePlayerDirectory, derive_short
+from retrogrid.providers.directory import NflversePlayerDirectory, derive_short
 
 from conftest import needs_nflverse
 

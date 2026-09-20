@@ -1,0 +1,3562 @@
+[
+ {
+  "id": "00-0034857",
+  "name": "Josh Allen",
+  "position": "QB",
+  "team": "BUF",
+  "pre_points": 320.02,
+  "pre_games": 13,
+  "week_points": 24.52,
+  "active": true
+ },
+ {
+  "id": "00-0036223",
+  "name": "Jonathan Taylor",
+  "position": "RB",
+  "team": "IND",
+  "pre_points": 291.5,
+  "pre_games": 13,
+  "week_points": 11.6,
+  "active": true
+ },
+ {
+  "id": "00-0033280",
+  "name": "Christian McCaffrey",
+  "position": "RB",
+  "team": "SF",
+  "pre_points": 286.0,
+  "pre_games": 13,
+  "week_points": 15.2,
+  "active": true
+ },
+ {
+  "id": "00-0033873",
+  "name": "Patrick Mahomes",
+  "position": "QB",
+  "team": "KC",
+  "pre_points": 282.12,
+  "pre_games": 13,
+  "week_points": 14.06,
+  "active": true
+ },
+ {
+  "id": "00-0039139",
+  "name": "Jahmyr Gibbs",
+  "position": "RB",
+  "team": "DET",
+  "pre_points": 278.6,
+  "pre_games": 13,
+  "week_points": 7.8,
+  "active": true
+ },
+ {
+  "id": "00-0033077",
+  "name": "Dak Prescott",
+  "position": "QB",
+  "team": "DAL",
+  "pre_points": 269.28,
+  "pre_games": 13,
+  "week_points": 11.96,
+  "active": true
+ },
+ {
+  "id": "00-0039851",
+  "name": "Drake Maye",
+  "position": "QB",
+  "team": "NE",
+  "pre_points": 265.08,
+  "pre_games": 13,
+  "week_points": 21.5,
+  "active": true
+ },
+ {
+  "id": "00-0026498",
+  "name": "Matthew Stafford",
+  "position": "QB",
+  "team": "LA",
+  "pre_points": 263.16,
+  "pre_games": 13,
+  "week_points": 21.92,
+  "active": true
+ },
+ {
+  "id": "00-0036389",
+  "name": "Jalen Hurts",
+  "position": "QB",
+  "team": "PHI",
+  "pre_points": 255.86,
+  "pre_games": 13,
+  "week_points": 22.9,
+  "active": true
+ },
+ {
+  "id": "00-0039918",
+  "name": "Caleb Williams",
+  "position": "QB",
+  "team": "CHI",
+  "pre_points": 244.12,
+  "pre_games": 13,
+  "week_points": 18.98,
+  "active": true
+ },
+ {
+  "id": "00-0038543",
+  "name": "Jaxon Smith-Njigba",
+  "position": "WR",
+  "team": "SEA",
+  "pre_points": 242.9,
+  "pre_games": 13,
+  "week_points": 14.8,
+  "active": true
+ },
+ {
+  "id": "00-0036355",
+  "name": "Justin Herbert",
+  "position": "QB",
+  "team": "LAC",
+  "pre_points": 242.14,
+  "pre_games": 13,
+  "week_points": 11.4,
+  "active": true
+ },
+ {
+  "id": "00-0039732",
+  "name": "Bo Nix",
+  "position": "QB",
+  "team": "DEN",
+  "pre_points": 239.56,
+  "pre_games": 13,
+  "week_points": 29.08,
+  "active": true
+ },
+ {
+  "id": "00-0033106",
+  "name": "Jared Goff",
+  "position": "QB",
+  "team": "DET",
+  "pre_points": 232.76,
+  "pre_games": 13,
+  "week_points": 25.52,
+  "active": true
+ },
+ {
+  "id": "00-0036971",
+  "name": "Trevor Lawrence",
+  "position": "QB",
+  "team": "JAX",
+  "pre_points": 227.3,
+  "pre_games": 13,
+  "week_points": 44.3,
+  "active": true
+ },
+ {
+  "id": "00-0036264",
+  "name": "Jordan Love",
+  "position": "QB",
+  "team": "GB",
+  "pre_points": 221.42,
+  "pre_games": 13,
+  "week_points": 15.94,
+  "active": true
+ },
+ {
+  "id": "00-0037248",
+  "name": "James Cook",
+  "position": "RB",
+  "team": "BUF",
+  "pre_points": 220.0,
+  "pre_games": 13,
+  "week_points": 30.1,
+  "active": true
+ },
+ {
+  "id": "00-0039075",
+  "name": "Puka Nacua",
+  "position": "WR",
+  "team": "LA",
+  "pre_points": 212.4,
+  "pre_games": 12,
+  "week_points": 23.4,
+  "active": true
+ },
+ {
+  "id": "00-0037247",
+  "name": "George Pickens",
+  "position": "WR",
+  "team": "DAL",
+  "pre_points": 206.9,
+  "pre_games": 13,
+  "week_points": 4.8,
+  "active": true
+ },
+ {
+  "id": "00-0034869",
+  "name": "Sam Darnold",
+  "position": "QB",
+  "team": "SEA",
+  "pre_points": 200.68,
+  "pre_games": 13,
+  "week_points": 11.34,
+  "active": true
+ },
+ {
+  "id": "00-0036997",
+  "name": "Javonte Williams",
+  "position": "RB",
+  "team": "DAL",
+  "pre_points": 193.5,
+  "pre_games": 13,
+  "week_points": 15.1,
+  "active": true
+ },
+ {
+  "id": "00-0036963",
+  "name": "Amon-Ra St. Brown",
+  "position": "WR",
+  "team": "DET",
+  "pre_points": 193.0,
+  "pre_games": 13,
+  "week_points": 34.9,
+  "active": true
+ },
+ {
+  "id": "00-0035700",
+  "name": "Josh Jacobs",
+  "position": "RB",
+  "team": "GB",
+  "pre_points": 192.3,
+  "pre_games": 12,
+  "week_points": 22.2,
+  "active": true
+ },
+ {
+  "id": "00-0037840",
+  "name": "Kyren Williams",
+  "position": "RB",
+  "team": "LA",
+  "pre_points": 189.9,
+  "pre_games": 13,
+  "week_points": 21.3,
+  "active": true
+ },
+ {
+  "id": "00-0037744",
+  "name": "Trey McBride",
+  "position": "TE",
+  "team": "ARI",
+  "pre_points": 188.2,
+  "pre_games": 13,
+  "week_points": 31.4,
+  "active": true
+ },
+ {
+  "id": "00-0031381",
+  "name": "Davante Adams",
+  "position": "WR",
+  "team": "LA",
+  "pre_points": 183.8,
+  "pre_games": 13,
+  "week_points": 9.1,
+  "active": true
+ },
+ {
+  "id": "00-0032764",
+  "name": "Derrick Henry",
+  "position": "RB",
+  "team": "BAL",
+  "pre_points": 181.0,
+  "pre_games": 13,
+  "week_points": 10.0,
+  "active": true
+ },
+ {
+  "id": "00-0034796",
+  "name": "Lamar Jackson",
+  "position": "QB",
+  "team": "BAL",
+  "pre_points": 180.1,
+  "pre_games": 10,
+  "week_points": 15.6,
+  "active": true
+ },
+ {
+  "id": "00-0040691",
+  "name": "Jaxson Dart",
+  "position": "QB",
+  "team": "NYG",
+  "pre_points": 176.94,
+  "pre_games": 10,
+  "week_points": 23.14,
+  "active": true
+ },
+ {
+  "id": "00-0036973",
+  "name": "Travis Etienne",
+  "position": "RB",
+  "team": "JAX",
+  "pre_points": 176.8,
+  "pre_games": 13,
+  "week_points": 30.0,
+  "active": true
+ },
+ {
+  "id": "00-0036900",
+  "name": "Ja'Marr Chase",
+  "position": "WR",
+  "team": "CIN",
+  "pre_points": 176.4,
+  "pre_games": 12,
+  "week_points": 18.2,
+  "active": true
+ },
+ {
+  "id": "00-0034844",
+  "name": "Saquon Barkley",
+  "position": "RB",
+  "team": "PHI",
+  "pre_points": 169.6,
+  "pre_games": 13,
+  "week_points": 16.2,
+  "active": true
+ },
+ {
+  "id": "00-0033119",
+  "name": "Jacoby Brissett",
+  "position": "QB",
+  "team": "ARI",
+  "pre_points": 169.16,
+  "pre_games": 10,
+  "week_points": 21.56,
+  "active": true
+ },
+ {
+  "id": "00-0036139",
+  "name": "Rico Dowdle",
+  "position": "RB",
+  "team": "CAR",
+  "pre_points": 168.8,
+  "pre_games": 13,
+  "week_points": 11.9,
+  "active": true
+ },
+ {
+  "id": "00-0039150",
+  "name": "Bryce Young",
+  "position": "QB",
+  "team": "CAR",
+  "pre_points": 168.58,
+  "pre_games": 12,
+  "week_points": 15.42,
+  "active": true
+ },
+ {
+  "id": "00-0040122",
+  "name": "Ashton Jeanty",
+  "position": "RB",
+  "team": "LV",
+  "pre_points": 160.9,
+  "pre_games": 13,
+  "week_points": 6.2,
+  "active": true
+ },
+ {
+  "id": "00-0038597",
+  "name": "Chase Brown",
+  "position": "RB",
+  "team": "CIN",
+  "pre_points": 160.1,
+  "pre_games": 13,
+  "week_points": 12.5,
+  "active": true
+ },
+ {
+  "id": "00-0031492",
+  "name": "Jason Myers",
+  "position": "K",
+  "team": "SEA",
+  "pre_points": 158.0,
+  "pre_games": 13,
+  "week_points": 24.0,
+  "active": true
+ },
+ {
+  "id": "00-0038120",
+  "name": "Breece Hall",
+  "position": "RB",
+  "team": "NYJ",
+  "pre_points": 157.76,
+  "pre_games": 13,
+  "week_points": 4.7,
+  "active": true
+ },
+ {
+  "id": "00-0036275",
+  "name": "D'Andre Swift",
+  "position": "RB",
+  "team": "CHI",
+  "pre_points": 155.3,
+  "pre_games": 12,
+  "week_points": 22.1,
+  "active": true
+ },
+ {
+  "id": "00-0036554",
+  "name": "Nico Collins",
+  "position": "WR",
+  "team": "HOU",
+  "pre_points": 153.6,
+  "pre_games": 12,
+  "week_points": 22.0,
+  "active": true
+ },
+ {
+  "id": "00-0039163",
+  "name": "C.J. Stroud",
+  "position": "QB",
+  "team": "HOU",
+  "pre_points": 148.64,
+  "pre_games": 10,
+  "week_points": 23.4,
+  "active": true
+ },
+ {
+  "id": "00-0036252",
+  "name": "Michael Pittman",
+  "position": "WR",
+  "team": "IND",
+  "pre_points": 148.4,
+  "pre_games": 13,
+  "week_points": 4.1,
+  "active": true
+ },
+ {
+  "id": "00-0037239",
+  "name": "Chris Olave",
+  "position": "WR",
+  "team": "NO",
+  "pre_points": 147.8,
+  "pre_games": 13,
+  "week_points": 17.5,
+  "active": true
+ },
+ {
+  "id": "00-0040124",
+  "name": "Tetairoa McMillan",
+  "position": "WR",
+  "team": "CAR",
+  "pre_points": 147.1,
+  "pre_games": 13,
+  "week_points": 3.5,
+  "active": true
+ },
+ {
+  "id": "00-0035676",
+  "name": "A.J. Brown",
+  "position": "WR",
+  "team": "PHI",
+  "pre_points": 146.9,
+  "pre_games": 12,
+  "week_points": 11.1,
+  "active": true
+ },
+ {
+  "id": "00-0040784",
+  "name": "Quinshon Judkins",
+  "position": "RB",
+  "team": "CLE",
+  "pre_points": 146.0,
+  "pre_games": 12,
+  "week_points": 3.2,
+  "active": true
+ },
+ {
+  "id": "00-0037692",
+  "name": "Brandon Aubrey",
+  "position": "K",
+  "team": "DAL",
+  "pre_points": 144.0,
+  "pre_games": 13,
+  "week_points": 16.6,
+  "active": true
+ },
+ {
+  "id": "00-0037224",
+  "name": "Cameron Dicker",
+  "position": "K",
+  "team": "LAC",
+  "pre_points": 141.0,
+  "pre_games": 13,
+  "week_points": 12.0,
+  "active": true
+ },
+ {
+  "id": "00-0037240",
+  "name": "Jameson Williams",
+  "position": "WR",
+  "team": "DET",
+  "pre_points": 139.9,
+  "pre_games": 13,
+  "week_points": 22.9,
+  "active": true
+ },
+ {
+  "id": "00-0038117",
+  "name": "Wan'Dale Robinson",
+  "position": "WR",
+  "team": "NYG",
+  "pre_points": 137.5,
+  "pre_games": 13,
+  "week_points": 13.9,
+  "active": true
+ },
+ {
+  "id": "00-0034348",
+  "name": "Courtland Sutton",
+  "position": "WR",
+  "team": "DEN",
+  "pre_points": 137.3,
+  "pre_games": 13,
+  "week_points": 20.8,
+  "active": true
+ },
+ {
+  "id": "DEF-SEA",
+  "name": "Seattle",
+  "position": "DEF",
+  "team": "SEA",
+  "pre_points": 136.0,
+  "pre_games": 13,
+  "week_points": 4.0,
+  "active": true
+ },
+ {
+  "id": "00-0030506",
+  "name": "Travis Kelce",
+  "position": "TE",
+  "team": "KC",
+  "pre_points": 134.8,
+  "pre_games": 13,
+  "week_points": 10.5,
+  "active": true
+ },
+ {
+  "id": "00-0040676",
+  "name": "Cam Ward",
+  "position": "QB",
+  "team": "TEN",
+  "pre_points": 134.42,
+  "pre_games": 13,
+  "week_points": 15.0,
+  "active": true
+ },
+ {
+  "id": "00-0036912",
+  "name": "DeVonta Smith",
+  "position": "WR",
+  "team": "PHI",
+  "pre_points": 133.9,
+  "pre_games": 13,
+  "week_points": 6.0,
+  "active": true
+ },
+ {
+  "id": "00-0035685",
+  "name": "David Montgomery",
+  "position": "RB",
+  "team": "DET",
+  "pre_points": 133.32,
+  "pre_games": 13,
+  "week_points": 9.2,
+  "active": true
+ },
+ {
+  "id": "00-0036358",
+  "name": "CeeDee Lamb",
+  "position": "WR",
+  "team": "DAL",
+  "pre_points": 133.2,
+  "pre_games": 9,
+  "week_points": 14.1,
+  "active": true
+ },
+ {
+  "id": "00-0038041",
+  "name": "Jake Ferguson",
+  "position": "TE",
+  "team": "DAL",
+  "pre_points": 133.0,
+  "pre_games": 13,
+  "week_points": 2.6,
+  "active": true
+ },
+ {
+  "id": "00-0040730",
+  "name": "RJ Harvey",
+  "position": "RB",
+  "team": "DEN",
+  "pre_points": 132.6,
+  "pre_games": 13,
+  "week_points": 10.5,
+  "active": true
+ },
+ {
+  "id": "00-0040734",
+  "name": "TreVeyon Henderson",
+  "position": "RB",
+  "team": "NE",
+  "pre_points": 132.4,
+  "pre_games": 13,
+  "week_points": 29.1,
+  "active": true
+ },
+ {
+  "id": "00-0040128",
+  "name": "Tyler Warren",
+  "position": "TE",
+  "team": "IND",
+  "pre_points": 130.7,
+  "pre_games": 13,
+  "week_points": 3.4,
+  "active": true
+ },
+ {
+  "id": "00-0039064",
+  "name": "Zay Flowers",
+  "position": "WR",
+  "team": "BAL",
+  "pre_points": 129.5,
+  "pre_games": 13,
+  "week_points": 14.3,
+  "active": true
+ },
+ {
+  "id": "00-0039915",
+  "name": "Ladd McConkey",
+  "position": "WR",
+  "team": "LAC",
+  "pre_points": 129.0,
+  "pre_games": 13,
+  "week_points": 3.0,
+  "active": true
+ },
+ {
+  "id": "00-0038134",
+  "name": "Kenneth Walker III",
+  "position": "RB",
+  "team": "SEA",
+  "pre_points": 128.1,
+  "pre_games": 13,
+  "week_points": 2.4,
+  "active": true
+ },
+ {
+  "id": "00-0035719",
+  "name": "Deebo Samuel Sr.",
+  "position": "WR",
+  "team": "WAS",
+  "pre_points": 128.0,
+  "pre_games": 12,
+  "week_points": 5.8,
+  "active": true
+ },
+ {
+  "id": "00-0039338",
+  "name": "Brock Bowers",
+  "position": "TE",
+  "team": "LV",
+  "pre_points": 126.6,
+  "pre_games": 10,
+  "week_points": 5.8,
+  "active": true
+ },
+ {
+  "id": "00-0036322",
+  "name": "Justin Jefferson",
+  "position": "WR",
+  "team": "MIN",
+  "pre_points": 125.4,
+  "pre_games": 13,
+  "week_points": 3.2,
+  "active": true
+ },
+ {
+  "id": "00-0033923",
+  "name": "Kareem Hunt",
+  "position": "RB",
+  "team": "KC",
+  "pre_points": 124.9,
+  "pre_games": 13,
+  "week_points": 2.5,
+  "active": true
+ },
+ {
+  "id": "00-0032726",
+  "name": "Ka'imi Fairbairn",
+  "position": "K",
+  "team": "HOU",
+  "pre_points": 124.0,
+  "pre_games": 11,
+  "week_points": 18.0,
+  "active": true
+ },
+ {
+  "id": "00-0035261",
+  "name": "Tony Pollard",
+  "position": "RB",
+  "team": "TEN",
+  "pre_points": 122.9,
+  "pre_games": 13,
+  "week_points": 17.7,
+  "active": true
+ },
+ {
+  "id": "00-0031588",
+  "name": "Stefon Diggs",
+  "position": "WR",
+  "team": "NE",
+  "pre_points": 120.5,
+  "pre_games": 13,
+  "week_points": 4.1,
+  "active": true
+ },
+ {
+  "id": "00-0030279",
+  "name": "Keenan Allen",
+  "position": "WR",
+  "team": "LAC",
+  "pre_points": 119.9,
+  "pre_games": 13,
+  "week_points": 6.1,
+  "active": true
+ },
+ {
+  "id": "00-0038559",
+  "name": "Michael Wilson",
+  "position": "WR",
+  "team": "ARI",
+  "pre_points": 119.7,
+  "pre_games": 13,
+  "week_points": 13.9,
+  "active": true
+ },
+ {
+  "id": "00-0036854",
+  "name": "Evan McPherson",
+  "position": "K",
+  "team": "CIN",
+  "pre_points": 117.0,
+  "pre_games": 13,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0039172",
+  "name": "Jake Bates",
+  "position": "K",
+  "team": "DET",
+  "pre_points": 116.0,
+  "pre_games": 13,
+  "week_points": 11.0,
+  "active": true
+ },
+ {
+  "id": "00-0040200",
+  "name": "Andy Borregales",
+  "position": "K",
+  "team": "NE",
+  "pre_points": 116.0,
+  "pre_games": 13,
+  "week_points": 7.0,
+  "active": true
+ },
+ {
+  "id": "00-0039067",
+  "name": "Rashee Rice",
+  "position": "WR",
+  "team": "KC",
+  "pre_points": 115.0,
+  "pre_games": 7,
+  "week_points": 8.6,
+  "active": true
+ },
+ {
+  "id": "00-0040583",
+  "name": "Woody Marks",
+  "position": "RB",
+  "team": "HOU",
+  "pre_points": 115.0,
+  "pre_games": 13,
+  "week_points": 4.3,
+  "active": true
+ },
+ {
+  "id": "00-0039868",
+  "name": "Troy Franklin",
+  "position": "WR",
+  "team": "DEN",
+  "pre_points": 114.5,
+  "pre_games": 13,
+  "week_points": 17.8,
+  "active": true
+ },
+ {
+  "id": "00-0040663",
+  "name": "Harold Fannin Jr.",
+  "position": "TE",
+  "team": "CLE",
+  "pre_points": 114.4,
+  "pre_games": 13,
+  "week_points": 8.5,
+  "active": true
+ },
+ {
+  "id": "00-0034351",
+  "name": "Dallas Goedert",
+  "position": "TE",
+  "team": "PHI",
+  "pre_points": 114.1,
+  "pre_games": 12,
+  "week_points": 22.0,
+  "active": true
+ },
+ {
+  "id": "00-0032268",
+  "name": "Marcus Mariota",
+  "position": "QB",
+  "team": "WAS",
+  "pre_points": 114.06,
+  "pre_games": 8,
+  "week_points": 14.74,
+  "active": true
+ },
+ {
+  "id": "00-0038563",
+  "name": "Tre Tucker",
+  "position": "WR",
+  "team": "LV",
+  "pre_points": 114.0,
+  "pre_games": 13,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0040074",
+  "name": "Tyler Loop",
+  "position": "K",
+  "team": "BAL",
+  "pre_points": 114.0,
+  "pre_games": 13,
+  "week_points": 6.0,
+  "active": true
+ },
+ {
+  "id": "DEF-HOU",
+  "name": "Houston",
+  "position": "DEF",
+  "team": "HOU",
+  "pre_points": 114.0,
+  "pre_games": 13,
+  "week_points": 7.0,
+  "active": true
+ },
+ {
+  "id": "00-0033090",
+  "name": "Hunter Henry",
+  "position": "TE",
+  "team": "NE",
+  "pre_points": 113.5,
+  "pre_games": 13,
+  "week_points": 2.3,
+  "active": true
+ },
+ {
+  "id": "00-0039409",
+  "name": "Cam Little",
+  "position": "K",
+  "team": "JAX",
+  "pre_points": 112.0,
+  "pre_games": 13,
+  "week_points": 12.0,
+  "active": true
+ },
+ {
+  "id": "00-0040236",
+  "name": "Kyle Monangai",
+  "position": "RB",
+  "team": "CHI",
+  "pre_points": 112.0,
+  "pre_games": 13,
+  "week_points": 3.3,
+  "active": true
+ },
+ {
+  "id": "00-0039165",
+  "name": "Zach Charbonnet",
+  "position": "RB",
+  "team": "SEA",
+  "pre_points": 110.5,
+  "pre_games": 12,
+  "week_points": 3.1,
+  "active": true
+ },
+ {
+  "id": "00-0034960",
+  "name": "Jakobi Meyers",
+  "position": "WR",
+  "team": "JAX",
+  "pre_points": 110.3,
+  "pre_games": 12,
+  "week_points": 9.6,
+  "active": true
+ },
+ {
+  "id": "00-0037261",
+  "name": "Khalil Shakir",
+  "position": "WR",
+  "team": "BUF",
+  "pre_points": 109.5,
+  "pre_games": 13,
+  "week_points": 9.0,
+  "active": true
+ },
+ {
+  "id": "00-0039404",
+  "name": "Will Reichard",
+  "position": "K",
+  "team": "MIN",
+  "pre_points": 109.0,
+  "pre_games": 13,
+  "week_points": 12.0,
+  "active": true
+ },
+ {
+  "id": "DEF-LA",
+  "name": "LA Rams",
+  "position": "DEF",
+  "team": "LA",
+  "pre_points": 109.0,
+  "pre_games": 13,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0037816",
+  "name": "Romeo Doubs",
+  "position": "WR",
+  "team": "GB",
+  "pre_points": 108.7,
+  "pre_games": 13,
+  "week_points": 4.6,
+  "active": true
+ },
+ {
+  "id": "00-0037525",
+  "name": "Jordan Mason",
+  "position": "RB",
+  "team": "MIN",
+  "pre_points": 108.0,
+  "pre_games": 13,
+  "week_points": 2.9,
+  "active": true
+ },
+ {
+  "id": "00-0037664",
+  "name": "Alec Pierce",
+  "position": "WR",
+  "team": "IND",
+  "pre_points": 107.9,
+  "pre_games": 11,
+  "week_points": 2.1,
+  "active": true
+ },
+ {
+  "id": "00-0036040",
+  "name": "Juwan Johnson",
+  "position": "TE",
+  "team": "NO",
+  "pre_points": 106.4,
+  "pre_games": 13,
+  "week_points": 5.0,
+  "active": true
+ },
+ {
+  "id": "00-0037545",
+  "name": "Rashid Shaheed",
+  "position": "WR",
+  "team": "SEA",
+  "pre_points": 106.4,
+  "pre_games": 14,
+  "week_points": 9.6,
+  "active": true
+ },
+ {
+  "id": "00-0025565",
+  "name": "Nick Folk",
+  "position": "K",
+  "team": "NYJ",
+  "pre_points": 106.0,
+  "pre_games": 13,
+  "week_points": 11.0,
+  "active": true
+ },
+ {
+  "id": "DEF-DEN",
+  "name": "Denver",
+  "position": "DEF",
+  "team": "DEN",
+  "pre_points": 106.0,
+  "pre_games": 13,
+  "week_points": 7.0,
+  "active": true
+ },
+ {
+  "id": "00-0034827",
+  "name": "DJ Moore",
+  "position": "WR",
+  "team": "CHI",
+  "pre_points": 104.08,
+  "pre_games": 13,
+  "week_points": 20.9,
+  "active": true
+ },
+ {
+  "id": "00-0033303",
+  "name": "Harrison Butker",
+  "position": "K",
+  "team": "KC",
+  "pre_points": 104.0,
+  "pre_games": 13,
+  "week_points": 8.0,
+  "active": true
+ },
+ {
+  "id": "00-0034173",
+  "name": "Eddy Pineiro",
+  "position": "K",
+  "team": "SF",
+  "pre_points": 104.0,
+  "pre_games": 10,
+  "week_points": 14.0,
+  "active": true
+ },
+ {
+  "id": "00-0035192",
+  "name": "Joey Slye",
+  "position": "K",
+  "team": "TEN",
+  "pre_points": 104.0,
+  "pre_games": 12,
+  "week_points": 6.0,
+  "active": true
+ },
+ {
+  "id": "DEF-JAX",
+  "name": "Jacksonville",
+  "position": "DEF",
+  "team": "JAX",
+  "pre_points": 104.0,
+  "pre_games": 13,
+  "week_points": 10.0,
+  "active": true
+ },
+ {
+  "id": "00-0039376",
+  "name": "Spencer Rattler",
+  "position": "QB",
+  "team": "NO",
+  "pre_points": 103.64,
+  "pre_games": 8,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0031203",
+  "name": "Cairo Santos",
+  "position": "K",
+  "team": "CHI",
+  "pre_points": 102.0,
+  "pre_games": 11,
+  "week_points": 8.0,
+  "active": true
+ },
+ {
+  "id": "00-0039391",
+  "name": "Kimani Vidal",
+  "position": "RB",
+  "team": "LAC",
+  "pre_points": 102.0,
+  "pre_games": 10,
+  "week_points": 5.3,
+  "active": true
+ },
+ {
+  "id": "00-0023853",
+  "name": "Matt Prater",
+  "position": "K",
+  "team": "BUF",
+  "pre_points": 100.0,
+  "pre_games": 13,
+  "week_points": 5.0,
+  "active": true
+ },
+ {
+  "id": "DEF-CLE",
+  "name": "Cleveland",
+  "position": "DEF",
+  "team": "CLE",
+  "pre_points": 99.0,
+  "pre_games": 13,
+  "week_points": 2.0,
+  "active": true
+ },
+ {
+  "id": "00-0038608",
+  "name": "Kayshon Boutte",
+  "position": "WR",
+  "team": "NE",
+  "pre_points": 98.6,
+  "pre_games": 11,
+  "week_points": 3.5,
+  "active": true
+ },
+ {
+  "id": "00-0036555",
+  "name": "Chuba Hubbard",
+  "position": "RB",
+  "team": "CAR",
+  "pre_points": 98.2,
+  "pre_games": 11,
+  "week_points": 4.3,
+  "active": true
+ },
+ {
+  "id": "00-0032569",
+  "name": "Wil Lutz",
+  "position": "K",
+  "team": "DEN",
+  "pre_points": 98.0,
+  "pre_games": 13,
+  "week_points": 4.0,
+  "active": true
+ },
+ {
+  "id": "00-0038567",
+  "name": "Chad Ryland",
+  "position": "K",
+  "team": "ARI",
+  "pre_points": 98.0,
+  "pre_games": 13,
+  "week_points": 2.0,
+  "active": true
+ },
+ {
+  "id": "DEF-NE",
+  "name": "New England",
+  "position": "DEF",
+  "team": "NE",
+  "pre_points": 98.0,
+  "pre_games": 13,
+  "week_points": -2.0,
+  "active": true
+ },
+ {
+  "id": "DEF-PHI",
+  "name": "Philadelphia",
+  "position": "DEF",
+  "team": "PHI",
+  "pre_points": 97.0,
+  "pre_games": 13,
+  "week_points": 16.0,
+  "active": true
+ },
+ {
+  "id": "00-0039847",
+  "name": "Theo Johnson",
+  "position": "TE",
+  "team": "NYG",
+  "pre_points": 96.6,
+  "pre_games": 13,
+  "week_points": 8.7,
+  "active": true
+ },
+ {
+  "id": "00-0036259",
+  "name": "Jauan Jennings",
+  "position": "WR",
+  "team": "SF",
+  "pre_points": 96.3,
+  "pre_games": 11,
+  "week_points": 17.2,
+  "active": true
+ },
+ {
+  "id": "00-0039923",
+  "name": "J.J. McCarthy",
+  "position": "QB",
+  "team": "MIN",
+  "pre_points": 95.58,
+  "pre_games": 7,
+  "week_points": 24.5,
+  "active": true
+ },
+ {
+  "id": "00-0038933",
+  "name": "Dalton Kincaid",
+  "position": "TE",
+  "team": "BUF",
+  "pre_points": 95.4,
+  "pre_games": 9,
+  "week_points": 4.9,
+  "active": true
+ },
+ {
+  "id": "00-0034383",
+  "name": "Dalton Schultz",
+  "position": "TE",
+  "team": "HOU",
+  "pre_points": 94.4,
+  "pre_games": 13,
+  "week_points": 17.6,
+  "active": true
+ },
+ {
+  "id": "00-0034753",
+  "name": "Mark Andrews",
+  "position": "TE",
+  "team": "BAL",
+  "pre_points": 93.6,
+  "pre_games": 13,
+  "week_points": 2.8,
+  "active": true
+ },
+ {
+  "id": "00-0038606",
+  "name": "Parker Washington",
+  "position": "WR",
+  "team": "JAX",
+  "pre_points": 93.2,
+  "pre_games": 12,
+  "week_points": 6.8,
+  "active": true
+ },
+ {
+  "id": "00-0033787",
+  "name": "Jake Elliott",
+  "position": "K",
+  "team": "PHI",
+  "pre_points": 93.0,
+  "pre_games": 13,
+  "week_points": 7.0,
+  "active": true
+ },
+ {
+  "id": "DEF-IND",
+  "name": "Indianapolis",
+  "position": "DEF",
+  "team": "IND",
+  "pre_points": 90.0,
+  "pre_games": 13,
+  "week_points": 2.0,
+  "active": true
+ },
+ {
+  "id": "00-0039793",
+  "name": "AJ Barner",
+  "position": "TE",
+  "team": "SEA",
+  "pre_points": 89.9,
+  "pre_games": 13,
+  "week_points": 4.2,
+  "active": true
+ },
+ {
+  "id": "00-0038994",
+  "name": "Jordan Addison",
+  "position": "WR",
+  "team": "MIN",
+  "pre_points": 89.1,
+  "pre_games": 10,
+  "week_points": 7.6,
+  "active": true
+ },
+ {
+  "id": "00-0038124",
+  "name": "Christian Watson",
+  "position": "WR",
+  "team": "GB",
+  "pre_points": 88.0,
+  "pre_games": 7,
+  "week_points": 4.4,
+  "active": true
+ },
+ {
+  "id": "00-0033288",
+  "name": "George Kittle",
+  "position": "TE",
+  "team": "SF",
+  "pre_points": 87.8,
+  "pre_games": 8,
+  "week_points": 18.8,
+  "active": true
+ },
+ {
+  "id": "00-0040242",
+  "name": "Jacory Croskey-Merritt",
+  "position": "RB",
+  "team": "WAS",
+  "pre_points": 86.3,
+  "pre_games": 13,
+  "week_points": 15.6,
+  "active": true
+ },
+ {
+  "id": "00-0040279",
+  "name": "Ryan Fitzgerald",
+  "position": "K",
+  "team": "CAR",
+  "pre_points": 86.0,
+  "pre_games": 13,
+  "week_points": 6.0,
+  "active": true
+ },
+ {
+  "id": "00-0037834",
+  "name": "Brock Purdy",
+  "position": "QB",
+  "team": "SF",
+  "pre_points": 85.18,
+  "pre_games": 5,
+  "week_points": 26.2,
+  "active": true
+ },
+ {
+  "id": "00-0040126",
+  "name": "Colston Loveland",
+  "position": "TE",
+  "team": "CHI",
+  "pre_points": 85.0,
+  "pre_games": 12,
+  "week_points": 8.1,
+  "active": true
+ },
+ {
+  "id": "00-0039893",
+  "name": "Brian Thomas Jr.",
+  "position": "WR",
+  "team": "JAX",
+  "pre_points": 84.6,
+  "pre_games": 10,
+  "week_points": 15.1,
+  "active": true
+ },
+ {
+  "id": "00-0040743",
+  "name": "Tyler Shough",
+  "position": "QB",
+  "team": "NO",
+  "pre_points": 84.08,
+  "pre_games": 7,
+  "week_points": 18.08,
+  "active": true
+ },
+ {
+  "id": "00-0038905",
+  "name": "Blake Grupe",
+  "position": "K",
+  "team": "IND",
+  "pre_points": 84.0,
+  "pre_games": 12,
+  "week_points": 15.0,
+  "active": true
+ },
+ {
+  "id": "00-0040189",
+  "name": "Oronde Gadsden II",
+  "position": "TE",
+  "team": "LAC",
+  "pre_points": 83.6,
+  "pre_games": 11,
+  "week_points": 8.1,
+  "active": true
+ },
+ {
+  "id": "00-0039738",
+  "name": "Blake Corum",
+  "position": "RB",
+  "team": "LA",
+  "pre_points": 83.3,
+  "pre_games": 13,
+  "week_points": 13.1,
+  "active": true
+ },
+ {
+  "id": "00-0037157",
+  "name": "Bam Knight",
+  "position": "RB",
+  "team": "ARI",
+  "pre_points": 82.1,
+  "pre_games": 11,
+  "week_points": -0.2,
+  "active": true
+ },
+ {
+  "id": "DEF-BUF",
+  "name": "Buffalo",
+  "position": "DEF",
+  "team": "BUF",
+  "pre_points": 82.0,
+  "pre_games": 13,
+  "week_points": 4.0,
+  "active": true
+ },
+ {
+  "id": "DEF-DET",
+  "name": "Detroit",
+  "position": "DEF",
+  "team": "DET",
+  "pre_points": 82.0,
+  "pre_games": 13,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "DEF-MIN",
+  "name": "Minnesota",
+  "position": "DEF",
+  "team": "MIN",
+  "pre_points": 82.0,
+  "pre_games": 13,
+  "week_points": 2.0,
+  "active": true
+ },
+ {
+  "id": "DEF-LAC",
+  "name": "LA Chargers",
+  "position": "DEF",
+  "team": "LAC",
+  "pre_points": 81.0,
+  "pre_games": 13,
+  "week_points": 13.0,
+  "active": true
+ },
+ {
+  "id": "00-0040130",
+  "name": "Jayden Higgins",
+  "position": "WR",
+  "team": "HOU",
+  "pre_points": 80.8,
+  "pre_games": 13,
+  "week_points": 0.9,
+  "active": true
+ },
+ {
+  "id": "00-0039384",
+  "name": "Tyrone Tracy Jr.",
+  "position": "RB",
+  "team": "NYG",
+  "pre_points": 80.7,
+  "pre_games": 11,
+  "week_points": 23.2,
+  "active": true
+ },
+ {
+  "id": "00-0040666",
+  "name": "Omarion Hampton",
+  "position": "RB",
+  "team": "LAC",
+  "pre_points": 80.7,
+  "pre_games": 6,
+  "week_points": 7.0,
+  "active": true
+ },
+ {
+  "id": "00-0038428",
+  "name": "Andre Szmyt",
+  "position": "K",
+  "team": "CLE",
+  "pre_points": 80.0,
+  "pre_games": 13,
+  "week_points": 5.0,
+  "active": true
+ },
+ {
+  "id": "DEF-CHI",
+  "name": "Chicago",
+  "position": "DEF",
+  "team": "CHI",
+  "pre_points": 80.0,
+  "pre_games": 13,
+  "week_points": 18.0,
+  "active": true
+ },
+ {
+  "id": "00-0038997",
+  "name": "Josh Downs",
+  "position": "WR",
+  "team": "IND",
+  "pre_points": 79.3,
+  "pre_games": 12,
+  "week_points": 8.8,
+  "active": true
+ },
+ {
+  "id": "00-0039894",
+  "name": "Xavier Worthy",
+  "position": "WR",
+  "team": "KC",
+  "pre_points": 79.2,
+  "pre_games": 11,
+  "week_points": 4.5,
+  "active": true
+ },
+ {
+  "id": "00-0034161",
+  "name": "Daniel Carlson",
+  "position": "K",
+  "team": "LV",
+  "pre_points": 79.0,
+  "pre_games": 13,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0036407",
+  "name": "Jerry Jeudy",
+  "position": "WR",
+  "team": "CLE",
+  "pre_points": 78.7,
+  "pre_games": 13,
+  "week_points": 3.2,
+  "active": true
+ },
+ {
+  "id": "00-0029822",
+  "name": "Brandon McManus",
+  "position": "K",
+  "team": "GB",
+  "pre_points": 78.0,
+  "pre_games": 10,
+  "week_points": 16.0,
+  "active": true
+ },
+ {
+  "id": "00-0035229",
+  "name": "T.J. Hockenson",
+  "position": "TE",
+  "team": "MIN",
+  "pre_points": 78.0,
+  "pre_games": 13,
+  "week_points": 8.6,
+  "active": true
+ },
+ {
+  "id": "DEF-CAR",
+  "name": "Carolina",
+  "position": "DEF",
+  "team": "CAR",
+  "pre_points": 78.0,
+  "pre_games": 13,
+  "week_points": 6.0,
+  "active": true
+ },
+ {
+  "id": "00-0036875",
+  "name": "Rhamondre Stevenson",
+  "position": "RB",
+  "team": "NE",
+  "pre_points": 77.8,
+  "pre_games": 10,
+  "week_points": 9.2,
+  "active": true
+ },
+ {
+  "id": "00-0040705",
+  "name": "Chimere Dike",
+  "position": "WR",
+  "team": "TEN",
+  "pre_points": 77.2,
+  "pre_games": 13,
+  "week_points": 3.0,
+  "active": true
+ },
+ {
+  "id": "00-0033908",
+  "name": "Cooper Kupp",
+  "position": "WR",
+  "team": "SEA",
+  "pre_points": 76.3,
+  "pre_games": 12,
+  "week_points": 7.1,
+  "active": true
+ },
+ {
+  "id": "DEF-GB",
+  "name": "Green Bay",
+  "position": "DEF",
+  "team": "GB",
+  "pre_points": 76.0,
+  "pre_games": 13,
+  "week_points": 1.0,
+  "active": true
+ },
+ {
+  "id": "00-0033555",
+  "name": "Mack Hollins",
+  "position": "WR",
+  "team": "NE",
+  "pre_points": 73.9,
+  "pre_games": 12,
+  "week_points": 6.1,
+  "active": true
+ },
+ {
+  "id": "00-0038621",
+  "name": "DeMario Douglas",
+  "position": "WR",
+  "team": "NE",
+  "pre_points": 73.3,
+  "pre_games": 12,
+  "week_points": 0.5,
+  "active": true
+ },
+ {
+  "id": "00-0033293",
+  "name": "Aaron Jones",
+  "position": "RB",
+  "team": "MIN",
+  "pre_points": 72.6,
+  "pre_games": 9,
+  "week_points": 8.0,
+  "active": true
+ },
+ {
+  "id": "00-0038797",
+  "name": "Emanuel Wilson",
+  "position": "RB",
+  "team": "GB",
+  "pre_points": 70.3,
+  "pre_games": 13,
+  "week_points": 0.3,
+  "active": true
+ },
+ {
+  "id": "00-0039410",
+  "name": "Ryan Flournoy",
+  "position": "WR",
+  "team": "DAL",
+  "pre_points": 69.9,
+  "pre_games": 12,
+  "week_points": 6.0,
+  "active": true
+ },
+ {
+  "id": "00-0040170",
+  "name": "Elic Ayomanor",
+  "position": "WR",
+  "team": "TEN",
+  "pre_points": 68.3,
+  "pre_games": 12,
+  "week_points": 2.2,
+  "active": true
+ },
+ {
+  "id": "DEF-NO",
+  "name": "New Orleans",
+  "position": "DEF",
+  "team": "NO",
+  "pre_points": 68.0,
+  "pre_games": 13,
+  "week_points": 4.0,
+  "active": true
+ },
+ {
+  "id": "00-0035250",
+  "name": "Devin Singletary",
+  "position": "RB",
+  "team": "NYG",
+  "pre_points": 67.2,
+  "pre_games": 13,
+  "week_points": 1.9,
+  "active": true
+ },
+ {
+  "id": "DEF-TEN",
+  "name": "Tennessee",
+  "position": "DEF",
+  "team": "TEN",
+  "pre_points": 67.0,
+  "pre_games": 13,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0040719",
+  "name": "Bhayshul Tuten",
+  "position": "RB",
+  "team": "JAX",
+  "pre_points": 66.5,
+  "pre_games": 13,
+  "week_points": 8.8,
+  "active": true
+ },
+ {
+  "id": "00-0038104",
+  "name": "Tyquan Thornton",
+  "position": "WR",
+  "team": "KC",
+  "pre_points": 65.6,
+  "pre_games": 11,
+  "week_points": 5.7,
+  "active": true
+ },
+ {
+  "id": "DEF-KC",
+  "name": "Kansas City",
+  "position": "DEF",
+  "team": "KC",
+  "pre_points": 65.0,
+  "pre_games": 13,
+  "week_points": 7.0,
+  "active": true
+ },
+ {
+  "id": "00-0033307",
+  "name": "Kendrick Bourne",
+  "position": "WR",
+  "team": "SF",
+  "pre_points": 63.7,
+  "pre_games": 10,
+  "week_points": 2.7,
+  "active": true
+ },
+ {
+  "id": "00-0040735",
+  "name": "Luther Burden III",
+  "position": "WR",
+  "team": "CHI",
+  "pre_points": 63.2,
+  "pre_games": 12,
+  "week_points": 11.4,
+  "active": true
+ },
+ {
+  "id": "00-0037809",
+  "name": "Chig Okonkwo",
+  "position": "TE",
+  "team": "TEN",
+  "pre_points": 63.1,
+  "pre_games": 13,
+  "week_points": 5.3,
+  "active": true
+ },
+ {
+  "id": "00-0038618",
+  "name": "Xavier Hutchinson",
+  "position": "WR",
+  "team": "HOU",
+  "pre_points": 62.7,
+  "pre_games": 12,
+  "week_points": 2.1,
+  "active": true
+ },
+ {
+  "id": "00-0038619",
+  "name": "Andrei Iosivas",
+  "position": "WR",
+  "team": "CIN",
+  "pre_points": 62.7,
+  "pre_games": 11,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0037197",
+  "name": "Isiah Pacheco",
+  "position": "RB",
+  "team": "KC",
+  "pre_points": 62.0,
+  "pre_games": 10,
+  "week_points": 2.1,
+  "active": true
+ },
+ {
+  "id": "00-0038976",
+  "name": "Marvin Mims Jr.",
+  "position": "WR",
+  "team": "DEN",
+  "pre_points": 61.9,
+  "pre_games": 11,
+  "week_points": 5.7,
+  "active": true
+ },
+ {
+  "id": "00-0037291",
+  "name": "Jalen Nailor",
+  "position": "WR",
+  "team": "MIN",
+  "pre_points": 61.8,
+  "pre_games": 13,
+  "week_points": 18.0,
+  "active": true
+ },
+ {
+  "id": "00-0033881",
+  "name": "Evan Engram",
+  "position": "TE",
+  "team": "DEN",
+  "pre_points": 61.4,
+  "pre_games": 12,
+  "week_points": 1.7,
+  "active": true
+ },
+ {
+  "id": "00-0035208",
+  "name": "Olamide Zaccheaus",
+  "position": "WR",
+  "team": "CHI",
+  "pre_points": 61.0,
+  "pre_games": 12,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0039342",
+  "name": "Xavier Legette",
+  "position": "WR",
+  "team": "CAR",
+  "pre_points": 60.7,
+  "pre_games": 11,
+  "week_points": 4.9,
+  "active": true
+ },
+ {
+  "id": "00-0036442",
+  "name": "Joe Burrow",
+  "position": "QB",
+  "team": "CIN",
+  "pre_points": 60.46,
+  "pre_games": 4,
+  "week_points": 7.5,
+  "active": true
+ },
+ {
+  "id": "00-0035535",
+  "name": "Darius Slayton",
+  "position": "WR",
+  "team": "NYG",
+  "pre_points": 59.7,
+  "pre_games": 10,
+  "week_points": 7.3,
+  "active": true
+ },
+ {
+  "id": "00-0039032",
+  "name": "Tyjae Spears",
+  "position": "RB",
+  "team": "TEN",
+  "pre_points": 58.8,
+  "pre_games": 9,
+  "week_points": 4.6,
+  "active": true
+ },
+ {
+  "id": "00-0040668",
+  "name": "Shedeur Sanders",
+  "position": "QB",
+  "team": "CLE",
+  "pre_points": 58.76,
+  "pre_games": 4,
+  "week_points": 6.48,
+  "active": true
+ },
+ {
+  "id": "00-0038935",
+  "name": "Brenton Strange",
+  "position": "TE",
+  "team": "JAX",
+  "pre_points": 58.4,
+  "pre_games": 8,
+  "week_points": 3.1,
+  "active": true
+ },
+ {
+  "id": "DEF-SF",
+  "name": "San Francisco",
+  "position": "DEF",
+  "team": "SF",
+  "pre_points": 58.0,
+  "pre_games": 13,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0035659",
+  "name": "Terry McLaurin",
+  "position": "WR",
+  "team": "WAS",
+  "pre_points": 57.5,
+  "pre_games": 6,
+  "week_points": 14.4,
+  "active": true
+ },
+ {
+  "id": "00-0036244",
+  "name": "Colby Parkinson",
+  "position": "TE",
+  "team": "LA",
+  "pre_points": 57.3,
+  "pre_games": 10,
+  "week_points": 22.0,
+  "active": true
+ },
+ {
+  "id": "00-0038393",
+  "name": "Dontayvion Wicks",
+  "position": "WR",
+  "team": "GB",
+  "pre_points": 56.3,
+  "pre_games": 10,
+  "week_points": 1.1,
+  "active": true
+ },
+ {
+  "id": "DEF-ARI",
+  "name": "Arizona",
+  "position": "DEF",
+  "team": "ARI",
+  "pre_points": 56.0,
+  "pre_games": 13,
+  "week_points": -1.0,
+  "active": true
+ },
+ {
+  "id": "00-0040584",
+  "name": "Gunnar Helm",
+  "position": "TE",
+  "team": "TEN",
+  "pre_points": 54.3,
+  "pre_games": 13,
+  "week_points": 12.9,
+  "active": true
+ },
+ {
+  "id": "DEF-LV",
+  "name": "Las Vegas",
+  "position": "DEF",
+  "team": "LV",
+  "pre_points": 54.0,
+  "pre_games": 13,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0036924",
+  "name": "Michael Carter",
+  "position": "RB",
+  "team": "ARI",
+  "pre_points": 53.9,
+  "pre_games": 9,
+  "week_points": 11.4,
+  "active": true
+ },
+ {
+  "id": "DEF-WAS",
+  "name": "Washington",
+  "position": "DEF",
+  "team": "WAS",
+  "pre_points": 53.0,
+  "pre_games": 13,
+  "week_points": 9.0,
+  "active": true
+ },
+ {
+  "id": "00-0035689",
+  "name": "Dawson Knox",
+  "position": "TE",
+  "team": "BUF",
+  "pre_points": 52.1,
+  "pre_games": 12,
+  "week_points": 17.2,
+  "active": true
+ },
+ {
+  "id": "00-0035537",
+  "name": "Ty Johnson",
+  "position": "RB",
+  "team": "BUF",
+  "pre_points": 51.5,
+  "pre_games": 13,
+  "week_points": 4.3,
+  "active": true
+ },
+ {
+  "id": "00-0033955",
+  "name": "Jeremy McNichols",
+  "position": "RB",
+  "team": "WAS",
+  "pre_points": 51.2,
+  "pre_games": 12,
+  "week_points": 0.7,
+  "active": true
+ },
+ {
+  "id": "DEF-NYJ",
+  "name": "NY Jets",
+  "position": "DEF",
+  "team": "NYJ",
+  "pre_points": 51.0,
+  "pre_games": 13,
+  "week_points": -2.0,
+  "active": true
+ },
+ {
+  "id": "00-0036290",
+  "name": "Cole Kmet",
+  "position": "TE",
+  "team": "CHI",
+  "pre_points": 50.3,
+  "pre_games": 12,
+  "week_points": 3.8,
+  "active": true
+ },
+ {
+  "id": "00-0037746",
+  "name": "Brian Robinson",
+  "position": "RB",
+  "team": "SF",
+  "pre_points": 50.2,
+  "pre_games": 13,
+  "week_points": 2.1,
+  "active": true
+ },
+ {
+  "id": "DEF-DAL",
+  "name": "Dallas",
+  "position": "DEF",
+  "team": "DAL",
+  "pre_points": 50.0,
+  "pre_games": 13,
+  "week_points": 1.0,
+  "active": true
+ },
+ {
+  "id": "00-0033857",
+  "name": "JuJu Smith-Schuster",
+  "position": "WR",
+  "team": "KC",
+  "pre_points": 49.9,
+  "pre_games": 13,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0037801",
+  "name": "KaVontae Turpin",
+  "position": "WR",
+  "team": "DAL",
+  "pre_points": 49.8,
+  "pre_games": 11,
+  "week_points": 2.2,
+  "active": true
+ },
+ {
+  "id": "DEF-BAL",
+  "name": "Baltimore",
+  "position": "DEF",
+  "team": "BAL",
+  "pre_points": 48.0,
+  "pre_games": 13,
+  "week_points": 23.0,
+  "active": true
+ },
+ {
+  "id": "00-0039890",
+  "name": "Adonai Mitchell",
+  "position": "WR",
+  "team": "NYJ",
+  "pre_points": 47.5,
+  "pre_games": 12,
+  "week_points": 14.4,
+  "active": true
+ },
+ {
+  "id": "00-0039916",
+  "name": "Ricky Pearsall",
+  "position": "WR",
+  "team": "SF",
+  "pre_points": 47.0,
+  "pre_games": 7,
+  "week_points": 12.6,
+  "active": true
+ },
+ {
+  "id": "00-0030564",
+  "name": "DeAndre Hopkins",
+  "position": "WR",
+  "team": "BAL",
+  "pre_points": 46.2,
+  "pre_games": 13,
+  "week_points": 3.7,
+  "active": true
+ },
+ {
+  "id": "00-0040667",
+  "name": "Matthew Golden",
+  "position": "WR",
+  "team": "GB",
+  "pre_points": 45.1,
+  "pre_games": 10,
+  "week_points": 7.0,
+  "active": true
+ },
+ {
+  "id": "00-0031503",
+  "name": "Jameis Winston",
+  "position": "QB",
+  "team": "NYG",
+  "pre_points": 44.78,
+  "pre_games": 2,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0039424",
+  "name": "Devaughn Vele",
+  "position": "WR",
+  "team": "NO",
+  "pre_points": 44.4,
+  "pre_games": 8,
+  "week_points": 9.4,
+  "active": true
+ },
+ {
+  "id": "00-0039074",
+  "name": "Davis Allen",
+  "position": "TE",
+  "team": "LA",
+  "pre_points": 43.3,
+  "pre_games": 12,
+  "week_points": 3.1,
+  "active": true
+ },
+ {
+  "id": "00-0038562",
+  "name": "Jake Moody",
+  "position": "K",
+  "team": "WAS",
+  "pre_points": 43.0,
+  "pre_games": 5,
+  "week_points": 13.0,
+  "active": true
+ },
+ {
+  "id": "DEF-CIN",
+  "name": "Cincinnati",
+  "position": "DEF",
+  "team": "CIN",
+  "pre_points": 43.0,
+  "pre_games": 13,
+  "week_points": 6.0,
+  "active": true
+ },
+ {
+  "id": "00-0040202",
+  "name": "Devin Neal",
+  "position": "RB",
+  "team": "NO",
+  "pre_points": 41.8,
+  "pre_games": 8,
+  "week_points": 9.7,
+  "active": true
+ },
+ {
+  "id": "00-0036415",
+  "name": "Van Jefferson",
+  "position": "WR",
+  "team": "TEN",
+  "pre_points": 41.2,
+  "pre_games": 11,
+  "week_points": 4.8,
+  "active": true
+ },
+ {
+  "id": "00-0037614",
+  "name": "John Metchie III",
+  "position": "WR",
+  "team": "NYJ",
+  "pre_points": 40.5,
+  "pre_games": 9,
+  "week_points": 4.9,
+  "active": true
+ },
+ {
+  "id": "00-0040138",
+  "name": "Jaylin Noel",
+  "position": "WR",
+  "team": "HOU",
+  "pre_points": 40.5,
+  "pre_games": 13,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0036626",
+  "name": "Dyami Brown",
+  "position": "WR",
+  "team": "JAX",
+  "pre_points": 40.0,
+  "pre_games": 9,
+  "week_points": -1.6,
+  "active": true
+ },
+ {
+  "id": "00-0040669",
+  "name": "Isaac TeSlaa",
+  "position": "WR",
+  "team": "DET",
+  "pre_points": 40.0,
+  "pre_games": 10,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0039491",
+  "name": "Jalen Coker",
+  "position": "WR",
+  "team": "CAR",
+  "pre_points": 39.4,
+  "pre_games": 7,
+  "week_points": 12.0,
+  "active": true
+ },
+ {
+  "id": "00-0040194",
+  "name": "Jackson Hawes",
+  "position": "TE",
+  "team": "BUF",
+  "pre_points": 39.2,
+  "pre_games": 10,
+  "week_points": 1.4,
+  "active": true
+ },
+ {
+  "id": "00-0032211",
+  "name": "Tyler Lockett",
+  "position": "WR",
+  "team": "LV",
+  "pre_points": 39.1,
+  "pre_games": 13,
+  "week_points": 2.0,
+  "active": true
+ },
+ {
+  "id": "00-0033526",
+  "name": "Samaje Perine",
+  "position": "RB",
+  "team": "CIN",
+  "pre_points": 39.0,
+  "pre_games": 11,
+  "week_points": 4.8,
+  "active": true
+ },
+ {
+  "id": "00-0038705",
+  "name": "Emari Demercado",
+  "position": "RB",
+  "team": "ARI",
+  "pre_points": 38.5,
+  "pre_games": 8,
+  "week_points": 1.1,
+  "active": true
+ },
+ {
+  "id": "00-0038454",
+  "name": "Keaton Mitchell",
+  "position": "RB",
+  "team": "BAL",
+  "pre_points": 38.0,
+  "pre_games": 9,
+  "week_points": 6.6,
+  "active": true
+ },
+ {
+  "id": "00-0039798",
+  "name": "Isaiah Davis",
+  "position": "RB",
+  "team": "NYJ",
+  "pre_points": 37.2,
+  "pre_games": 13,
+  "week_points": 13.0,
+  "active": true
+ },
+ {
+  "id": "00-0040164",
+  "name": "Jaylin Lane",
+  "position": "WR",
+  "team": "WAS",
+  "pre_points": 37.2,
+  "pre_games": 13,
+  "week_points": 6.0,
+  "active": true
+ },
+ {
+  "id": "00-0035249",
+  "name": "Josh Oliver",
+  "position": "TE",
+  "team": "MIN",
+  "pre_points": 37.1,
+  "pre_games": 8,
+  "week_points": 2.3,
+  "active": true
+ },
+ {
+  "id": "00-0036988",
+  "name": "Josh Palmer",
+  "position": "WR",
+  "team": "BUF",
+  "pre_points": 36.2,
+  "pre_games": 8,
+  "week_points": 2.1,
+  "active": true
+ },
+ {
+  "id": "00-0034829",
+  "name": "Mike Gesicki",
+  "position": "TE",
+  "team": "CIN",
+  "pre_points": 36.1,
+  "pre_games": 8,
+  "week_points": 1.6,
+  "active": true
+ },
+ {
+  "id": "00-0039066",
+  "name": "Michael Mayer",
+  "position": "TE",
+  "team": "LV",
+  "pre_points": 35.2,
+  "pre_games": 9,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0039498",
+  "name": "Harrison Mevis",
+  "position": "K",
+  "team": "LA",
+  "pre_points": 35.0,
+  "pre_games": 5,
+  "week_points": 12.0,
+  "active": true
+ },
+ {
+  "id": "00-0040078",
+  "name": "Brashard Smith",
+  "position": "RB",
+  "team": "KC",
+  "pre_points": 35.0,
+  "pre_games": 13,
+  "week_points": 0.1,
+  "active": true
+ },
+ {
+  "id": "00-0040727",
+  "name": "Tre Harris",
+  "position": "WR",
+  "team": "LAC",
+  "pre_points": 34.8,
+  "pre_games": 12,
+  "week_points": 6.4,
+  "active": true
+ },
+ {
+  "id": "00-0037005",
+  "name": "Tommy Tremble",
+  "position": "TE",
+  "team": "CAR",
+  "pre_points": 34.6,
+  "pre_games": 11,
+  "week_points": 2.3,
+  "active": true
+ },
+ {
+  "id": "00-0040187",
+  "name": "Mitchell Evans",
+  "position": "TE",
+  "team": "CAR",
+  "pre_points": 32.8,
+  "pre_games": 10,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0038115",
+  "name": "Daniel Bellinger",
+  "position": "TE",
+  "team": "NYG",
+  "pre_points": 32.2,
+  "pre_games": 10,
+  "week_points": 5.0,
+  "active": true
+ },
+ {
+  "id": "DEF-NYG",
+  "name": "NY Giants",
+  "position": "DEF",
+  "team": "NYG",
+  "pre_points": 32.0,
+  "pre_games": 13,
+  "week_points": 5.0,
+  "active": true
+ },
+ {
+  "id": "00-0032464",
+  "name": "Kalif Raymond",
+  "position": "WR",
+  "team": "DET",
+  "pre_points": 30.4,
+  "pre_games": 11,
+  "week_points": 2.5,
+  "active": true
+ },
+ {
+  "id": "00-0034613",
+  "name": "Tanner Hudson",
+  "position": "TE",
+  "team": "CIN",
+  "pre_points": 30.2,
+  "pre_games": 7,
+  "week_points": 3.1,
+  "active": true
+ },
+ {
+  "id": "00-0039356",
+  "name": "Ja'Tavion Sanders",
+  "position": "TE",
+  "team": "CAR",
+  "pre_points": 30.1,
+  "pre_games": 10,
+  "week_points": 1.5,
+  "active": true
+ },
+ {
+  "id": "00-0033702",
+  "name": "Younghoe Koo",
+  "position": "K",
+  "team": "NYG",
+  "pre_points": 30.0,
+  "pre_games": 5,
+  "week_points": 3.0,
+  "active": true
+ },
+ {
+  "id": "00-0037805",
+  "name": "Jeremy Ruckert",
+  "position": "TE",
+  "team": "NYJ",
+  "pre_points": 30.0,
+  "pre_games": 11,
+  "week_points": 2.3,
+  "active": true
+ },
+ {
+  "id": "00-0040782",
+  "name": "Isaiah Bond",
+  "position": "WR",
+  "team": "CLE",
+  "pre_points": 29.5,
+  "pre_games": 11,
+  "week_points": 9.9,
+  "active": true
+ },
+ {
+  "id": "00-0038046",
+  "name": "Charlie Kolar",
+  "position": "TE",
+  "team": "BAL",
+  "pre_points": 28.9,
+  "pre_games": 10,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0040131",
+  "name": "Kyle Williams",
+  "position": "WR",
+  "team": "NE",
+  "pre_points": 28.6,
+  "pre_games": 10,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0031236",
+  "name": "Brandin Cooks",
+  "position": "WR",
+  "team": "BUF",
+  "pre_points": 27.8,
+  "pre_games": 10,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0039875",
+  "name": "Ray Davis",
+  "position": "RB",
+  "team": "BUF",
+  "pre_points": 26.4,
+  "pre_games": 13,
+  "week_points": 1.8,
+  "active": true
+ },
+ {
+  "id": "00-0038839",
+  "name": "Mitchell Tinsley",
+  "position": "WR",
+  "team": "CIN",
+  "pre_points": 25.5,
+  "pre_games": 6,
+  "week_points": 2.1,
+  "active": true
+ },
+ {
+  "id": "00-0032775",
+  "name": "Demarcus Robinson",
+  "position": "WR",
+  "team": "SF",
+  "pre_points": 25.4,
+  "pre_games": 10,
+  "week_points": 4.6,
+  "active": true
+ },
+ {
+  "id": "00-0039041",
+  "name": "Elijah Higgins",
+  "position": "TE",
+  "team": "ARI",
+  "pre_points": 25.4,
+  "pre_games": 13,
+  "week_points": 0.8,
+  "active": true
+ },
+ {
+  "id": "00-0039751",
+  "name": "Jordan Whittington",
+  "position": "WR",
+  "team": "LA",
+  "pre_points": 24.9,
+  "pre_games": 11,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0039144",
+  "name": "Luke Musgrave",
+  "position": "TE",
+  "team": "GB",
+  "pre_points": 24.7,
+  "pre_games": 11,
+  "week_points": 7.2,
+  "active": true
+ },
+ {
+  "id": "00-0039451",
+  "name": "Isaiah Williams",
+  "position": "WR",
+  "team": "NYJ",
+  "pre_points": 24.5,
+  "pre_games": 11,
+  "week_points": 8.3,
+  "active": true
+ },
+ {
+  "id": "00-0036849",
+  "name": "Tutu Atwell",
+  "position": "WR",
+  "team": "LA",
+  "pre_points": 24.4,
+  "pre_games": 5,
+  "week_points": 1.4,
+  "active": true
+ },
+ {
+  "id": "00-0040729",
+  "name": "Jack Bech",
+  "position": "WR",
+  "team": "LV",
+  "pre_points": 24.4,
+  "pre_games": 11,
+  "week_points": 2.7,
+  "active": true
+ },
+ {
+  "id": "00-0035993",
+  "name": "Tyler Huntley",
+  "position": "QB",
+  "team": "BAL",
+  "pre_points": 23.36,
+  "pre_games": 2,
+  "week_points": -0.3,
+  "active": false
+ },
+ {
+  "id": "00-0038359",
+  "name": "Xavier Smith",
+  "position": "WR",
+  "team": "LA",
+  "pre_points": 22.8,
+  "pre_games": 12,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0040737",
+  "name": "Terrance Ferguson",
+  "position": "TE",
+  "team": "LA",
+  "pre_points": 22.3,
+  "pre_games": 8,
+  "week_points": 1.1,
+  "active": true
+ },
+ {
+  "id": "00-0031687",
+  "name": "Raheem Mostert",
+  "position": "RB",
+  "team": "LV",
+  "pre_points": 21.3,
+  "pre_games": 10,
+  "week_points": 0.7,
+  "active": true
+ },
+ {
+  "id": "00-0037085",
+  "name": "Tyler Badie",
+  "position": "RB",
+  "team": "DEN",
+  "pre_points": 21.0,
+  "pre_games": 12,
+  "week_points": 0.6,
+  "active": true
+ },
+ {
+  "id": "00-0036165",
+  "name": "Isaiah Hodgins",
+  "position": "WR",
+  "team": "NYG",
+  "pre_points": 20.3,
+  "pre_games": 3,
+  "week_points": 0.9,
+  "active": true
+ },
+ {
+  "id": "00-0038840",
+  "name": "Brycen Tremayne",
+  "position": "WR",
+  "team": "CAR",
+  "pre_points": 19.3,
+  "pre_games": 11,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0039146",
+  "name": "Jayden Reed",
+  "position": "WR",
+  "team": "GB",
+  "pre_points": 19.3,
+  "pre_games": 2,
+  "week_points": 8.0,
+  "active": true
+ },
+ {
+  "id": "00-0038555",
+  "name": "Tank Bigsby",
+  "position": "RB",
+  "team": "PHI",
+  "pre_points": 18.4,
+  "pre_games": 11,
+  "week_points": 5.7,
+  "active": true
+ },
+ {
+  "id": "00-0037091",
+  "name": "Bo Melton",
+  "position": "WR",
+  "team": "GB",
+  "pre_points": 18.3,
+  "pre_games": 9,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0033357",
+  "name": "Taysom Hill",
+  "position": "TE",
+  "team": "NO",
+  "pre_points": 18.06,
+  "pre_games": 9,
+  "week_points": 0.2,
+  "active": true
+ },
+ {
+  "id": "00-0038738",
+  "name": "Hunter Luepke",
+  "position": "RB",
+  "team": "DAL",
+  "pre_points": 17.6,
+  "pre_games": 10,
+  "week_points": 4.0,
+  "active": true
+ },
+ {
+  "id": "00-0032104",
+  "name": "Ameer Abdullah",
+  "position": "RB",
+  "team": "IND",
+  "pre_points": 17.4,
+  "pre_games": 9,
+  "week_points": 7.2,
+  "active": true
+ },
+ {
+  "id": "00-0034521",
+  "name": "Allen Lazard",
+  "position": "WR",
+  "team": "NYJ",
+  "pre_points": 16.9,
+  "pre_games": 8,
+  "week_points": 1.1,
+  "active": true
+ },
+ {
+  "id": "00-0040238",
+  "name": "LeQuint Allen Jr.",
+  "position": "RB",
+  "team": "JAX",
+  "pre_points": 16.4,
+  "pre_games": 13,
+  "week_points": 2.1,
+  "active": true
+ },
+ {
+  "id": "00-0037563",
+  "name": "Malik Davis",
+  "position": "RB",
+  "team": "DAL",
+  "pre_points": 16.3,
+  "pre_games": 7,
+  "week_points": 10.7,
+  "active": true
+ },
+ {
+  "id": "00-0037742",
+  "name": "Treylon Burks",
+  "position": "WR",
+  "team": "WAS",
+  "pre_points": 16.2,
+  "pre_games": 4,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0038685",
+  "name": "Chris Brooks",
+  "position": "RB",
+  "team": "GB",
+  "pre_points": 16.0,
+  "pre_games": 13,
+  "week_points": 2.1,
+  "active": true
+ },
+ {
+  "id": "00-0037306",
+  "name": "John FitzPatrick",
+  "position": "TE",
+  "team": "GB",
+  "pre_points": 15.9,
+  "pre_games": 9,
+  "week_points": 3.3,
+  "active": true
+ },
+ {
+  "id": "00-0040218",
+  "name": "Jimmy Horn Jr.",
+  "position": "WR",
+  "team": "CAR",
+  "pre_points": 15.6,
+  "pre_games": 6,
+  "week_points": 1.2,
+  "active": true
+ },
+ {
+  "id": "00-0038794",
+  "name": "Jaleel McLaughlin",
+  "position": "RB",
+  "team": "DEN",
+  "pre_points": 15.0,
+  "pre_games": 4,
+  "week_points": 0.4,
+  "active": true
+ },
+ {
+  "id": "00-0039920",
+  "name": "Malachi Corley",
+  "position": "WR",
+  "team": "CLE",
+  "pre_points": 13.8,
+  "pre_games": 8,
+  "week_points": 1.5,
+  "active": true
+ },
+ {
+  "id": "00-0035631",
+  "name": "Drew Sample",
+  "position": "TE",
+  "team": "CIN",
+  "pre_points": 13.6,
+  "pre_games": 8,
+  "week_points": 2.2,
+  "active": true
+ },
+ {
+  "id": "00-0040590",
+  "name": "Konata Mumpfield",
+  "position": "WR",
+  "team": "LA",
+  "pre_points": 12.7,
+  "pre_games": 6,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0038547",
+  "name": "Luke Schoonmaker",
+  "position": "TE",
+  "team": "DAL",
+  "pre_points": 12.6,
+  "pre_games": 11,
+  "week_points": 3.4,
+  "active": true
+ },
+ {
+  "id": "00-0036630",
+  "name": "Tylan Wallace",
+  "position": "WR",
+  "team": "BAL",
+  "pre_points": 12.5,
+  "pre_games": 10,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0033854",
+  "name": "Dare Ogunbowale",
+  "position": "RB",
+  "team": "HOU",
+  "pre_points": 12.4,
+  "pre_games": 11,
+  "week_points": 4.9,
+  "active": true
+ },
+ {
+  "id": "00-0040644",
+  "name": "Trevor Etienne",
+  "position": "RB",
+  "team": "CAR",
+  "pre_points": 12.2,
+  "pre_games": 13,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0039912",
+  "name": "Ben Sinnott",
+  "position": "TE",
+  "team": "WAS",
+  "pre_points": 12.1,
+  "pre_games": 5,
+  "week_points": 4.1,
+  "active": true
+ },
+ {
+  "id": "00-0039530",
+  "name": "Brevyn Spann-Ford",
+  "position": "TE",
+  "team": "DAL",
+  "pre_points": 11.9,
+  "pre_games": 12,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0035406",
+  "name": "Lil'Jordan Humphrey",
+  "position": "WR",
+  "team": "DEN",
+  "pre_points": 11.7,
+  "pre_games": 4,
+  "week_points": 11.7,
+  "active": true
+ },
+ {
+  "id": "00-0039746",
+  "name": "Will Shipley",
+  "position": "RB",
+  "team": "PHI",
+  "pre_points": 11.7,
+  "pre_games": 10,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0036741",
+  "name": "Jack Stoll",
+  "position": "TE",
+  "team": "NO",
+  "pre_points": 11.5,
+  "pre_games": 7,
+  "week_points": 1.2,
+  "active": true
+ },
+ {
+  "id": "00-0036628",
+  "name": "John Bates",
+  "position": "TE",
+  "team": "WAS",
+  "pre_points": 11.1,
+  "pre_games": 7,
+  "week_points": 2.4,
+  "active": true
+ },
+ {
+  "id": "00-0039229",
+  "name": "Charlie Smyth",
+  "position": "K",
+  "team": "NO",
+  "pre_points": 11.0,
+  "pre_games": 2,
+  "week_points": 10.0,
+  "active": true
+ },
+ {
+  "id": "00-0037329",
+  "name": "Brittain Brown",
+  "position": "RB",
+  "team": "CHI",
+  "pre_points": 9.7,
+  "pre_games": 1,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0040259",
+  "name": "Gage Larvadain",
+  "position": "WR",
+  "team": "CLE",
+  "pre_points": 9.6,
+  "pre_games": 9,
+  "week_points": 1.3,
+  "active": true
+ },
+ {
+  "id": "00-0040582",
+  "name": "Arian Smith",
+  "position": "WR",
+  "team": "NYJ",
+  "pre_points": 8.8,
+  "pre_games": 9,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0038090",
+  "name": "Skyy Moore",
+  "position": "WR",
+  "team": "SF",
+  "pre_points": 8.5,
+  "pre_games": 13,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0039623",
+  "name": "Mason Tipton",
+  "position": "WR",
+  "team": "NO",
+  "pre_points": 8.2,
+  "pre_games": 6,
+  "week_points": 0.6,
+  "active": true
+ },
+ {
+  "id": "00-0039648",
+  "name": "David Martin-Robinson",
+  "position": "TE",
+  "team": "TEN",
+  "pre_points": 7.7,
+  "pre_games": 7,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0033591",
+  "name": "Noah Brown",
+  "position": "WR",
+  "team": "WAS",
+  "pre_points": 7.5,
+  "pre_games": 3,
+  "week_points": 3.3,
+  "active": true
+ },
+ {
+  "id": "00-0036133",
+  "name": "James Proche",
+  "position": "WR",
+  "team": "TEN",
+  "pre_points": 7.5,
+  "pre_games": 3,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0037086",
+  "name": "Grant Calcaterra",
+  "position": "TE",
+  "team": "PHI",
+  "pre_points": 7.3,
+  "pre_games": 6,
+  "week_points": 0.9,
+  "active": true
+ },
+ {
+  "id": "00-0039359",
+  "name": "Cade Stover",
+  "position": "TE",
+  "team": "HOU",
+  "pre_points": 7.1,
+  "pre_games": 3,
+  "week_points": 3.7,
+  "active": true
+ },
+ {
+  "id": "00-0038102",
+  "name": "Kenny Pickett",
+  "position": "QB",
+  "team": "LV",
+  "pre_points": 6.8,
+  "pre_games": 3,
+  "week_points": 2.26,
+  "active": true
+ },
+ {
+  "id": "00-0039796",
+  "name": "Rasheen Ali",
+  "position": "RB",
+  "team": "BAL",
+  "pre_points": 6.5,
+  "pre_games": 11,
+  "week_points": 10.2,
+  "active": true
+ },
+ {
+  "id": "00-0038576",
+  "name": "Charlie Jones",
+  "position": "WR",
+  "team": "CIN",
+  "pre_points": 6.0,
+  "pre_games": 13,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0038938",
+  "name": "Jalin Hyatt",
+  "position": "WR",
+  "team": "NYG",
+  "pre_points": 6.0,
+  "pre_games": 5,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0035544",
+  "name": "Tom Kennedy",
+  "position": "WR",
+  "team": "DET",
+  "pre_points": 5.6,
+  "pre_games": 2,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0040398",
+  "name": "Brady Cook",
+  "position": "QB",
+  "team": "NYJ",
+  "pre_points": 4.52,
+  "pre_games": 1,
+  "week_points": 11.94,
+  "active": true
+ },
+ {
+  "id": "00-0038640",
+  "name": "Jalen Brooks",
+  "position": "WR",
+  "team": "ARI",
+  "pre_points": 4.2,
+  "pre_games": 2,
+  "week_points": 2.4,
+  "active": true
+ },
+ {
+  "id": "00-0037557",
+  "name": "Ronnie Rivers",
+  "position": "RB",
+  "team": "LA",
+  "pre_points": 4.1,
+  "pre_games": 2,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0040024",
+  "name": "Darius Cooper",
+  "position": "WR",
+  "team": "PHI",
+  "pre_points": 4.1,
+  "pre_games": 3,
+  "week_points": 3.9,
+  "active": true
+ },
+ {
+  "id": "00-0037594",
+  "name": "Julius Chestnut",
+  "position": "RB",
+  "team": "TEN",
+  "pre_points": 3.9,
+  "pre_games": 12,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0039407",
+  "name": "Dylan Laube",
+  "position": "RB",
+  "team": "LV",
+  "pre_points": 3.8,
+  "pre_games": 13,
+  "week_points": 0.4,
+  "active": true
+ },
+ {
+  "id": "00-0038519",
+  "name": "Nikko Remigio",
+  "position": "WR",
+  "team": "KC",
+  "pre_points": 3.7,
+  "pre_games": 12,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0036331",
+  "name": "Devin Duvernay",
+  "position": "WR",
+  "team": "CHI",
+  "pre_points": 3.6,
+  "pre_games": 13,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0036590",
+  "name": "Quintin Morris",
+  "position": "TE",
+  "team": "JAX",
+  "pre_points": 3.5,
+  "pre_games": 7,
+  "week_points": 3.0,
+  "active": true
+ },
+ {
+  "id": "00-0039458",
+  "name": "Brenden Bates",
+  "position": "TE",
+  "team": "CLE",
+  "pre_points": 3.3,
+  "pre_games": 1,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0037120",
+  "name": "Tyler Goodson",
+  "position": "RB",
+  "team": "IND",
+  "pre_points": 3.0,
+  "pre_games": 7,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0038397",
+  "name": "Evan Hull",
+  "position": "RB",
+  "team": "NO",
+  "pre_points": 3.0,
+  "pre_games": 2,
+  "week_points": 1.2,
+  "active": true
+ },
+ {
+  "id": "00-0034798",
+  "name": "Durham Smythe",
+  "position": "TE",
+  "team": "CHI",
+  "pre_points": 2.9,
+  "pre_games": 4,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0039686",
+  "name": "Colson Yankoff",
+  "position": "TE",
+  "team": "WAS",
+  "pre_points": 2.8,
+  "pre_games": 9,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0040208",
+  "name": "Tahj Brooks",
+  "position": "RB",
+  "team": "CIN",
+  "pre_points": 2.8,
+  "pre_games": 9,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0036876",
+  "name": "Kylen Granson",
+  "position": "TE",
+  "team": "PHI",
+  "pre_points": 2.5,
+  "pre_games": 8,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0036959",
+  "name": "Michael Bandy",
+  "position": "WR",
+  "team": "DEN",
+  "pre_points": 2.1,
+  "pre_games": 2,
+  "week_points": 8.5,
+  "active": true
+ },
+ {
+  "id": "00-0034860",
+  "name": "Dante Pettis",
+  "position": "WR",
+  "team": "NO",
+  "pre_points": 1.9,
+  "pre_games": 4,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0035876",
+  "name": "Andre Baccellia",
+  "position": "WR",
+  "team": "ARI",
+  "pre_points": 1.8,
+  "pre_games": 3,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0033576",
+  "name": "Eric Saubert",
+  "position": "TE",
+  "team": "SEA",
+  "pre_points": 1.7,
+  "pre_games": 5,
+  "week_points": 1.4,
+  "active": true
+ },
+ {
+  "id": "00-0039603",
+  "name": "British Brooks",
+  "position": "RB",
+  "team": "HOU",
+  "pre_points": 1.5,
+  "pre_games": 5,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0039373",
+  "name": "Audric Estim\u00e9",
+  "position": "RB",
+  "team": "NO",
+  "pre_points": 1.1,
+  "pre_games": 1,
+  "week_points": 6.5,
+  "active": true
+ },
+ {
+  "id": "00-0036187",
+  "name": "Reggie Gilliam",
+  "position": "RB",
+  "team": "BUF",
+  "pre_points": 0.7,
+  "pre_games": 8,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0040184",
+  "name": "KeAndre Lambert-Smith",
+  "position": "WR",
+  "team": "LAC",
+  "pre_points": 0.6,
+  "pre_games": 6,
+  "week_points": 8.1,
+  "active": true
+ },
+ {
+  "id": "00-0035291",
+  "name": "Trayveon Williams",
+  "position": "RB",
+  "team": "CLE",
+  "pre_points": 0.4,
+  "pre_games": 2,
+  "week_points": 1.7,
+  "active": true
+ },
+ {
+  "id": "00-0039364",
+  "name": "Sione Vaki",
+  "position": "RB",
+  "team": "DET",
+  "pre_points": 0.4,
+  "pre_games": 5,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0022942",
+  "name": "Philip Rivers",
+  "position": "QB",
+  "team": "IND",
+  "pre_points": 0.0,
+  "pre_games": 0,
+  "week_points": 7.8,
+  "active": true
+ },
+ {
+  "id": "00-0033439",
+  "name": "Pharaoh Brown",
+  "position": "TE",
+  "team": "ARI",
+  "pre_points": 0.0,
+  "pre_games": 3,
+  "week_points": 1.1,
+  "active": true
+ },
+ {
+  "id": "00-0034681",
+  "name": "Chase Edmonds",
+  "position": "RB",
+  "team": "WAS",
+  "pre_points": 0.0,
+  "pre_games": 1,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0035956",
+  "name": "Giovanni Ricci",
+  "position": "TE",
+  "team": "DET",
+  "pre_points": 0.0,
+  "pre_games": 0,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0036906",
+  "name": "Khalil Herbert",
+  "position": "RB",
+  "team": "NYJ",
+  "pre_points": 0.0,
+  "pre_games": 2,
+  "week_points": 0.5,
+  "active": true
+ },
+ {
+  "id": "00-0037132",
+  "name": "Britain Covey",
+  "position": "WR",
+  "team": "PHI",
+  "pre_points": 0.0,
+  "pre_games": 2,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0037231",
+  "name": "Kevin Austin Jr.",
+  "position": "WR",
+  "team": "NO",
+  "pre_points": 0.0,
+  "pre_games": 1,
+  "week_points": 4.8,
+  "active": true
+ },
+ {
+  "id": "00-0037475",
+  "name": "Stone Smartt",
+  "position": "TE",
+  "team": "NYJ",
+  "pre_points": 0.0,
+  "pre_games": 3,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0038488",
+  "name": "Brady Russell",
+  "position": "RB",
+  "team": "SEA",
+  "pre_points": 0.0,
+  "pre_games": 8,
+  "week_points": 0.0,
+  "active": true
+ },
+ {
+  "id": "00-0039062",
+  "name": "Jonathan Mingo",
+  "position": "WR",
+  "team": "DAL",
+  "pre_points": 0.0,
+  "pre_games": 1,
+  "week_points": 3.0,
+  "active": true
+ },
+ {
+  "id": "00-0039405",
+  "name": "Jawhar Jordan",
+  "position": "RB",
+  "team": "HOU",
+  "pre_points": 0.0,
+  "pre_games": 0,
+  "week_points": 12.8,
+  "active": true
+ },
+ {
+  "id": "00-0040058",
+  "name": "Nick Kallerup",
+  "position": "TE",
+  "team": "SEA",
+  "pre_points": 0.0,
+  "pre_games": 3,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0040075",
+  "name": "LaJohntay Wester",
+  "position": "WR",
+  "team": "BAL",
+  "pre_points": 0.0,
+  "pre_games": 10,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0040205",
+  "name": "Kalel Mullings",
+  "position": "RB",
+  "team": "TEN",
+  "pre_points": 0.0,
+  "pre_games": 1,
+  "week_points": 0.3,
+  "active": true
+ },
+ {
+  "id": "00-0040352",
+  "name": "Coleman Owen",
+  "position": "WR",
+  "team": "IND",
+  "pre_points": 0.0,
+  "pre_games": 0,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0040431",
+  "name": "Dalen Cambre",
+  "position": "WR",
+  "team": "NYG",
+  "pre_points": 0.0,
+  "pre_games": 1,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0040506",
+  "name": "Myles Price",
+  "position": "WR",
+  "team": "MIN",
+  "pre_points": 0.0,
+  "pre_games": 13,
+  "week_points": 0.0,
+  "active": false
+ },
+ {
+  "id": "00-0040556",
+  "name": "Corey Kiner",
+  "position": "RB",
+  "team": "ARI",
+  "pre_points": 0.0,
+  "pre_games": 0,
+  "week_points": 1.1,
+  "active": true
+ },
+ {
+  "id": "00-0038400",
+  "name": "Tanner McKee",
+  "position": "QB",
+  "team": "PHI",
+  "pre_points": -0.2,
+  "pre_games": 1,
+  "week_points": 2.22,
+  "active": true
+ },
+ {
+  "id": "00-0033319",
+  "name": "Nick Mullens",
+  "position": "QB",
+  "team": "JAX",
+  "pre_points": -0.28,
+  "pre_games": 2,
+  "week_points": -0.2,
+  "active": false
+ },
+ {
+  "id": "00-0035289",
+  "name": "Gardner Minshew",
+  "position": "QB",
+  "team": "KC",
+  "pre_points": -0.6,
+  "pre_games": 2,
+  "week_points": -0.12,
+  "active": true
+ }
+]

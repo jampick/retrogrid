@@ -1,8 +1,24 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "retroffb"
+name = "retrogrid"
 version = "0.1.0"
-description = "Cyberpunk fantasy football threat console"
+description = "RETRO//GRID — a cyberpunk NFL gameday console: every live game, the plays that matter as neon tactical diagrams, with an opt-in fantasy layer"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "jampick" }]
 requires-python = ">=3.12"
+keywords = ["nfl", "football", "fantasy-football", "omarchy", "retro", "dashboard"]
+classifiers = [
+  "Environment :: Web Environment",
+  "Framework :: FastAPI",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Topic :: Games/Entertainment",
+]
 dependencies = [
   "fastapi",
   "uvicorn[standard]",
@@ -11,13 +27,28 @@ dependencies = [
   "pillow",
   "numpy",
   "httpx",
+  "platformdirs",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-asyncio"]
+dev = ["pytest", "pytest-asyncio", "build"]
+
+[project.scripts]
+retrogrid = "retrogrid.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/jampick/retrogrid"
+Issues = "https://github.com/jampick/retrogrid/issues"
 
 [tool.setuptools.packages.find]
 where = ["backend"]
+
+[tool.setuptools.package-data]
+retrogrid = [
+  "web/*.html", "web/static/*", "web/dist/*.js", "web/dist/*.css",
+  "bundled/*.json", "bundled/slate/*", "bundled/sprites/*.png",
+  "theme/bundled/*.toml", "providers/*.json", "parser/*.json",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

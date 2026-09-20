@@ -1,9 +1,9 @@
 """Play grammar (DESIGN §8): pure, seeded, never crashes."""
 import pytest
 
-from retroffb.grammar import compile_play
-from retroffb.models import PlayRow
-from retroffb.providers.slate import load_slate, slate_available
+from retrogrid.grammar import compile_play
+from retrogrid.models import PlayRow
+from retrogrid.providers.slate import load_slate, slate_available
 
 
 def _pass(**kw):

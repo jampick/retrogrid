@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from retroffb.models import PlayRow
-from retroffb.scoring.action import ALERT_THRESHOLD, ActionBoard, classify
+from retrogrid.models import PlayRow
+from retrogrid.scoring.action import ALERT_THRESHOLD, ActionBoard, classify
 
 G = "2025_15_KC_BUF"          # away KC, home BUF
 

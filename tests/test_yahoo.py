@@ -6,11 +6,11 @@ from pathlib import Path
 
 import pytest
 
-from retroffb.providers.directory import NflversePlayerDirectory, name_key
-from retroffb.providers.yahoo import YahooLeagueProvider, list_leagues, scoring_rules, team_abbr
-from retroffb.providers.yahoo_api import YahooClient, YahooError, flatten, many
-from retroffb.scoring import LeagueIndex, MatchupBoard, ScoringState
-from retroffb.scoring.engine import DEFAULT_RULES
+from retrogrid.providers.directory import NflversePlayerDirectory, name_key
+from retrogrid.providers.yahoo import YahooLeagueProvider, list_leagues, scoring_rules, team_abbr
+from retrogrid.providers.yahoo_api import YahooClient, YahooError, flatten, many
+from retrogrid.scoring import LeagueIndex, MatchupBoard, ScoringState
+from retrogrid.scoring.engine import DEFAULT_RULES
 
 from conftest import needs_nflverse
 

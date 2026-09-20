@@ -4,9 +4,9 @@ from collections import Counter
 
 import pytest
 
-from retroffb.models import SLOTS
-from retroffb.providers.slate import PoolEntry, Slate, load_pool, load_slate
-from retroffb.providers.stub_league import (
+from retrogrid.models import SLOTS
+from retrogrid.providers.slate import PoolEntry, Slate, load_pool, load_slate
+from retrogrid.providers.stub_league import (
     YAHOO_HALF_PPR, SyntheticLeagueProvider, approx_play_points, pa_tier_key,
 )
 

@@ -1,0 +1,163 @@
+{
+  "season": 2025,
+  "week": 15,
+  "date": "2025-12-14",
+  "start_utc": "2025-12-14T18:02:26.937000+00:00",
+  "duration": 37727.063,
+  "games": [
+    {
+      "id": "2025_15_WAS_NYG",
+      "home": "NYG",
+      "away": "WAS",
+      "kickoff": 0.0,
+      "end": 11364.063,
+      "kickoff_utc": "2025-12-14T18:02:26.937000+00:00",
+      "home_score": 21,
+      "away_score": 29,
+      "plays": 164
+    },
+    {
+      "id": "2025_15_NYJ_JAX",
+      "home": "JAX",
+      "away": "NYJ",
+      "kickoff": 1.04,
+      "end": 11315.063,
+      "kickoff_utc": "2025-12-14T18:02:27.977000+00:00",
+      "home_score": 48,
+      "away_score": 20,
+      "plays": 162
+    },
+    {
+      "id": "2025_15_LAC_KC",
+      "home": "KC",
+      "away": "LAC",
+      "kickoff": 3.15,
+      "end": 11532.063,
+      "kickoff_utc": "2025-12-14T18:02:30.087000+00:00",
+      "home_score": 13,
+      "away_score": 16,
+      "plays": 153
+    },
+    {
+      "id": "2025_15_ARI_HOU",
+      "home": "HOU",
+      "away": "ARI",
+      "kickoff": 10.513,
+      "end": 11076.393,
+      "kickoff_utc": "2025-12-14T18:02:37.450000+00:00",
+      "home_score": 40,
+      "away_score": 20,
+      "plays": 161
+    },
+    {
+      "id": "2025_15_BAL_CIN",
+      "home": "CIN",
+      "away": "BAL",
+      "kickoff": 20.29,
+      "end": 10285.22,
+      "kickoff_utc": "2025-12-14T18:02:47.227000+00:00",
+      "home_score": 0,
+      "away_score": 24,
+      "plays": 136
+    },
+    {
+      "id": "2025_15_LV_PHI",
+      "home": "PHI",
+      "away": "LV",
+      "kickoff": 43.763,
+      "end": 9106.83,
+      "kickoff_utc": "2025-12-14T18:03:10.700000+00:00",
+      "home_score": 31,
+      "away_score": 0,
+      "plays": 129
+    },
+    {
+      "id": "2025_15_BUF_NE",
+      "home": "NE",
+      "away": "BUF",
+      "kickoff": 57.693,
+      "end": 10951.866,
+      "kickoff_utc": "2025-12-14T18:03:24.630000+00:00",
+      "home_score": 31,
+      "away_score": 35,
+      "plays": 153
+    },
+    {
+      "id": "2025_15_CLE_CHI",
+      "home": "CHI",
+      "away": "CLE",
+      "kickoff": 64.34,
+      "end": 11079.063,
+      "kickoff_utc": "2025-12-14T18:03:31.277000+00:00",
+      "home_score": 31,
+      "away_score": 3,
+      "plays": 156
+    },
+    {
+      "id": "2025_15_DET_LA",
+      "home": "LA",
+      "away": "DET",
+      "kickoff": 12169.796,
+      "end": 23594.446,
+      "kickoff_utc": "2025-12-14T21:25:16.733000+00:00",
+      "home_score": 41,
+      "away_score": 34,
+      "plays": 171
+    },
+    {
+      "id": "2025_15_GB_DEN",
+      "home": "DEN",
+      "away": "GB",
+      "kickoff": 12172.93,
+      "end": 24042.18,
+      "kickoff_utc": "2025-12-14T21:25:19.867000+00:00",
+      "home_score": 34,
+      "away_score": 26,
+      "plays": 165
+    },
+    {
+      "id": "2025_15_IND_SEA",
+      "home": "SEA",
+      "away": "IND",
+      "kickoff": 12184.766,
+      "end": 22763.063,
+      "kickoff_utc": "2025-12-14T21:25:31.703000+00:00",
+      "home_score": 18,
+      "away_score": 16,
+      "plays": 154
+    },
+    {
+      "id": "2025_15_CAR_NO",
+      "home": "NO",
+      "away": "CAR",
+      "kickoff": 12192.08,
+      "end": 23303.583,
+      "kickoff_utc": "2025-12-14T21:25:39.017000+00:00",
+      "home_score": 20,
+      "away_score": 17,
+      "plays": 153
+    },
+    {
+      "id": "2025_15_TEN_SF",
+      "home": "SF",
+      "away": "TEN",
+      "kickoff": 12199.603,
+      "end": 23347.75,
+      "kickoff_utc": "2025-12-14T21:25:46.540000+00:00",
+      "home_score": 37,
+      "away_score": 24,
+      "plays": 159
+    },
+    {
+      "id": "2025_15_MIN_DAL",
+      "home": "DAL",
+      "away": "MIN",
+      "kickoff": 26431.76,
+      "end": 37607.063,
+      "kickoff_utc": "2025-12-15T01:22:58.697000+00:00",
+      "home_score": 26,
+      "away_score": 34,
+      "plays": 159
+    }
+  ]
+}

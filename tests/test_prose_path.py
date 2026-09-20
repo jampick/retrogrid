@@ -1,17 +1,19 @@
 """The simulated live path: prose alone must score the slate like nflverse does."""
 import pytest
 
-from retroffb.providers.directory import NflversePlayerDirectory
-from retroffb.providers.prose import reparse
-from retroffb.providers.slate import load_slate, slate_available
-from retroffb.providers.stub_league import SyntheticLeagueProvider
-from retroffb.scoring import ScoringState
+from retrogrid import paths
+from retrogrid.providers.directory import NflversePlayerDirectory
+from retrogrid.providers.prose import reparse
+from retrogrid.providers.slate import load_slate, slate_available
+from retrogrid.providers.stub_league import SyntheticLeagueProvider
+from retrogrid.scoring import ScoringState
 
 
 @pytest.mark.skipif(not slate_available(), reason="no slate data")
 def test_prose_only_scoring_matches_nflverse_columns():
     slate = load_slate()
-    d = NflversePlayerDirectory.from_data_dir(week=slate.week, season=slate.season)
+    d = (NflversePlayerDirectory.from_snapshot(paths.BUNDLED_DIRECTORY) if paths.sim_slate() == paths.BUNDLED_SLATE
+         else NflversePlayerDirectory.from_data_dir(week=slate.week, season=slate.season))
     rules = SyntheticLeagueProvider.from_slate(seed=1, directory=d).league().scoring_rules
     truth, live = ScoringState(rules), ScoringState(rules)
     for g in slate.games:

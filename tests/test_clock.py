@@ -4,7 +4,7 @@ import asyncio
 
 import pytest
 
-from retroffb.sim.clock import SimClock
+from retrogrid.sim.clock import SimClock
 
 from conftest import FakeTime
 

@@ -3,9 +3,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from retroffb.models import Game, PlayRow
-from retroffb.providers.audio import AudioTable
-from retroffb.providers.chatter import TEAMS, ChatterBox, ChatterLine, RedditChatter, StubChatter, clean, parse_feed, route
+from retrogrid.models import Game, PlayRow
+from retrogrid.providers.audio import AudioTable
+from retrogrid.providers.chatter import TEAMS, ChatterBox, ChatterLine, RedditChatter, StubChatter, clean, parse_feed, route
 
 FEED = Path(__file__).parent / "fixtures" / "reddit" / "comments.rss"
 GAMES = [Game("2026_02_CLE_TB", "TB", "CLE", 0, "live"), Game("2026_02_PHI_TEN", "TEN", "PHI", 0, "live"),
@@ -76,7 +76,7 @@ def test_audio_overrides_merge_and_reload(tmp_path):
 
 
 def test_shipped_seed_is_well_formed():
-    from retroffb.providers.audio import SEED
+    from retrogrid.providers.audio import SEED
     rows = json.loads(SEED.read_text())
     assert set(rows) <= set(TEAMS)
     for r in rows.values():

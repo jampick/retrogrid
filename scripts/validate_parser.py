@@ -1,4 +1,4 @@
-"""Validate retroffb.parser.desc against nflverse's own parsed columns.
+"""Validate retrogrid.parser.desc against nflverse's own parsed columns.
 
     PYTHONPATH=backend .venv/bin/python scripts/validate_parser.py [--season 2024] [--samples 8]
 
@@ -19,7 +19,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from retroffb.parser.desc import parse_desc  # noqa: E402
+from retrogrid.parser.desc import parse_desc  # noqa: E402
 
 SCRIMMAGE = ["pass", "run", "qb_kneel", "qb_spike"]
 

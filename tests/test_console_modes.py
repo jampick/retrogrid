@@ -1,4 +1,4 @@
-"""The console with and without the fantasy layer (RETROFFB_LEAGUE)."""
+"""The console with and without the fantasy layer (RETROGRID_LEAGUE)."""
 from __future__ import annotations
 
 import pytest
@@ -7,9 +7,9 @@ from conftest import needs_slate
 
 
 def _engine(monkeypatch, league: str):
-    monkeypatch.setenv("RETROFFB_LEAGUE", league)
-    monkeypatch.setenv("RETROFFB_START", "5400")
-    from retroffb import console
+    monkeypatch.setenv("RETROGRID_LEAGUE", league)
+    monkeypatch.setenv("RETROGRID_START", "5400")
+    from retrogrid import console
     e = console.Engine()
     e.rebuild()
     return console, e

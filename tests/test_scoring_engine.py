@@ -3,10 +3,10 @@ from __future__ import annotations
 
 import pytest
 
-from retroffb.models import Game, PlayRow, Roster, RosterSlot
-from retroffb.scoring.engine import DEFAULT_RULES, ScoringState, pa_tier, round_points, score_play
-from retroffb.scoring.matchup import LeagueBoard, MatchupBoard
-from retroffb.models import Matchup
+from retrogrid.models import Game, PlayRow, Roster, RosterSlot
+from retrogrid.scoring.engine import DEFAULT_RULES, ScoringState, pa_tier, round_points, score_play
+from retrogrid.scoring.matchup import LeagueBoard, MatchupBoard
+from retrogrid.models import Matchup
 
 GAME = "2025_03_KC_BUF"          # KC away @ BUF home
 _seq = iter(range(1, 10_000))

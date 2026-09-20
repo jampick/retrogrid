@@ -1,10 +1,11 @@
 {
-  "name": "retroffb-frontend",
+  "name": "retrogrid-frontend",
   "private": true,
   "scripts": {
-    "build": "esbuild app=frontend/src/main.ts sheet=frontend/src/sheet.ts --bundle --sourcemap --target=es2022 --outdir=frontend/dist",
-    "watch": "esbuild app=frontend/src/main.ts sheet=frontend/src/sheet.ts --bundle --sourcemap --target=es2022 --outdir=frontend/dist --watch=forever",
-    "check": "tsc --noEmit -p frontend"
+    "build": "esbuild app=frontend/src/main.ts sheet=frontend/src/sheet.ts --bundle --sourcemap --target=es2022 --outdir=backend/retrogrid/web/dist",
+    "watch": "esbuild app=frontend/src/main.ts sheet=frontend/src/sheet.ts --bundle --sourcemap --target=es2022 --outdir=backend/retrogrid/web/dist --watch=forever",
+    "check": "tsc --noEmit -p frontend",
+    "build:release": "esbuild app=frontend/src/main.ts sheet=frontend/src/sheet.ts --bundle --minify --target=es2022 --outdir=backend/retrogrid/web/dist"
   },
   "devDependencies": {
     "esbuild": "^0.25.0",

@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+pandas
+pyarrow
+pillow
+numpy
+httpx
+
+[dev]
+pytest
+pytest-asyncio

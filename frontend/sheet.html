@@ -1,0 +1,23 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>RETRO//FFB · theme contact sheet</title>
+<style>
+  body { margin: 0; background: #111; color: #999; font: 12px ui-monospace, monospace; }
+  main { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 10px; }
+  figure { margin: 0; }
+  .f { position: relative; width: 100%; aspect-ratio: 1896 / 1030; overflow: hidden; }
+  iframe { position: absolute; left: 0; top: 0; width: 1896px; height: 1030px; border: 0; transform-origin: 0 0; }
+  figcaption { padding: 4px 2px 8px; letter-spacing: .1em; text-transform: uppercase; }
+</style></head><body><main id="m"></main>
+<script>
+fetch("/api/themes").then(r => r.json()).then(({ themes }) => {
+  const m = document.getElementById("m");
+  for (const t of themes) {
+    const fig = document.createElement("figure");
+    fig.innerHTML = `<div class="f"><iframe loading="lazy" src="/?mini=1&theme=${t.slug}"></iframe></div>
+      <figcaption>${t.name} · ${t.mode}${t.mono ? " · mono" : ""} — ${t.notes.join("; ")}</figcaption>`;
+    m.appendChild(fig);
+  }
+  const fit = () => document.querySelectorAll(".f").forEach(f => f.firstElementChild.style.transform = `scale(${f.clientWidth / 1896})`);
+  fit(); addEventListener("resize", fit);
+});
+</script></body></html>

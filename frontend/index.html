@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>RETRO//FFB</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/static/console.css">
+</head>
+<body>
+<div id="crt">
+  <canvas id="ghosts"></canvas>
+  <div id="console">
+    <header id="status">
+      <div id="logo"></div>
+      <div id="tug">
+        <span class="owner you" id="you-owner"></span>
+        <span id="you-score"></span>
+        <canvas id="tugbar" height="18"></canvas>
+        <span id="them-score"></span>
+        <span class="owner them" id="them-owner"></span>
+      </div>
+      <div id="delta"></div>
+      <div id="clockbox">
+        <span id="live">● LIVE</span>
+        <span id="clock"></span>
+        <span id="transport"></span>
+      </div>
+      <div id="scrub"><i></i></div>
+    </header>
+
+    <aside id="left">
+      <section>
+        <h2><span>FEEDS</span><em id="feeds-count"></em></h2>
+        <ul id="feeds"></ul>
+      </section>
+      <section>
+        <h2><span>THREATS</span><em id="scope" title="toggle scope [L]"></em></h2>
+        <ul id="threats"></ul>
+      </section>
+    </aside>
+
+    <main id="stage">
+      <div id="banner"></div>
+      <canvas id="field"></canvas>
+      <div class="ghost-tag you" id="gt-you"></div>
+      <div class="ghost-tag them" id="gt-them"></div>
+    </main>
+
+    <aside id="right">
+      <section>
+        <h2><span>LINEUP</span><em>YOU · THEM</em></h2>
+        <ul id="lineup"></ul>
+      </section>
+      <div id="keys">[T] THEME · [V] VIEWER · [L] SCOPE · [A] AUTO-DIRECT<br>[SPACE] HOLD · [1-4] RATE · [←→] SKIP · [M] MUTE</div>
+    </aside>
+
+    <footer id="active"></footer>
+  </div>
+  <div id="fx-scan"></div>
+  <div id="fx-vignette"></div>
+  <div id="picker" hidden></div>
+  <div id="boot"></div>
+</div>
+<script src="/dist/app.js"></script>
+</body>
+</html>

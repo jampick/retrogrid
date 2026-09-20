@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", "module": "ES2022", "moduleResolution": "bundler",
+    "strict": true, "noEmit": true, "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "noUnusedLocals": true, "noImplicitReturns": true
+  },
+  "include": ["src"]
+}

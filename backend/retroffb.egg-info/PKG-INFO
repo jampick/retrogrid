@@ -1,0 +1,15 @@
+Metadata-Version: 2.4
+Name: retroffb
+Version: 0.1.0
+Summary: Cyberpunk fantasy football threat console
+Requires-Python: >=3.12
+Requires-Dist: fastapi
+Requires-Dist: uvicorn[standard]
+Requires-Dist: pandas
+Requires-Dist: pyarrow
+Requires-Dist: pillow
+Requires-Dist: numpy
+Requires-Dist: httpx
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: pytest-asyncio; extra == "dev"

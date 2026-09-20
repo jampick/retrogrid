@@ -1,0 +1,13 @@
+{
+  "name": "retroffb-frontend",
+  "private": true,
+  "scripts": {
+    "build": "esbuild frontend/src/main.ts --bundle --sourcemap --target=es2022 --outfile=frontend/dist/app.js",
+    "watch": "esbuild frontend/src/main.ts --bundle --sourcemap --target=es2022 --outfile=frontend/dist/app.js --watch=forever",
+    "check": "tsc --noEmit -p frontend"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "typescript": "^5.6.0"
+  }
+}

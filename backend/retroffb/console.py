@@ -18,12 +18,12 @@ from zoneinfo import ZoneInfo
 from fastapi import WebSocket
 
 from .grammar import compile_play
-from .models import PlayRow, StatDelta
+from .models import SLOTS, PlayRow, StatDelta
 from .parser.desc import penalty_summary
 from .providers.directory import NflversePlayerDirectory
 from .providers.nflverse_plays import SlatePlayProvider
 from .providers.slate import DEFAULT_SLATE_DIR, ROOT, load_slate, slate_available
-from .providers.stub_league import SyntheticLeagueProvider
+from .providers.league import default_viewer, make_league
 from .scoring import LeagueIndex, MatchupBoard, ScoringState, ThreatEvent, ThreatHub
 from .sim.clock import SimClock
 
@@ -55,7 +55,7 @@ def _air_estimator():
 @dataclass(eq=False)
 class Session:
     ws: WebSocket
-    viewer: str = "t01"
+    viewer: str
     focus: str | None = None
     scope: str = "matchup"
     auto: bool = True               # AUTO-DIRECT: follow the action (demo / cast mode)
@@ -73,7 +73,8 @@ class Engine:
     def __init__(self) -> None:
         self.slate = load_slate(SLATE_DIR)
         self.directory = NflversePlayerDirectory.from_data_dir(week=self.slate.week, season=self.slate.season)
-        self.league = SyntheticLeagueProvider.from_slate(seed=int(os.environ.get("RETROFFB_SEED", "1")), slate_dir=SLATE_DIR, directory=self.directory)
+        self.league = make_league(SLATE_DIR, self.directory, self.slate.week, self.slate.season,
+                                  seed=int(os.environ.get("RETROFFB_SEED", "1")))
         self.clock = SimClock(self.slate.duration, speed=float(os.environ.get("RETROFFB_SPEED", "4")),
                               start_at=float(os.environ.get("RETROFFB_START", "420")))
         if os.environ.get("RETROFFB_PROSE") == "1":          # rehearse the live path: prose is the only source
@@ -87,15 +88,11 @@ class Engine:
             self.clock = SimClock(self.slate.duration, speed=1.0, start_at=(datetime.now(t0.tzinfo) - t0).total_seconds())
             self.provider = EspnPlayProvider(self.slate, self.clock, self.directory)
         self.week = self.slate.week
-        self.teams = {t.key: t for t in self.league.league().teams}
-        self.rosters = {k: self.league.roster(k, self.week) for k in self.teams}
-        self.opponent: dict[str, str] = {}
-        for m in self.league.matchups(self.week):
-            self.opponent[m.a], self.opponent[m.b] = m.b, m.a
-        self.index = LeagueIndex.from_provider(self.league, self.week)
+        self.team_game = {t: g.id for g in self.slate.games for t in (g.home, g.away)}
         self.state = ScoringState(self.league.league().scoring_rules)
-        self.hub = ThreatHub(self.index, self.directory)
-        self.boards = {k: MatchupBoard(self.rosters[k], self.rosters[self.opponent[k]], self.state) for k in self.teams}
+        self.hub: ThreatHub | None = None
+        self.boards: dict[str, MatchupBoard] = {}
+        self.load_league()
         self.recent: dict[str, list[tuple[float, float]]] = {}
         self.aux: dict[str, dict[str, float]] = {}
         self.plays_by_id = {p.play_id: p for p in self.slate.plays}
@@ -103,8 +100,62 @@ class Engine:
         self.last_by_game: dict[str, PlayRow] = {}
         self.sessions: set[Session] = set()
         self.air_est = _air_estimator()
-        self.team_game = {t: g.id for g in self.slate.games for t in (g.home, g.away)}
         self._t0 = datetime.fromisoformat(self.slate.start_utc.replace("Z", "+00:00"))
+
+    # ── league (slow lane, §9) ────────────────────────────────────────────
+    def load_league(self) -> None:
+        """Read teams, rosters and matchups off the provider. Called again after
+        every slow-lane refresh; boards keep their lead memory."""
+        self.teams = {t.key: t for t in self.league.league().teams}
+        self.default_viewer = default_viewer(self.league)
+        self.rosters = {k: self.league.roster(k, self.week) for k in self.teams}
+        self.opponent = {}
+        for m in self.league.matchups(self.week):
+            self.opponent[m.a], self.opponent[m.b] = m.b, m.a
+        self.index = LeagueIndex(self.rosters.values(), self.league.matchups(self.week))
+        if self.hub is None:
+            self.hub = ThreatHub(self.index, self.directory)
+        else:
+            self.hub.set_index(self.index)
+        for k in self.teams:
+            you, them = self.rosters[k], self.rosters[self.opponent[k]]
+            if k in self.boards:
+                self.boards[k].set_rosters(you, them)
+            else:
+                self.boards[k] = MatchupBoard(you, them, self.state, getattr(self.league, "slots", SLOTS))
+        self.state.set_base(self.off_slate_points())
+
+    def off_slate_points(self) -> dict[str, float]:
+        """Official points of rostered players whose game is not in the slate."""
+        base: dict[str, float] = {}
+        for k in self.teams:
+            for pid, pts in self.league.official_points(k, self.week).items():
+                pl = self.directory.player(pid)
+                if pts and (pl is None or pl.team not in self.team_game):
+                    base[pid] = pts
+        return base
+
+    async def league_pump(self, every: float = 300.0) -> None:
+        """Lineup changes and late swaps; official points for drift."""
+        refresh = getattr(self.league, "refresh", None)
+        while refresh is not None:
+            await asyncio.sleep(every)
+            try:
+                await asyncio.to_thread(refresh)
+            except Exception as e:                            # noqa: BLE001 — keep the last good league
+                log.warning("league refresh failed: %s", e)
+                continue
+            self.load_league()
+            self.log_drift()
+
+    def log_drift(self, tolerance: float = 1.0) -> None:
+        """Local engine vs Yahoo's own numbers. Yahoo lags live play by minutes,
+        so this is a diagnostic, never a correction."""
+        for k in self.teams:
+            for pid, theirs in self.league.official_points(k, self.week).items():
+                ours = self.state.points(pid)
+                if abs(ours - theirs) >= tolerance:
+                    log.info("drift %-14s ours %6.2f  yahoo %6.2f  (%+.2f)", self.name(pid), ours, theirs, ours - theirs)
 
     # ── ingest ────────────────────────────────────────────────────────────
     def ingest(self, play: PlayRow) -> dict[str, list[ThreatEvent]]:
@@ -218,7 +269,9 @@ class Engine:
         return max(pool, key=lambda g: (stake.get(g.id, 0), -g.kickoff)).id if pool else None
 
     # ── frames ────────────────────────────────────────────────────────────
-    def name(self, pid: str) -> str:
+    def name(self, pid: str | None) -> str:
+        if pid is None:
+            return "EMPTY"                                    # an unfilled lineup slot
         p = self.directory.player(pid)
         if not p:
             return "UNKNOWN"
@@ -396,8 +449,8 @@ class Engine:
         games = {g.id: g for g in self.provider.games_at(now)}
         marks = self.hub.board(s.viewer).per_game_status(now)
 
-        def live(pid: str) -> bool:
-            pl = self.directory.player(pid)
+        def live(pid: str | None) -> bool:
+            pl = self.directory.player(pid) if pid else None
             g = games.get(self.team_game.get(pl.team, "")) if pl else None
             return bool(g and g.status in ("live", "half"))
 
@@ -510,7 +563,7 @@ def sample_plays(n: int = 24, seed: int = 0, family: str | None = None, viewer: 
             pool.append(p)
     rng = random.Random(seed)
     picks = pool if len(pool) <= n else rng.sample(pool, n)
-    s = Session(ws=None, viewer=viewer if viewer in engine.teams else "t01")    # type: ignore[arg-type]
+    s = Session(ws=None, viewer=viewer if viewer in engine.teams else engine.default_viewer)    # type: ignore[arg-type]
     frames = []
     for p in picks:
         f = engine.play_frame(s, p, focus=False, alert=False)
@@ -528,12 +581,12 @@ async def start(hub) -> list[asyncio.Task]:                   # noqa: ANN001
     if not slate_available(SLATE_DIR):
         raise RuntimeError("no slate — run scripts/fetch_nflverse.py then scripts/build_slate.py (or build_live.py)")
     engine = Engine()
-    return [asyncio.create_task(engine.run()), asyncio.create_task(engine.ticker())]
+    return [asyncio.create_task(engine.run()), asyncio.create_task(engine.ticker()), asyncio.create_task(engine.league_pump())]
 
 
 async def on_connect(ws: WebSocket) -> None:
     if engine:
-        s = Session(ws)
+        s = Session(ws, engine.default_viewer)
         _by_ws[ws] = s
         engine.sessions.add(s)
         await engine.catch_up(s)

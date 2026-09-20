@@ -30,6 +30,13 @@ FANTASY_POSITIONS = ("QB", "RB", "WR", "TE", "K")
 ESPN_HEADSHOT = "https://a.espncdn.com/i/headshots/nfl/players/full/{espn_id}.png"
 
 _JERSEY_PREFIX = re.compile(r"^(\d{1,2})-")
+_NAME_SUFFIX = frozenset({"jr", "sr", "ii", "iii", "iv", "v"})
+
+
+def name_key(name: str) -> str:
+    """"A.J. Brown" / "AJ Brown", "Kenneth Walker III" / "Kenneth Walker" -> one key."""
+    words = re.sub(r"[^a-z ]", "", name.lower().replace("-", " ")).split()
+    return "".join(w for w in words if w not in _NAME_SUFFIX)
 
 
 def def_id(team: str) -> str:
@@ -71,6 +78,7 @@ class NflversePlayerDirectory:
         self._players: dict[str, Player] = {}
         self._rank: dict[str, tuple[int, int, int]] = {}
         self._by_short: dict[str, list[str]] = defaultdict(list)
+        self._by_name: dict[str, list[str]] = defaultdict(list)
         for r in df.itertuples(index=False):
             team, number = overlay.get(r.gsis_id, (_str(r.latest_team), _int(r.jersey_number)))
             espn_id = _str(r.espn_id)
@@ -114,6 +122,7 @@ class NflversePlayerDirectory:
         self._players[player.id] = player
         self._rank[player.id] = (int(rank[0]), int(rank[1]), rank[2])
         self._by_short[player.short.lower()].append(player.id)
+        self._by_name[name_key(player.name)].append(player.id)
 
     # ------------------------------------------------------------- contract
 
@@ -140,6 +149,17 @@ class NflversePlayerDirectory:
             last = short.rsplit(".", 1)[-1].strip().lower()
             cands = [p for p in self._players.values()
                      if p.team == team and p.number == number and last in p.name.lower()]
+        if not cands:
+            return None
+        return max(cands, key=lambda p: (self._rank[p.id], p.id))
+
+    def by_name(self, name: str, team: str | None = None, position: str | None = None) -> Player | None:
+        """Resolve a full name from another data source (Yahoo). Position and
+        team narrow namesakes but never veto: a traded player still resolves."""
+        cands = [self._players[i] for i in self._by_name.get(name_key(name), [])]
+        for attr, want in (("position", position), ("team", team)):
+            if want is not None:
+                cands = [p for p in cands if getattr(p, attr) == want] or cands
         if not cands:
             return None
         return max(cands, key=lambda p: (self._rank[p.id], p.id))

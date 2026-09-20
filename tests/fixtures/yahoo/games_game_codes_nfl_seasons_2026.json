@@ -1,0 +1,22 @@
+{
+ "fantasy_content": {
+  "xml:lang": "en-US",
+  "yahoo:uri": "/fantasy/v2/games;game_codes=nfl;seasons=2026",
+  "games": {
+   "0": {
+    "game": [
+     {
+      "game_key": "461",
+      "game_id": "461",
+      "name": "Football",
+      "code": "nfl",
+      "season": "2026"
+     }
+    ]
+   },
+   "count": 1
+  },
+  "time": "30ms",
+  "copyright": "x"
+ }
+}

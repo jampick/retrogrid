@@ -1,0 +1,50 @@
+{
+ "fantasy_content": {
+  "xml:lang": "en-US",
+  "yahoo:uri": "/fantasy/v2/users;use_login=1/games;game_keys=461/leagues",
+  "users": {
+   "0": {
+    "user": [
+     {
+      "guid": "G"
+     },
+     {
+      "games": {
+       "0": {
+        "game": [
+         {
+          "game_key": "461",
+          "code": "nfl",
+          "season": "2026"
+         },
+         {
+          "leagues": {
+           "0": {
+            "league": [
+             {
+              "league_key": "461.l.777",
+              "league_id": "777",
+              "name": "Neon Sunday",
+              "num_teams": 4,
+              "current_week": 2,
+              "season": "2026",
+              "game_code": "nfl"
+             }
+            ]
+           },
+           "count": 1
+          }
+         }
+        ]
+       },
+       "count": 1
+      }
+     }
+    ]
+   },
+   "count": 1
+  },
+  "time": "30ms",
+  "copyright": "x"
+ }
+}

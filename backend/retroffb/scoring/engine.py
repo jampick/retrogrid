@@ -289,6 +289,13 @@ class ScoringState:
         self._games: dict[str, tuple[str, str]] = {}      # game_id → (home, away)
         self._scores: dict[str, tuple[int, int]] = {}     # game_id → (home, away)
         self._seen: set[str] = set()
+        self._base: dict[str, float] = {}                 # survives reset: not ours to recompute
+
+    def set_base(self, points: Mapping[str, float]) -> None:
+        """Official points for players whose game is outside the slate
+        (Thursday's starters on a Sunday): they count, but no play of ours
+        will ever produce them."""
+        self._base = dict(points)
 
     # -- lifecycle ---------------------------------------------------------
     def reset(self) -> None:
@@ -372,13 +379,13 @@ class ScoringState:
     # -- reads ---------------------------------------------------------------
     def points(self, player_id: str) -> float:
         """Unrounded running total; 0.0 for a player who hasn't registered."""
-        return self._points.get(player_id, 0.0)
+        return self._points.get(player_id, 0.0) + self._base.get(player_id, 0.0)
 
     def statline(self, player_id: str) -> dict[str, float]:
         return dict(self._stats.get(player_id, {}))
 
     def all_points(self) -> dict[str, float]:
-        return dict(self._points)
+        return {pid: self.points(pid) for pid in {*self._points, *self._base}}
 
     def game_score(self, game_id: str) -> tuple[int, int] | None:
         """(home, away) as last seen, or None for an unopened game."""

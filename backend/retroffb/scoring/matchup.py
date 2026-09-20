@@ -8,7 +8,7 @@ points of its own.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Sequence
 
 from ..models import SLOTS, Matchup, Roster
 from .engine import ScoringState, round_points
@@ -114,7 +114,9 @@ class MatchupBoard:
     """One viewer's head-to-head. Call :meth:`update` after every scored play
     (cheap: 18 dict lookups) to learn about lead changes."""
 
-    def __init__(self, you: Roster, them: Roster, state: ScoringState) -> None:
+    def __init__(self, you: Roster, them: Roster, state: ScoringState,
+                 template: Sequence[str] = SLOTS) -> None:
+        self.template = tuple(template)
         self.you = you
         self.them = them
         self.state = state
@@ -125,7 +127,8 @@ class MatchupBoard:
                    state: ScoringState) -> MatchupBoard:
         m = provider.matchup(team_key, week)
         opponent = m.b if m.a == team_key else m.a
-        return cls(provider.roster(team_key, week), provider.roster(opponent, week), state)
+        return cls(provider.roster(team_key, week), provider.roster(opponent, week), state,
+                   getattr(provider, "slots", SLOTS))
 
     def set_rosters(self, you: Roster, them: Roster) -> None:
         """Slow-lane roster refresh (§9). Lead memory is kept."""
@@ -137,12 +140,14 @@ class MatchupBoard:
 
     def rows(self) -> list[SlotRow]:
         """Rows in SLOTS display order, same-slot rows adjacent; the k-th RB
-        faces the k-th RB. A side missing a slot shows `player_id=None` at 0."""
+        faces the k-th RB. A side missing a slot shows `player_id=None` at 0.
+        `template` is the league's lineup shape: a real league may run one RB,
+        a superflex, no kicker."""
         mine, theirs = _by_slot(self.you), _by_slot(self.them)
         rows: list[SlotRow] = []
-        for slot in dict.fromkeys([*SLOTS, *mine, *theirs]):
+        for slot in dict.fromkeys([*self.template, *mine, *theirs]):
             a, b = mine.get(slot, []), theirs.get(slot, [])
-            for k in range(max(SLOTS.count(slot), len(a), len(b))):
+            for k in range(max(self.template.count(slot), len(a), len(b))):
                 you = self._side(a[k] if k < len(a) else None)
                 them = self._side(b[k] if k < len(b) else None)
                 losing = round_points(you.points) < round_points(them.points)

@@ -1,4 +1,42 @@
-# Next: Yahoo Fantasy integration (Phase 8, league side)
+# Yahoo Fantasy integration (Phase 8, league side)
+
+**Status 2026-09-20: adapter built and tested against Yahoo-shaped fixtures;
+never yet run against the real API.** The fixtures were written from the
+documented response shape, so expect the first real run to surface a parsing
+surprise or two — every raw response lands in `data/yahoo/raw/` for that reason.
+
+**Blocked 2026-09-20:** app created, OAuth consent + token work, but every
+Fantasy endpoint answers 403 "This application is not authorized to perform
+this action". Since 2026-07-22 Yahoo requires a reviewed application at
+https://sports.yahoo.com/developer/access/ (give it our Client ID) before any
+app may read the Fantasy API. Nothing to fix on our side until that is approved.
+
+## Run it
+
+```
+# .env (gitignored)
+YAHOO_CLIENT_ID=...
+YAHOO_CLIENT_SECRET=...
+RETROFFB_LEAGUE=yahoo             # or export it per run
+# YAHOO_REDIRECT_URI=https://localhost:8443/callback   (default: oob)
+
+scripts/yahoo_auth.py             # once: sign in, pick the league
+scripts/yahoo_auth.py --check --week 2   # print league, rules, lineups, join misses
+scripts/live.sh                   # console on your real league
+```
+
+`RETROFFB_YAHOO_REPLAY=1` serves everything from `data/yahoo/raw/` (offline dev).
+Pieces: `providers/yahoo_api.py` (flattener, token, cached GET),
+`providers/yahoo.py` (provider, stat map, player join), `providers/league.py`
+(factory + default viewer), `Engine.load_league / league_pump / log_drift`.
+
+Not done: drift is only logged (no UI); yardage bonuses, return yards, IDP and
+any unmapped stat are warned about at startup, not scored; players the join
+cannot match show as UNKNOWN and sit at Yahoo's official points.
+
+---
+
+Original plan, kept for the reasoning:
 
 Left 2026-09-20, right after LIVE mode (ESPN plays) went in. The play lane is
 real now; the league is still `SyntheticLeagueProvider`. This swaps it for the

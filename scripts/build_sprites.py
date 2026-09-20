@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 from retroffb.providers.directory import NflversePlayerDirectory   # noqa: E402
 from retroffb.providers.slate import load_slate                    # noqa: E402
-from retroffb.providers.stub_league import SyntheticLeagueProvider  # noqa: E402
+from retroffb.providers.league import make_league  # noqa: E402
 
 OUT = ROOT / "data" / "sprites"
 RAW = ROOT / "data" / "headshots"
@@ -129,7 +129,7 @@ async def main() -> None:
     slate_dir = ROOT / "data" / ("live" if args.live else "slate")
     slate = load_slate(slate_dir)
     directory = NflversePlayerDirectory.from_data_dir(week=slate.week, season=slate.season)
-    league = SyntheticLeagueProvider.from_slate(seed=1, slate_dir=slate_dir, directory=directory)
+    league = make_league(slate_dir, directory, slate.week, slate.season)
     ids = {s.player_id for t in league.league().teams for s in league.roster(t.key, slate.week).slots}
     if args.all:
         for p in slate.plays:

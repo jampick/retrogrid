@@ -1,0 +1,276 @@
+{
+ "fantasy_content": {
+  "xml:lang": "en-US",
+  "yahoo:uri": "/fantasy/v2/league/461.l.777/scoreboard;week=2",
+  "league": [
+   {
+    "league_key": "461.l.777",
+    "league_id": "777",
+    "name": "Neon Sunday",
+    "num_teams": 4,
+    "current_week": 2,
+    "season": "2026",
+    "game_code": "nfl"
+   },
+   {
+    "scoreboard": {
+     "week": "2",
+     "0": {
+      "matchups": {
+       "0": {
+        "matchup": {
+         "week": "2",
+         "status": "midevent",
+         "is_playoffs": "0",
+         "0": {
+          "teams": {
+           "0": {
+            "team": [
+             [
+              {
+               "team_key": "461.l.777.t.1"
+              },
+              {
+               "team_id": "1"
+              },
+              {
+               "name": "Gridiron Ghosts"
+              },
+              {
+               "is_owned_by_current_login": 1
+              },
+              [],
+              {
+               "url": "https://x"
+              },
+              {
+               "team_logos": [
+                {
+                 "team_logo": {
+                  "size": "large",
+                  "url": "https://x"
+                 }
+                }
+               ]
+              },
+              [],
+              {
+               "number_of_moves": 3
+              },
+              {
+               "managers": [
+                {
+                 "manager": {
+                  "manager_id": "1",
+                  "nickname": "jampick",
+                  "guid": "G",
+                  "is_current_login": "1"
+                 }
+                }
+               ]
+              }
+             ],
+             {
+              "team_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "42.70"
+              },
+              "team_projected_points": {
+               "total": "101.10"
+              }
+             }
+            ]
+           },
+           "1": {
+            "team": [
+             [
+              {
+               "team_key": "461.l.777.t.2"
+              },
+              {
+               "team_id": "2"
+              },
+              {
+               "name": "Dart Attack"
+              },
+              [],
+              {
+               "url": "https://x"
+              },
+              {
+               "team_logos": [
+                {
+                 "team_logo": {
+                  "size": "large",
+                  "url": "https://x"
+                 }
+                }
+               ]
+              },
+              [],
+              {
+               "number_of_moves": 3
+              },
+              {
+               "managers": [
+                {
+                 "manager": {
+                  "manager_id": "2",
+                  "nickname": "molly",
+                  "guid": "G",
+                  "is_current_login": "0"
+                 }
+                }
+               ]
+              }
+             ],
+             {
+              "team_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "28.50"
+              },
+              "team_projected_points": {
+               "total": "101.10"
+              }
+             }
+            ]
+           },
+           "count": 2
+          }
+         }
+        }
+       },
+       "1": {
+        "matchup": {
+         "week": "2",
+         "status": "midevent",
+         "is_playoffs": "0",
+         "0": {
+          "teams": {
+           "0": {
+            "team": [
+             [
+              {
+               "team_key": "461.l.777.t.3"
+              },
+              {
+               "team_id": "3"
+              },
+              {
+               "name": "Goff Balls"
+              },
+              [],
+              {
+               "url": "https://x"
+              },
+              {
+               "team_logos": [
+                {
+                 "team_logo": {
+                  "size": "large",
+                  "url": "https://x"
+                 }
+                }
+               ]
+              },
+              [],
+              {
+               "number_of_moves": 3
+              },
+              {
+               "managers": [
+                {
+                 "manager": {
+                  "manager_id": "3",
+                  "nickname": "hiro",
+                  "guid": "G",
+                  "is_current_login": "0"
+                 }
+                }
+               ]
+              }
+             ],
+             {
+              "team_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              },
+              "team_projected_points": {
+               "total": "101.10"
+              }
+             }
+            ]
+           },
+           "1": {
+            "team": [
+             [
+              {
+               "team_key": "461.l.777.t.4"
+              },
+              {
+               "team_id": "4"
+              },
+              {
+               "name": "Bear Down"
+              },
+              [],
+              {
+               "url": "https://x"
+              },
+              {
+               "team_logos": [
+                {
+                 "team_logo": {
+                  "size": "large",
+                  "url": "https://x"
+                 }
+                }
+               ]
+              },
+              [],
+              {
+               "number_of_moves": 3
+              },
+              {
+               "managers": [
+                {
+                 "manager": {
+                  "manager_id": "4",
+                  "nickname": "case",
+                  "guid": "G",
+                  "is_current_login": "0"
+                 }
+                }
+               ]
+              }
+             ],
+             {
+              "team_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              },
+              "team_projected_points": {
+               "total": "101.10"
+              }
+             }
+            ]
+           },
+           "count": 2
+          }
+         }
+        }
+       },
+       "count": 2
+      }
+     }
+    }
+   }
+  ],
+  "time": "30ms",
+  "copyright": "x"
+ }
+}

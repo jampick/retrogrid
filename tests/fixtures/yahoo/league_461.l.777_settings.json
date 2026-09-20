@@ -1,0 +1,626 @@
+{
+ "fantasy_content": {
+  "xml:lang": "en-US",
+  "yahoo:uri": "/fantasy/v2/league/461.l.777/settings",
+  "league": [
+   {
+    "league_key": "461.l.777",
+    "league_id": "777",
+    "name": "Neon Sunday",
+    "num_teams": 4,
+    "current_week": 2,
+    "season": "2026",
+    "game_code": "nfl"
+   },
+   {
+    "settings": [
+     {
+      "draft_type": "live",
+      "roster_positions": [
+       {
+        "roster_position": {
+         "position": "QB",
+         "count": 1
+        }
+       },
+       {
+        "roster_position": {
+         "position": "RB",
+         "count": 1
+        }
+       },
+       {
+        "roster_position": {
+         "position": "WR",
+         "count": 1
+        }
+       },
+       {
+        "roster_position": {
+         "position": "TE",
+         "count": 1
+        }
+       },
+       {
+        "roster_position": {
+         "position": "W/R/T",
+         "count": 1
+        }
+       },
+       {
+        "roster_position": {
+         "position": "K",
+         "count": 1
+        }
+       },
+       {
+        "roster_position": {
+         "position": "DEF",
+         "count": 1
+        }
+       },
+       {
+        "roster_position": {
+         "position": "BN",
+         "count": 5
+        }
+       },
+       {
+        "roster_position": {
+         "position": "IR",
+         "count": 1
+        }
+       }
+      ],
+      "stat_categories": {
+       "stats": [
+        {
+         "stat": {
+          "stat_id": 4,
+          "enabled": "1",
+          "name": "Pass Yds",
+          "display_name": "Pass Yds",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 5,
+          "enabled": "1",
+          "name": "Pass TD",
+          "display_name": "Pass TD",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 6,
+          "enabled": "1",
+          "name": "Stat 6",
+          "display_name": "S6",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 9,
+          "enabled": "1",
+          "name": "Stat 9",
+          "display_name": "S9",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 10,
+          "enabled": "1",
+          "name": "Stat 10",
+          "display_name": "S10",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 11,
+          "enabled": "1",
+          "name": "Stat 11",
+          "display_name": "S11",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 12,
+          "enabled": "1",
+          "name": "Stat 12",
+          "display_name": "S12",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 13,
+          "enabled": "1",
+          "name": "Stat 13",
+          "display_name": "S13",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 15,
+          "enabled": "1",
+          "name": "Stat 15",
+          "display_name": "S15",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 16,
+          "enabled": "1",
+          "name": "Stat 16",
+          "display_name": "S16",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 18,
+          "enabled": "1",
+          "name": "Stat 18",
+          "display_name": "S18",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 19,
+          "enabled": "1",
+          "name": "Stat 19",
+          "display_name": "S19",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 20,
+          "enabled": "1",
+          "name": "Stat 20",
+          "display_name": "S20",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 21,
+          "enabled": "1",
+          "name": "Stat 21",
+          "display_name": "S21",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 22,
+          "enabled": "1",
+          "name": "Stat 22",
+          "display_name": "S22",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 23,
+          "enabled": "1",
+          "name": "Stat 23",
+          "display_name": "S23",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 29,
+          "enabled": "1",
+          "name": "Stat 29",
+          "display_name": "S29",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 32,
+          "enabled": "1",
+          "name": "Stat 32",
+          "display_name": "S32",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 33,
+          "enabled": "1",
+          "name": "Stat 33",
+          "display_name": "S33",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 34,
+          "enabled": "1",
+          "name": "Stat 34",
+          "display_name": "S34",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 35,
+          "enabled": "1",
+          "name": "Stat 35",
+          "display_name": "S35",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 36,
+          "enabled": "1",
+          "name": "Stat 36",
+          "display_name": "S36",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 37,
+          "enabled": "1",
+          "name": "Stat 37",
+          "display_name": "S37",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 50,
+          "enabled": "1",
+          "name": "Stat 50",
+          "display_name": "S50",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 51,
+          "enabled": "1",
+          "name": "Stat 51",
+          "display_name": "S51",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 52,
+          "enabled": "1",
+          "name": "Stat 52",
+          "display_name": "S52",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 53,
+          "enabled": "1",
+          "name": "Stat 53",
+          "display_name": "S53",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 54,
+          "enabled": "1",
+          "name": "Stat 54",
+          "display_name": "S54",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 55,
+          "enabled": "1",
+          "name": "Stat 55",
+          "display_name": "S55",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 56,
+          "enabled": "1",
+          "name": "Stat 56",
+          "display_name": "S56",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 57,
+          "enabled": "1",
+          "name": "Stat 57",
+          "display_name": "S57",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 48,
+          "enabled": "1",
+          "name": "Ret Yds",
+          "display_name": "Ret Yds",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 82,
+          "enabled": "1",
+          "name": "XPR",
+          "display_name": "XPR",
+          "sort_order": "1",
+          "position_type": "O"
+         }
+        }
+       ]
+      },
+      "stat_modifiers": {
+       "stats": [
+        {
+         "stat": {
+          "stat_id": 4,
+          "value": "0.04",
+          "bonuses": [
+           {
+            "bonus": {
+             "target": 300,
+             "points": "3"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 5,
+          "value": "4"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 6,
+          "value": "-1"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 9,
+          "value": "0.1"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 10,
+          "value": "6"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 11,
+          "value": "0.5"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 12,
+          "value": "0.1"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 13,
+          "value": "6"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 15,
+          "value": "6"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 16,
+          "value": "2"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 18,
+          "value": "-2"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 19,
+          "value": "3"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 20,
+          "value": "3"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 21,
+          "value": "3"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 22,
+          "value": "4"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 23,
+          "value": "5"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 29,
+          "value": "1"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 32,
+          "value": "1"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 33,
+          "value": "2"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 34,
+          "value": "2"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 35,
+          "value": "6"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 36,
+          "value": "2"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 37,
+          "value": "2"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 50,
+          "value": "10"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 51,
+          "value": "7"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 52,
+          "value": "4"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 53,
+          "value": "1"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 54,
+          "value": "0"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 55,
+          "value": "-1"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 56,
+          "value": "-4"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 57,
+          "value": "6"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 48,
+          "value": "0.05"
+         }
+        },
+        {
+         "stat": {
+          "stat_id": 82,
+          "value": "2"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  ],
+  "time": "30ms",
+  "copyright": "x"
+ }
+}

@@ -1,0 +1,2172 @@
+{
+ "fantasy_content": {
+  "xml:lang": "en-US",
+  "yahoo:uri": "/fantasy/v2/league/461.l.777/teams/roster;week=2/players/stats;type=week;week=2",
+  "league": [
+   {
+    "league_key": "461.l.777",
+    "league_id": "777",
+    "name": "Neon Sunday",
+    "num_teams": 4,
+    "current_week": 2,
+    "season": "2026",
+    "game_code": "nfl"
+   },
+   {
+    "teams": {
+     "0": {
+      "team": [
+       [
+        {
+         "team_key": "461.l.777.t.1"
+        },
+        {
+         "team_id": "1"
+        },
+        {
+         "name": "Gridiron Ghosts"
+        },
+        {
+         "is_owned_by_current_login": 1
+        },
+        [],
+        {
+         "url": "https://x"
+        },
+        {
+         "team_logos": [
+          {
+           "team_logo": {
+            "size": "large",
+            "url": "https://x"
+           }
+          }
+         ]
+        },
+        [],
+        {
+         "number_of_moves": 3
+        },
+        {
+         "managers": [
+          {
+           "manager": {
+            "manager_id": "1",
+            "nickname": "jampick",
+            "guid": "G",
+            "is_current_login": "1"
+           }
+          }
+         ]
+        }
+       ],
+       {
+        "roster": {
+         "coverage_type": "week",
+         "week": "2",
+         "is_editable": 0,
+         "0": {
+          "players": {
+           "0": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.30977"
+              },
+              {
+               "player_id": "30977"
+              },
+              {
+               "name": {
+                "full": "Josh Allen",
+                "first": "Josh",
+                "last": "Allen",
+                "ascii_first": "Josh",
+                "ascii_last": "Allen"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Buf"
+              },
+              {
+               "display_position": "QB"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "QB"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "QB"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "24.50"
+              }
+             }
+            ]
+           },
+           "1": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.40059"
+              },
+              {
+               "player_id": "40059"
+              },
+              {
+               "name": {
+                "full": "Jahmyr Gibbs",
+                "first": "Jahmyr",
+                "last": "Gibbs",
+                "ascii_first": "Jahmyr",
+                "ascii_last": "Gibbs"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Det"
+              },
+              {
+               "display_position": "RB"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "RB"
+                },
+                {
+                 "position": "W/R/T"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "RB"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "18.20"
+              }
+             }
+            ]
+           },
+           "2": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.33500"
+              },
+              {
+               "player_id": "33500"
+              },
+              {
+               "name": {
+                "full": "Amon-Ra St. Brown",
+                "first": "Amon-Ra",
+                "last": "St. Brown",
+                "ascii_first": "Amon-Ra",
+                "ascii_last": "St. Brown"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Det"
+              },
+              {
+               "display_position": "WR"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "WR"
+                },
+                {
+                 "position": "W/R/T"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "WR"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "3": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.40048"
+              },
+              {
+               "player_id": "40048"
+              },
+              {
+               "name": {
+                "full": "Dalton Kincaid",
+                "first": "Dalton",
+                "last": "Kincaid",
+                "ascii_first": "Dalton",
+                "ascii_last": "Kincaid"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Buf"
+              },
+              {
+               "display_position": "TE"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "TE"
+                },
+                {
+                 "position": "W/R/T"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "TE"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "4": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.33996"
+              },
+              {
+               "player_id": "33996"
+              },
+              {
+               "name": {
+                "full": "Kenneth Walker III",
+                "first": "Kenneth",
+                "last": "Walker III",
+                "ascii_first": "Kenneth",
+                "ascii_last": "Walker III"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "KC"
+              },
+              {
+               "display_position": "RB"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "RB"
+                },
+                {
+                 "position": "W/R/T"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "W/R/T"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "5": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.33537"
+              },
+              {
+               "player_id": "33537"
+              },
+              {
+               "name": {
+                "full": "Evan McPherson",
+                "first": "Evan",
+                "last": "McPherson",
+                "ascii_first": "Evan",
+                "ascii_last": "McPherson"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Cin"
+              },
+              {
+               "display_position": "K"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "K"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "K"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "6": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.100028"
+              },
+              {
+               "player_id": "100028"
+              },
+              {
+               "name": {
+                "full": "Washington",
+                "first": "Washington",
+                "last": "",
+                "ascii_first": "Washington",
+                "ascii_last": ""
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Was"
+              },
+              {
+               "display_position": "DEF"
+              },
+              [],
+              {
+               "position_type": "DT"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "DEF"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "DEF"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "7": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.32692"
+              },
+              {
+               "player_id": "32692"
+              },
+              {
+               "name": {
+                "full": "Justin Jefferson",
+                "first": "Justin",
+                "last": "Jefferson",
+                "ascii_first": "Justin",
+                "ascii_last": "Jefferson"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Min"
+              },
+              {
+               "display_position": "WR"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "WR"
+                },
+                {
+                 "position": "W/R/T"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "BN"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "8": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.33477"
+              },
+              {
+               "player_id": "33477"
+              },
+              {
+               "name": {
+                "full": "Nico Collins",
+                "first": "Nico",
+                "last": "Collins",
+                "ascii_first": "Nico",
+                "ascii_last": "Collins"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Hou"
+              },
+              {
+               "display_position": "WR"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "WR"
+                },
+                {
+                 "position": "W/R/T"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "IR"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "count": 9
+          }
+         }
+        }
+       }
+      ]
+     },
+     "1": {
+      "team": [
+       [
+        {
+         "team_key": "461.l.777.t.2"
+        },
+        {
+         "team_id": "2"
+        },
+        {
+         "name": "Dart Attack"
+        },
+        [],
+        {
+         "url": "https://x"
+        },
+        {
+         "team_logos": [
+          {
+           "team_logo": {
+            "size": "large",
+            "url": "https://x"
+           }
+          }
+         ]
+        },
+        [],
+        {
+         "number_of_moves": 3
+        },
+        {
+         "managers": [
+          {
+           "manager": {
+            "manager_id": "2",
+            "nickname": "molly",
+            "guid": "G",
+            "is_current_login": "0"
+           }
+          }
+         ]
+        }
+       ],
+       {
+        "roster": {
+         "coverage_type": "week",
+         "week": "2",
+         "is_editable": 0,
+         "0": {
+          "players": {
+           "0": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.49001"
+              },
+              {
+               "player_id": "49001"
+              },
+              {
+               "name": {
+                "full": "Jaxson Dart",
+                "first": "Jaxson",
+                "last": "Dart",
+                "ascii_first": "Jaxson",
+                "ascii_last": "Dart"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "NYG"
+              },
+              {
+               "display_position": "QB"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "QB"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "QB"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "1": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.49002"
+              },
+              {
+               "player_id": "49002"
+              },
+              {
+               "name": {
+                "full": "Ashton Jeanty",
+                "first": "Ashton",
+                "last": "Jeanty",
+                "ascii_first": "Ashton",
+                "ascii_last": "Jeanty"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "LV"
+              },
+              {
+               "display_position": "RB"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "RB"
+                },
+                {
+                 "position": "W/R/T"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "RB"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "2": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.49003"
+              },
+              {
+               "player_id": "49003"
+              },
+              {
+               "name": {
+                "full": "D.J. Moore",
+                "first": "D.J.",
+                "last": "Moore",
+                "ascii_first": "D.J.",
+                "ascii_last": "Moore"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Buf"
+              },
+              {
+               "display_position": "WR"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "WR"
+                },
+                {
+                 "position": "W/R/T"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "WR"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "21.00"
+              }
+             }
+            ]
+           },
+           "3": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.40064"
+              },
+              {
+               "player_id": "40064"
+              },
+              {
+               "name": {
+                "full": "Sam LaPorta",
+                "first": "Sam",
+                "last": "LaPorta",
+                "ascii_first": "Sam",
+                "ascii_last": "LaPorta"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Det"
+              },
+              {
+               "display_position": "TE"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "TE"
+                },
+                {
+                 "position": "W/R/T"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "TE"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "7.50"
+              }
+             }
+            ]
+           },
+           "4": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.29279"
+              },
+              {
+               "player_id": "29279"
+              },
+              {
+               "name": {
+                "full": "Derrick Henry",
+                "first": "Derrick",
+                "last": "Henry",
+                "ascii_first": "Derrick",
+                "ascii_last": "Henry"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Bal"
+              },
+              {
+               "display_position": "RB"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "RB"
+                },
+                {
+                 "position": "W/R/T"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "W/R/T"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "5": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.49004"
+              },
+              {
+               "player_id": "49004"
+              },
+              {
+               "name": {
+                "full": "Drew Stevens",
+                "first": "Drew",
+                "last": "Stevens",
+                "ascii_first": "Drew",
+                "ascii_last": "Stevens"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Was"
+              },
+              {
+               "display_position": "K"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "K"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "K"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "6": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.100014"
+              },
+              {
+               "player_id": "100014"
+              },
+              {
+               "name": {
+                "full": "Los Angeles",
+                "first": "Los",
+                "last": "Angeles",
+                "ascii_first": "Los",
+                "ascii_last": "Angeles"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "LAR"
+              },
+              {
+               "display_position": "DEF"
+              },
+              [],
+              {
+               "position_type": "DT"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "DEF"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "DEF"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "7": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.49999"
+              },
+              {
+               "player_id": "49999"
+              },
+              {
+               "name": {
+                "full": "Nobody Atall",
+                "first": "Nobody",
+                "last": "Atall",
+                "ascii_first": "Nobody",
+                "ascii_last": "Atall"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "FA"
+              },
+              {
+               "display_position": "WR"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "WR"
+                },
+                {
+                 "position": "W/R/T"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "BN"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "count": 8
+          }
+         }
+        }
+       }
+      ]
+     },
+     "2": {
+      "team": [
+       [
+        {
+         "team_key": "461.l.777.t.3"
+        },
+        {
+         "team_id": "3"
+        },
+        {
+         "name": "Goff Balls"
+        },
+        [],
+        {
+         "url": "https://x"
+        },
+        {
+         "team_logos": [
+          {
+           "team_logo": {
+            "size": "large",
+            "url": "https://x"
+           }
+          }
+         ]
+        },
+        [],
+        {
+         "number_of_moves": 3
+        },
+        {
+         "managers": [
+          {
+           "manager": {
+            "manager_id": "3",
+            "nickname": "hiro",
+            "guid": "G",
+            "is_current_login": "0"
+           }
+          }
+         ]
+        }
+       ],
+       {
+        "roster": {
+         "coverage_type": "week",
+         "week": "2",
+         "is_editable": 0,
+         "0": {
+          "players": {
+           "0": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.29235"
+              },
+              {
+               "player_id": "29235"
+              },
+              {
+               "name": {
+                "full": "Jared Goff",
+                "first": "Jared",
+                "last": "Goff",
+                "ascii_first": "Jared",
+                "ascii_last": "Goff"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Det"
+              },
+              {
+               "display_position": "QB"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "QB"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "QB"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "1": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.40055"
+              },
+              {
+               "player_id": "40055"
+              },
+              {
+               "name": {
+                "full": "Bijan Robinson",
+                "first": "Bijan",
+                "last": "Robinson",
+                "ascii_first": "Bijan",
+                "ascii_last": "Robinson"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Atl"
+              },
+              {
+               "display_position": "RB"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "RB"
+                },
+                {
+                 "position": "W/R/T"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "RB"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "2": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.33966"
+              },
+              {
+               "player_id": "33966"
+              },
+              {
+               "name": {
+                "full": "Chris Olave",
+                "first": "Chris",
+                "last": "Olave",
+                "ascii_first": "Chris",
+                "ascii_last": "Olave"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "NO"
+              },
+              {
+               "display_position": "WR"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "WR"
+                },
+                {
+                 "position": "W/R/T"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "WR"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "3": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.34010"
+              },
+              {
+               "player_id": "34010"
+              },
+              {
+               "name": {
+                "full": "Trey McBride",
+                "first": "Trey",
+                "last": "McBride",
+                "ascii_first": "Trey",
+                "ascii_last": "McBride"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Ari"
+              },
+              {
+               "display_position": "TE"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "TE"
+                },
+                {
+                 "position": "W/R/T"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "TE"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "4": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.34019"
+              },
+              {
+               "player_id": "34019"
+              },
+              {
+               "name": {
+                "full": "James Cook",
+                "first": "James",
+                "last": "Cook",
+                "ascii_first": "James",
+                "ascii_last": "Cook"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Buf"
+              },
+              {
+               "display_position": "RB"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "RB"
+                },
+                {
+                 "position": "W/R/T"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "W/R/T"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "5": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.28188"
+              },
+              {
+               "player_id": "28188"
+              },
+              {
+               "name": {
+                "full": "Chris Boswell",
+                "first": "Chris",
+                "last": "Boswell",
+                "ascii_first": "Chris",
+                "ascii_last": "Boswell"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Pit"
+              },
+              {
+               "display_position": "K"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "K"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "K"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "6": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.100030"
+              },
+              {
+               "player_id": "100030"
+              },
+              {
+               "name": {
+                "full": "Jacksonville",
+                "first": "Jacksonville",
+                "last": "",
+                "ascii_first": "Jacksonville",
+                "ascii_last": ""
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Jax"
+              },
+              {
+               "display_position": "DEF"
+              },
+              [],
+              {
+               "position_type": "DT"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "DEF"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "DEF"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "count": 7
+          }
+         }
+        }
+       }
+      ]
+     },
+     "3": {
+      "team": [
+       [
+        {
+         "team_key": "461.l.777.t.4"
+        },
+        {
+         "team_id": "4"
+        },
+        {
+         "name": "Bear Down"
+        },
+        [],
+        {
+         "url": "https://x"
+        },
+        {
+         "team_logos": [
+          {
+           "team_logo": {
+            "size": "large",
+            "url": "https://x"
+           }
+          }
+         ]
+        },
+        [],
+        {
+         "number_of_moves": 3
+        },
+        {
+         "managers": [
+          {
+           "manager": {
+            "manager_id": "4",
+            "nickname": "case",
+            "guid": "G",
+            "is_current_login": "0"
+           }
+          }
+         ]
+        }
+       ],
+       {
+        "roster": {
+         "coverage_type": "week",
+         "week": "2",
+         "is_editable": 0,
+         "0": {
+          "players": {
+           "0": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.40900"
+              },
+              {
+               "player_id": "40900"
+              },
+              {
+               "name": {
+                "full": "Caleb Williams",
+                "first": "Caleb",
+                "last": "Williams",
+                "ascii_first": "Caleb",
+                "ascii_last": "Williams"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Chi"
+              },
+              {
+               "display_position": "QB"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "QB"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "QB"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "1": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.32711"
+              },
+              {
+               "player_id": "32711"
+              },
+              {
+               "name": {
+                "full": "Jonathan Taylor",
+                "first": "Jonathan",
+                "last": "Taylor",
+                "ascii_first": "Jonathan",
+                "ascii_last": "Taylor"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Ind"
+              },
+              {
+               "display_position": "RB"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "RB"
+                },
+                {
+                 "position": "W/R/T"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "RB"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "2": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.40041"
+              },
+              {
+               "player_id": "40041"
+              },
+              {
+               "name": {
+                "full": "Jaxon Smith-Njigba",
+                "first": "Jaxon",
+                "last": "Smith-Njigba",
+                "ascii_first": "Jaxon",
+                "ascii_last": "Smith-Njigba"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Sea"
+              },
+              {
+               "display_position": "WR"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "WR"
+                },
+                {
+                 "position": "W/R/T"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "WR"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "3": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.31019"
+              },
+              {
+               "player_id": "31019"
+              },
+              {
+               "name": {
+                "full": "Dallas Goedert",
+                "first": "Dallas",
+                "last": "Goedert",
+                "ascii_first": "Dallas",
+                "ascii_last": "Goedert"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Phi"
+              },
+              {
+               "display_position": "TE"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "TE"
+                },
+                {
+                 "position": "W/R/T"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "TE"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "4": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.40039"
+              },
+              {
+               "player_id": "40039"
+              },
+              {
+               "name": {
+                "full": "Zay Flowers",
+                "first": "Zay",
+                "last": "Flowers",
+                "ascii_first": "Zay",
+                "ascii_last": "Flowers"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Bal"
+              },
+              {
+               "display_position": "WR"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "WR"
+                },
+                {
+                 "position": "W/R/T"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "W/R/T"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "5": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.28227"
+              },
+              {
+               "player_id": "28227"
+              },
+              {
+               "name": {
+                "full": "Cairo Santos",
+                "first": "Cairo",
+                "last": "Santos",
+                "ascii_first": "Cairo",
+                "ascii_last": "Santos"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "Chi"
+              },
+              {
+               "display_position": "K"
+              },
+              [],
+              {
+               "position_type": "O"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "K"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "K"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "6": {
+            "player": [
+             [
+              {
+               "player_key": "461.p.100012"
+              },
+              {
+               "player_id": "100012"
+              },
+              {
+               "name": {
+                "full": "Kansas City",
+                "first": "Kansas",
+                "last": "City",
+                "ascii_first": "Kansas",
+                "ascii_last": "City"
+               }
+              },
+              [],
+              {
+               "editorial_team_abbr": "KC"
+              },
+              {
+               "display_position": "DEF"
+              },
+              [],
+              {
+               "position_type": "DT"
+              },
+              {
+               "eligible_positions": [
+                {
+                 "position": "DEF"
+                }
+               ]
+              }
+             ],
+             {
+              "selected_position": [
+               {
+                "coverage_type": "week",
+                "week": "2"
+               },
+               {
+                "position": "DEF"
+               },
+               {
+                "is_flex": 0
+               }
+              ]
+             },
+             {
+              "player_points": {
+               "coverage_type": "week",
+               "week": "2",
+               "total": "0.00"
+              }
+             }
+            ]
+           },
+           "count": 7
+          }
+         }
+        }
+       }
+      ]
+     },
+     "count": 4
+    }
+   }
+  ],
+  "time": "30ms",
+  "copyright": "x"
+ }
+}

@@ -7,4 +7,4 @@ WS="${2:-4}"
 PROFILE="$(cd "$(dirname "$0")/.." && pwd)/.chrome-profile"
 pkill -f -- "--user-data-dir=$PROFILE" 2>/dev/null || true
 sleep 0.5
-hyprctl dispatch "hl.dsp.exec_cmd('chromium --user-data-dir=$PROFILE --no-first-run --disable-session-crashed-bubble --autoplay-policy=no-user-gesture-required --class=retroffb --app=$URL', { workspace = '$WS silent' })" >/dev/null
+hyprctl dispatch "hl.dsp.exec_cmd('chromium --user-data-dir=$PROFILE --no-first-run --disable-session-crashed-bubble --autoplay-policy=no-user-gesture-required --class=retroffb --app=\"$URL\"', { workspace = '$WS silent' })" >/dev/null

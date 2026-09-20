@@ -1,6 +1,6 @@
 # RETRO//FFB — Design Document
 
-*Last updated 2026-09-20 (Week 3). Status: design settled, build in progress.*
+*Last updated 2026-09-20 (Week 3). Status: design settled; Phases 0–6 have a working first pass (see README).*
 
 ---
 
@@ -164,9 +164,10 @@ Pure function `resolve(colors.toml) -> Palette`, run in OKLCH.
 2. **Eligible colours** = named colours with ≥ 3:1 contrast against `bg` and
    chroma above a floor.
 3. **`you` × `them`.** Candidates `you ∈ [cyan, blue, accent, green]`,
-   `them ∈ [magenta, red, orange, yellow]` (bright variants included). Take
-   the pair with the greatest hue separation, requiring ≥ 60°; break ties by
-   list order so conventional themes resolve conventionally.
+   `them ∈ [magenta, red, orange, yellow]` (bright variants included). Walk
+   pairs in list order and take the **first ≥ 75° apart**, so conventional
+   themes resolve conventionally (cyan vs magenta); failing that, the widest
+   pair if it reaches 60°; failing that, monochrome.
 4. **`alert`** from `[yellow, orange, accent]`, excluding whatever `them`
    took. If it lands within 30° of `them` it must differ in lightness by
    ≥ 0.15 — alert and threat may be cousins, never twins.
@@ -314,6 +315,11 @@ the points delta from *this specific play*.
 threat board and slides in a banner with player and delta. It never seizes
 the view. You stay in control, and nothing is missed — plays are already
 ~20s behind live, so the replay is always available.
+
+**AUTO-DIRECT (optional, on by default under SIM SUNDAY).** For unattended
+viewing — the demo on a side monitor, and TV cast mode (§11) — the console may
+cut to an alerting play by itself. It still banners first, never interrupts
+the rails, and `[A]` turns it off, restoring strict alert-and-tap.
 
 **Idle: last play holds.** During dead air the most recent play stays
 frozen with its route trails glowing and slowly decaying. The rails stay

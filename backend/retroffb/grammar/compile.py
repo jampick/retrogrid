@@ -89,10 +89,12 @@ def _out_of_bounds(p: PlayRow) -> bool:
     return bool(_OB.search(p.desc))
 
 
-def _to_sideline(start: Pt, side: int, end_y: float) -> list[Pt]:
-    """Carrier forced out: win the edge first, then turn up the boundary and step on the stripe."""
+def _to_sideline(start: Pt, side: int, end_y: float, late: bool = False) -> list[Pt]:
+    """Carrier forced out: win the edge first, then turn up the boundary and step on the stripe.
+    `late` is the returner's version — upfield first, angled out of bounds at the end."""
     end = (K.FIELD_W - 0.2 if side > 0 else 0.2, end_y)
-    ctrl = (start[0] + (end[0] - start[0]) * 0.7, start[1] + (end_y - start[1]) * 0.2)
+    fx, fy = (0.25, 0.7) if late else (0.7, 0.2)
+    ctrl = (start[0] + (end[0] - start[0]) * fx, start[1] + (end_y - start[1]) * fy)
     return [((1 - u) ** 2 * start[0] + 2 * u * (1 - u) * ctrl[0] + u * u * end[0],
              (1 - u) ** 2 * start[1] + 2 * u * (1 - u) * ctrl[1] + u * u * end[1]) for u in (0.25, 0.5, 0.75, 1.0)]
 
@@ -223,9 +225,11 @@ def _line_play(off: list[Actor], defs: list[Actor], qb_spot: Pt, t_end: float, r
 
 
 # ── play families ──────────────────────────────────────────────────────────
-def _scrimmage(p: PlayRow, rng: random.Random) -> tuple[list[Actor], list[Actor], Actor, float, float, str]:
+def _scrimmage(p: PlayRow, rng: random.Random, back_target: bool = False) -> tuple[list[Actor], list[Actor], Actor, float, float, str]:
     los, bx = _los(p), _ball_x(rng)
     name = pick_formation(p)
+    if name == "empty" and back_target:
+        name = "gun11"              # a checkdown needs a back in the backfield, not split wide
     off = offense(name, bx, los, rng)
     defs = defense(off, bx, los, rng, heavy=name in ("heavy", "victory"))
     ball = Actor("ball", "BALL", "ball", "WR")
@@ -252,7 +256,7 @@ def _pick_target(off: list[Actor], pos: str | None, loc: str | None, rng: random
 
 
 def _pass(p: PlayRow, rng: random.Random, pos_of: PosOf, air_est: Callable[[PlayRow], float] | None) -> Compiled:
-    off, defs, ball, los, bx, form = _scrimmage(p, rng)
+    off, defs, ball, los, bx, form = _scrimmage(p, rng, bool(p.receiver_id) and pos_of(p.receiver_id) == "RB")
     qb = _by_role(off, "QB")
     assert qb
     air = p.air_yards
@@ -613,7 +617,8 @@ def _punt_or_kickoff(p: PlayRow, rng: random.Random) -> Compiled:
         ret.run_until([land], t_kick, t_land)
         ret.involved, ret.player_id = True, p.returner_id
         end = (min(K.FIELD_W - 1.5, max(1.5, land[0] + rng.uniform(-8, 8))), 8.0 if p.touchdown else max(10.5, land[1] - p.return_yards))
-        t_end = ret.run(_weave(land, end, rng), t_land, K.SPEED["WR"] * K.CARRY_FACTOR, accel=False)
+        path = _to_sideline(land, 1 if land[0] > K.CENTER_X else -1, end[1], late=True) if _out_of_bounds(p) else _weave(land, end, rng)
+        t_end = ret.run(path, t_land, K.SPEED["WR"] * K.CARRY_FACTOR, accel=False)
         _follow(ball, ret, t_land, t_end)
     elif fate == "fair catch":
         ret.run_until([land], t_kick, t_land - 0.5)                     # camped under it
@@ -669,8 +674,12 @@ def _punt_or_kickoff(p: PlayRow, rng: random.Random) -> Compiled:
             a.cut(t_land) if a.end_t > t_land else a.hold(t_land)
             here = a.at(t_land)
             reach = K.SPEED["LB"] * 0.85 * (t_end - t_land)
-            go = min(reach, max(0.0, dist(here, spot) - (2.0 + rank * 1.6)))
-            a.move(toward(here, spot, go), t_end) if go > 0.3 else a.hold(t_end)
+            # rally in a fan around the spot, not a conga line down one approach angle
+            ang = math.atan2(here[1] - spot[1], here[0] - spot[0]) + (rank + 1) // 2 * 0.6 * (1 if rank % 2 else -1)
+            r = 2.0 + min(rank, 6) * 0.9
+            stand = (min(K.FIELD_W - 0.8, max(0.8, spot[0] + r * math.cos(ang))), spot[1] + r * math.sin(ang))
+            go = min(reach, dist(here, stand))
+            a.move(toward(here, stand, go), t_end) if go > 0.3 else a.hold(t_end)
     return Compiled(off + [kicker] + defs + [ret, ball], t_end + 0.5, cam, None, los_line=not kickoff,
                     template=f"{p.play_type}/{fate}")
 

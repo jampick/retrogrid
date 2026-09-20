@@ -73,6 +73,10 @@ class Engine:
         self.league = SyntheticLeagueProvider.from_slate(seed=int(os.environ.get("RETROFFB_SEED", "1")), directory=self.directory)
         self.clock = SimClock(self.slate.duration, speed=float(os.environ.get("RETROFFB_SPEED", "4")),
                               start_at=float(os.environ.get("RETROFFB_START", "420")))
+        if os.environ.get("RETROFFB_PROSE") == "1":          # rehearse the live path: prose is the only source
+            from .providers.prose import reparse
+            self.slate.plays[:] = [reparse(p, self.directory) for p in self.slate.plays]
+            log.info("PROSE mode: %d plays rebuilt from their descriptions", len(self.slate.plays))
         self.provider = SlatePlayProvider(self.slate, self.clock)
         self.week = self.slate.week
         self.teams = {t.key: t for t in self.league.league().teams}

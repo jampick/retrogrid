@@ -25,7 +25,9 @@ scripts/dev-window.sh / 4                       # chromeless window on Hyprland 
 compiled and looping side by side, filterable by family. `R` reroll · `S`
 finished diagrams · click to zoom · in zoom `F`/`N` flag a bad play (with a
 note) into `data/grammar_flags.json` — the worklist for the next grammar pass.
-Env: `RETROFFB_START` (sim seconds), `RETROFFB_SPEED`, `RETROFFB_SEED`.
+Env: `RETROFFB_START` (sim seconds), `RETROFFB_SPEED`, `RETROFFB_SEED`,
+`RETROFFB_PROSE=1` (rehearse the live path: every play rebuilt from its
+description alone — parser + name resolution + air-yards prior).
 
 Keys: `T` theme · `V` who-am-I · `L` threat scope · `A` auto-direct ·
 `Space` hold · `1–4` sim rate · `←/→` skip 5 min · `Enter` view alert · `M` mute ·
@@ -38,7 +40,7 @@ through them by hand · `/` back to live.
 |---|---|
 | 0 Skeleton, contracts, SIM SUNDAY clock, **Omarchy ThemeProvider + role resolver** | working |
 | 1 nflverse ingest, headshot sprite pipeline, synthetic league | working |
-| 2 `desc` parser — ≥99.9% agreement with nflverse on 2024 + held-out 2025 | working (not yet on the hot path; SIM uses nflverse columns) |
+| 2 `desc` parser — ≥99.9% agreement with nflverse on 2024 + held-out 2025 | working; `RETROFFB_PROSE=1` puts it on the hot path — all 322 scoring players match nflverse-column scoring to the point |
 | 3 Play grammar — all 2,175 slate plays compile, zero fallbacks | second pass (kick/punt coverage lanes + fates, reachable catch points); iterate via `/plays`; BDB constant fit open |
 | 4 Renderer, PHOSPHOR + PRINTOUT light models, ghosts, RETUNE | working |
 | 5 Console shell | working |
@@ -46,4 +48,4 @@ through them by hand · `/` back to live.
 | 7 Polish | open |
 | 8 Yahoo / ESPN adapters, hosting | needs credentials |
 
-`pytest` — 155 tests.
+`pytest` — 156 tests.

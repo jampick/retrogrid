@@ -134,6 +134,12 @@ class NflversePlayerDirectory:
         for attr, want in (("number", number), ("position", position)):
             if want is not None:
                 cands = [p for p in cands if getattr(p, attr) == want] or cands
+        if not cands and team is not None and number is not None:
+            # Prose the directory does not spell the same way ("Ty.Johnson", a
+            # nickname): team + jersey + surname is still unambiguous.
+            last = short.rsplit(".", 1)[-1].strip().lower()
+            cands = [p for p in self._players.values()
+                     if p.team == team and p.number == number and last in p.name.lower()]
         if not cands:
             return None
         return max(cands, key=lambda p: (self._rank[p.id], p.id))

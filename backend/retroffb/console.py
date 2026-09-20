@@ -22,7 +22,7 @@ from .models import PlayRow, StatDelta
 from .parser.desc import penalty_summary
 from .providers.directory import NflversePlayerDirectory
 from .providers.nflverse_plays import SlatePlayProvider
-from .providers.slate import load_slate, slate_available
+from .providers.slate import DEFAULT_SLATE_DIR, ROOT, load_slate, slate_available
 from .providers.stub_league import SyntheticLeagueProvider
 from .scoring import LeagueIndex, MatchupBoard, ScoringState, ThreatEvent, ThreatHub
 from .sim.clock import SimClock
@@ -32,6 +32,8 @@ SPRITES = Path(__file__).resolve().parents[2] / "data" / "sprites"
 RATES = (1, 4, 15, 60)
 RECENT_HALF_LIFE = 900.0           # sim seconds; "who matters right now"
 ET = ZoneInfo("America/New_York")
+LIVE = os.environ.get("RETROFFB_LIVE") == "1"          # today's real games off ESPN (scripts/build_live.py)
+SLATE_DIR = ROOT / "data" / "live" if LIVE else DEFAULT_SLATE_DIR
 
 _PREFIX = re.compile(r"^(\(\d*:?\d+\)\s*)?(\((Shotgun|No Huddle|No Huddle, Shotgun)\)\s*)*", re.I)
 _JERSEY = re.compile(r"\b\d{1,2}-(?=[A-Z][\w']*\.)")
@@ -69,9 +71,9 @@ class Session:
 
 class Engine:
     def __init__(self) -> None:
-        self.slate = load_slate()
+        self.slate = load_slate(SLATE_DIR)
         self.directory = NflversePlayerDirectory.from_data_dir(week=self.slate.week, season=self.slate.season)
-        self.league = SyntheticLeagueProvider.from_slate(seed=int(os.environ.get("RETROFFB_SEED", "1")), directory=self.directory)
+        self.league = SyntheticLeagueProvider.from_slate(seed=int(os.environ.get("RETROFFB_SEED", "1")), slate_dir=SLATE_DIR, directory=self.directory)
         self.clock = SimClock(self.slate.duration, speed=float(os.environ.get("RETROFFB_SPEED", "4")),
                               start_at=float(os.environ.get("RETROFFB_START", "420")))
         if os.environ.get("RETROFFB_PROSE") == "1":          # rehearse the live path: prose is the only source
@@ -79,6 +81,11 @@ class Engine:
             self.slate.plays[:] = [reparse(p, self.directory) for p in self.slate.plays]
             log.info("PROSE mode: %d plays rebuilt from their descriptions", len(self.slate.plays))
         self.provider = SlatePlayProvider(self.slate, self.clock)
+        if LIVE:                                             # wall-clock time, plays as ESPN posts them
+            from .providers.espn import EspnPlayProvider
+            t0 = datetime.fromisoformat(self.slate.start_utc)
+            self.clock = SimClock(self.slate.duration, speed=1.0, start_at=(datetime.now(t0.tzinfo) - t0).total_seconds())
+            self.provider = EspnPlayProvider(self.slate, self.clock, self.directory)
         self.week = self.slate.week
         self.teams = {t.key: t for t in self.league.league().teams}
         self.rosters = {k: self.league.roster(k, self.week) for k in self.teams}
@@ -102,6 +109,7 @@ class Engine:
     # ── ingest ────────────────────────────────────────────────────────────
     def ingest(self, play: PlayRow) -> dict[str, list[ThreatEvent]]:
         deltas = self.state.apply(play)
+        self.plays_by_id[play.play_id] = play                 # live: the slate grows as we go
         self.deltas_by_play[play.play_id] = deltas
         self.last_by_game[play.game_id] = play
         for d in deltas:
@@ -139,6 +147,9 @@ class Engine:
             self.ingest(p)
 
     async def run(self) -> None:
+        if LIVE:
+            await self.provider.prime()                       # whatever has already been played today
+            asyncio.get_running_loop().create_task(self.provider.run())
         self.rebuild()
         self.clock.start()
         epoch = self.clock.epoch
@@ -406,7 +417,7 @@ class Engine:
         return {
             "type": "state",
             "clock": {"label": f"WK{self.week} · {wall:%a %H:%M}".upper(), "sim": now, "duration": self.clock.duration,
-                      "speed": self.clock.speed, "paused": not self.clock.running, "auto": s.auto},
+                      "speed": self.clock.speed, "paused": not self.clock.running, "auto": s.auto, "live": LIVE},
             "viewer": {"team_key": s.viewer, "owner": self.teams[s.viewer].owner},
             "viewers": [{"team_key": t.key, "owner": t.owner, "name": t.name} for t in self.teams.values()],
             "matchup": {"you": {"name": f"{self.teams[s.viewer].owner} · {self.teams[s.viewer].name}", "points": round(snap.you_total, 1)},
@@ -438,7 +449,7 @@ class Engine:
         elif t == "auto":
             s.auto = not s.auto
             await s.send(self.state_frame(s))
-        elif t == "sim":
+        elif t == "sim" and not LIVE:                         # nobody fast-forwards a real Sunday
             a, v = m.get("action"), m.get("value")
             if a == "pause":
                 self.clock.pause() if self.clock.running else self.clock.start()
@@ -514,8 +525,8 @@ _by_ws: dict[WebSocket, Session] = {}
 
 async def start(hub) -> list[asyncio.Task]:                   # noqa: ANN001
     global engine
-    if not slate_available():
-        raise RuntimeError("no slate — run scripts/fetch_nflverse.py then scripts/build_slate.py")
+    if not slate_available(SLATE_DIR):
+        raise RuntimeError("no slate — run scripts/fetch_nflverse.py then scripts/build_slate.py (or build_live.py)")
     engine = Engine()
     return [asyncio.create_task(engine.run()), asyncio.create_task(engine.ticker())]
 

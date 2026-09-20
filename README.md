@@ -29,6 +29,14 @@ Env: `RETROFFB_START` (sim seconds), `RETROFFB_SPEED`, `RETROFFB_SEED`,
 `RETROFFB_PROSE=1` (rehearse the live path: every play rebuilt from its
 description alone — parser + name resolution + air-yards prior).
 
+**LIVE** — today's real games: `scripts/live.sh` (fetches this season's nflverse
+rosters/stats, `build_live.py` drafts the synthetic league from teams playing
+today, then serves with `RETROFFB_LIVE=1`). Plays come from ESPN's public
+scoreboard + summary feeds (`providers/espn.py`, no credentials), polled every
+8 s; a play lands once its text holds still for a poll, touchdown+try entries
+are split in two, and booth amendments trigger a rebuild. `--keep` reuses
+today's league instead of redrafting. Sim controls are inert in LIVE.
+
 Keys: `T` theme · `V` who-am-I · `L` threat scope · `A` auto-direct ·
 `Space` hold · `1–4` sim rate · `←/→` skip 5 min · `Enter` view alert · `M` mute ·
 `C` replay-cycle recent plays in the dead time between snaps · `[` `]` step
@@ -46,6 +54,7 @@ through them by hand · `/` back to live.
 | 5 Console shell | working |
 | 6 Scoring + threat ranking | working |
 | 7 Polish | open |
-| 8 Yahoo / ESPN adapters, hosting | needs credentials |
+| 8 ESPN live plays | working (first pass) |
+| 8 Yahoo league adapter, hosting | needs credentials |
 
 `pytest` — 156 tests.

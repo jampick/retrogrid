@@ -8,12 +8,13 @@ are skipped (pass --force to re-download).
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from pathlib import Path
 
 import httpx
 
-SEASON = 2025
+SEASON = int(os.environ.get("RETROFFB_SEASON", "2025"))
 BASE = "https://github.com/nflverse/nflverse-data/releases/download"
 ROOT = Path(__file__).resolve().parents[1]
 DEST = ROOT / "data" / "nflverse"

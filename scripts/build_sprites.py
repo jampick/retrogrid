@@ -121,13 +121,15 @@ async def fetch(client: httpx.AsyncClient, sem: asyncio.Semaphore, pid: str, url
 
 async def main() -> None:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--live", action="store_true", help="rosters of today's LIVE league (data/live) instead of the sim slate")
     ap.add_argument("--all", action="store_true", help="every player who appears in the slate, not just rostered")
     args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     RAW.mkdir(parents=True, exist_ok=True)
-    slate = load_slate()
+    slate_dir = ROOT / "data" / ("live" if args.live else "slate")
+    slate = load_slate(slate_dir)
     directory = NflversePlayerDirectory.from_data_dir(week=slate.week, season=slate.season)
-    league = SyntheticLeagueProvider.from_slate(seed=1, directory=directory)
+    league = SyntheticLeagueProvider.from_slate(seed=1, slate_dir=slate_dir, directory=directory)
     ids = {s.player_id for t in league.league().teams for s in league.roster(t.key, slate.week).slots}
     if args.all:
         for p in slate.plays:

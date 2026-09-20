@@ -60,6 +60,15 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
+@app.middleware("http")
+async def revalidate_bundles(request, call_next):             # noqa: ANN001, ANN201
+    """The bundle is rebuilt constantly; make the browser revalidate (ETag) instead of guessing freshness."""
+    response = await call_next(request)
+    if request.url.path.startswith("/dist/"):
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
 def themes_payload() -> dict:
     return {
         "system": system.current().to_dict() if system.available else None,
@@ -80,9 +89,9 @@ def api_theme_poke() -> dict:
 
 @app.get("/api/plays/sample")
 def api_plays_sample(n: int = 24, seed: int = 0, family: str | None = None, viewer: str = "t01",
-                     play: str | None = None) -> JSONResponse:
+                     play: str | None = None, grep: str | None = None) -> JSONResponse:
     from .console import sample_plays
-    return JSONResponse(sample_plays(max(1, min(n, 96)), seed, family, viewer, play))
+    return JSONResponse(sample_plays(max(1, min(n, 96)), seed, family, viewer, play, grep))
 
 
 FLAGS = ROOT / "data" / "grammar_flags.json"

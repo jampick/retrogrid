@@ -469,14 +469,18 @@ def play_family(p: PlayRow) -> str:
 
 
 def sample_plays(n: int = 24, seed: int = 0, family: str | None = None, viewer: str = "t01",
-                 only: str | None = None) -> dict:
-    """N seeded-random compiled plays from the slate, as ordinary PlayFrames."""
+                 only: str | None = None, grep: str | None = None) -> dict:
+    """N seeded-random compiled plays from the slate, as ordinary PlayFrames.
+    `grep` narrows the pool to descriptions containing that text (case-insensitive)."""
     import random
     if not engine:
         return {"plays": [], "families": {}}
     counts: dict[str, int] = {}
     pool = []
+    needle = (grep or "").lower()
     for p in engine.slate.plays:
+        if needle and needle not in p.desc.lower():
+            continue
         f = play_family(p)
         if p.touchdown:
             counts["td"] = counts.get("td", 0) + 1

@@ -19,6 +19,7 @@ let seed = Number(q.get("seed") ?? 0);
 let n = Number(q.get("n") ?? 28);
 let speed = Number(q.get("speed") ?? 1);
 let settled = q.get("settled") === "1";
+const grep = q.get("grep") ?? "";          // narrow the pool to descriptions containing this text
 let paused = false;
 let cells: Cell[] = [];
 let zoom: Cell | null = null;
@@ -30,6 +31,7 @@ const seen = new IntersectionObserver((es) => {
 
 function url(): void {
   const p = new URLSearchParams({ family, seed: String(seed), n: String(n), speed: String(speed), settled: settled ? "1" : "0" });
+  if (grep) p.set("grep", grep);
   history.replaceState(null, "", `?${p}`);
 }
 
@@ -52,7 +54,8 @@ function start(c: Cell): void {
 async function load(): Promise<void> {
   url();
   const only = q.get("play");
-  const r = await fetch(`/api/plays/sample?n=${n}&seed=${seed}&family=${family}` + (only ? `&play=${encodeURIComponent(only)}` : ""));
+  const r = await fetch(`/api/plays/sample?n=${n}&seed=${seed}&family=${family}` + (only ? `&play=${encodeURIComponent(only)}` : "")
+    + (grep ? `&grep=${encodeURIComponent(grep)}` : ""));
   const data: Sample = await r.json();
   flags = await (await fetch("/api/plays/flags")).json();
   const total = Object.entries(data.families).filter(([k]) => k !== "td").reduce((a, [, v]) => a + v, 0);

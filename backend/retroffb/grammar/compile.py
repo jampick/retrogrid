@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import math
 import random
+import re
 from typing import Callable
 
 from . import constants as K
@@ -79,6 +80,21 @@ def _weave(start: Pt, end: Pt, rng: random.Random) -> list[Pt]:
             pts.append(((1 - u) ** 2 * p0[0] + 2 * u * (1 - u) * b[0] + u * u * p2[0],
                         (1 - u) ** 2 * p0[1] + 2 * u * (1 - u) * b[1] + u * u * p2[1]))
     return pts
+
+
+_OB = re.compile(r"\b(?:pushed|ran) ob\b")
+
+
+def _out_of_bounds(p: PlayRow) -> bool:
+    return bool(_OB.search(p.desc))
+
+
+def _to_sideline(start: Pt, side: int, end_y: float) -> list[Pt]:
+    """Carrier forced out: win the edge first, then turn up the boundary and step on the stripe."""
+    end = (K.FIELD_W - 0.2 if side > 0 else 0.2, end_y)
+    ctrl = (start[0] + (end[0] - start[0]) * 0.7, start[1] + (end_y - start[1]) * 0.2)
+    return [((1 - u) ** 2 * start[0] + 2 * u * (1 - u) * ctrl[0] + u * u * end[0],
+             (1 - u) ** 2 * start[1] + 2 * u * (1 - u) * ctrl[1] + u * u * end[1]) for u in (0.25, 0.5, 0.75, 1.0)]
 
 
 def _cap_y(y: float, td: bool, down: bool = False) -> float:
@@ -252,6 +268,8 @@ def _pass(p: PlayRow, rng: random.Random, pos_of: PosOf, air_est: Callable[[Play
     cx = K.THIRD_X.get(p.pass_location or "middle", K.CENTER_X) + rng.uniform(-3, 3)
     if p.pass_location in (None, "middle"):
         cx = bx + (cx - K.CENTER_X) * 0.6
+    if p.complete and _out_of_bounds(p) and p.pass_location in ("left", "right"):
+        cx = rng.uniform(3.0, 7.0) if p.pass_location == "left" else K.FIELD_W - rng.uniform(3.0, 7.0)
     # A receiver can only be where his alignment lets him get to by the throw:
     # keep the ball in the charted third when possible, never drag him across the field.
     reach = 13.0 if back else 5.0 + 0.7 * max(0.0, air) if air < 15 else 8.0 + 0.4 * air
@@ -303,7 +321,10 @@ def _pass(p: PlayRow, rng: random.Random, pos_of: PosOf, air_est: Callable[[Play
         yac = end_y - catch[1]
         drift = rng.uniform(-1, 1) * min(8.0, abs(yac) * 0.4)
         end: Pt = (min(K.FIELD_W - 1, max(1, catch[0] + drift)), end_y)
-        if abs(yac) > 0.4:
+        if _out_of_bounds(p):
+            t_end = target.run(_to_sideline(catch, 1 if catch[0] > K.CENTER_X else -1, end_y), t_catch,
+                               K.SPEED[target.kind] * K.CARRY_FACTOR, accel=False)
+        elif abs(yac) > 0.4:
             t_end = target.run(_weave(catch, end, rng), t_catch, K.SPEED[target.kind] * K.CARRY_FACTOR, accel=False)
         else:
             t_end = t_catch + 0.25
@@ -370,7 +391,8 @@ def _run(p: PlayRow, rng: random.Random, pos_of: PosOf) -> Compiled:
         edge = (bx + side * rng.uniform(7, 11), los - 1.0)
         end = (min(K.FIELD_W - 1, max(1, edge[0] + side * rng.uniform(0, 4))), end_y)
         t_los = qb.run([edge], t_break, K.SPEED["QB"])
-        t_end = qb.run(_weave(edge, end, rng), t_los, K.SPEED["QB"] * K.CARRY_FACTOR, accel=False)
+        t_end = qb.run(_to_sideline(edge, side, end_y) if _out_of_bounds(p) else _weave(edge, end, rng),
+                       t_los, K.SPEED["QB"] * K.CARRY_FACTOR, accel=False)
         _follow(ball, qb, snap_t, t_end)
         for a in off:
             if a.kind in ("WR", "TE", "RB"):
@@ -408,6 +430,8 @@ def _run(p: PlayRow, rng: random.Random, pos_of: PosOf) -> Compiled:
         drift = side * rng.uniform(0, 1) * min(9.0, max(0.0, yards) * 0.35)
         end = (min(K.FIELD_W - 1, max(1, hole_x + drift)), end_y)
         path = [(hole_x + rng.uniform(-0.5, 0.5), los + 2.5)] + _weave((hole_x, los + 2.5), end, rng) if yards >= 10 else [end]
+        if _out_of_bounds(p):
+            path = _to_sideline(crease, side if p.run_location in ("left", "right") else (1 if hole_x > K.CENTER_X else -1), end_y)
         t_end = carrier.run(path, t_los, K.SPEED["RB"] * K.CARRY_FACTOR * (0.75 if stuffed else 1), accel=False)
         _follow(ball, carrier, t_hand, t_end)
         fb = _by_role(off, "FB")

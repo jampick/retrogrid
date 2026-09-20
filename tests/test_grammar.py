@@ -78,3 +78,19 @@ def test_short_targets_are_not_dragged_across_the_field():
         apex = max(ball.keys, key=lambda k: k.z)
         catch_x = next(k.x for k in ball.keys if k.t > apex.t and k.z <= 0.61)
         assert abs(catch_x - tgt.start[0]) <= 5.0 + 0.7 * 15 + 0.1, c.template
+
+
+@pytest.mark.skipif(not slate_available(), reason="no slate data")
+def test_out_of_bounds_plays_finish_on_the_sideline():
+    hits = 0
+    for p in load_slate().plays:
+        if p.play_type in ("run", "pass") and not p.sack and not p.interception \
+                and ("pushed ob" in p.desc or "ran ob" in p.desc) and (p.complete or p.play_type == "run") \
+                and "no play" not in p.desc.lower() and "FUMBLES" not in p.desc:
+            c = compile_play(p)
+            ball = next(a for a in c.actors if a.role == "BALL")
+            x = ball.at(c.duration)[0]
+            assert x < 1.0 or x > 53.333 - 1.0, p.desc
+            assert c.duration < 14, p.desc
+            hits += 1
+    assert hits > 50

@@ -62,17 +62,23 @@ def _snap(ball: Actor, bx: float, los: float, qb: Actor) -> float:
 
 
 def _weave(start: Pt, end: Pt, rng: random.Random) -> list[Pt]:
-    """Ball-carrier path: long runs cut at the second level."""
+    """Ball-carrier path: long runs bend at the second level — arcs, not zig-zags."""
     d = end[1] - start[1]
     if abs(d) < 8:
         return [end]
-    s = 1 if d > 0 else -1
     cut = rng.choice((-1, 1)) * rng.uniform(2.5, 5.5)
-    mid = (start[0] + cut, start[1] + d * 0.45)
-    pts = [mid]
+    ctrl = [start, (start[0] + cut, start[1] + d * 0.45)]
     if abs(d) > 25:
-        pts.append((mid[0] - cut * 1.4, start[1] + d * 0.75))
-    return pts + [end]
+        ctrl.append((ctrl[1][0] - cut * 1.4, start[1] + d * 0.75))
+    ctrl.append(end)
+    pts: list[Pt] = []
+    for a, b, c in zip(ctrl, ctrl[1:], ctrl[2:]):           # quadratic through the midpoints
+        p0 = a if a is start else ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+        p2 = c if c is end else ((b[0] + c[0]) / 2, (b[1] + c[1]) / 2)
+        for u in (0.25, 0.5, 0.75, 1.0):
+            pts.append(((1 - u) ** 2 * p0[0] + 2 * u * (1 - u) * b[0] + u * u * p2[0],
+                        (1 - u) ** 2 * p0[1] + 2 * u * (1 - u) * b[1] + u * u * p2[1]))
+    return pts
 
 
 def _cap_y(y: float, td: bool, down: bool = False) -> float:
@@ -495,8 +501,14 @@ def _placekick(p: PlayRow, rng: random.Random) -> Compiled:
     kicker.move((bx + 0.3, los - 6.5), K.FG_KICK + 0.6)
     defs = [Actor(f"d-R{i}", f"R{i}", "def", "DL", [Key(0, bx + (i - 3.5) * 1.5, los + 0.9)]) for i in range(8)]
     defs += [Actor(f"d-B{i}", f"B{i}", "def", "DB", [Key(0, bx + dx, los + 5)]) for i, dx in enumerate((-7, 0, 7))]
-    for d in defs[:8]:
-        d.move((d.start[0] * 0.9 + bx * 0.1, los - rng.uniform(0.3, 1.6)), K.FG_KICK + 0.2)
+    for i, d in enumerate(defs[:8]):
+        if i in (0, 7):                                     # edge rushers bend the corner and dive
+            d.move((d.start[0] + (-1.2 if i == 0 else 1.2), los - 0.8), K.FG_KICK * 0.55)
+            d.move((bx + (-2.2 if i == 0 else 2.2), los - 5.0), K.FG_KICK + 0.25)
+        else:                                               # the interior is a stalemate at the line
+            d.move((d.start[0] * 0.92 + bx * 0.08, los + rng.uniform(0.1, 0.5)), K.FG_KICK + 0.2)
+    for a in off:
+        a.move((a.start[0], a.start[1] - rng.uniform(0.2, 0.7)), K.FG_KICK)
     ball = Actor("ball", "BALL", "ball", "WR", [Key(0, bx, los - 0.3), Key(K.FG_SNAP, bx, los - 7.5), Key(K.FG_KICK, bx, los - 7.5)])
     result = p.field_goal_result or {"good": "made", "failed": "missed", "blocked": "blocked"}.get(p.extra_point_result or "good", "made")
     spot = (bx, los - 7.5)

@@ -1,0 +1,32 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build:release
+      - run: pip install -e ".[dev]"
+      - run: pytest -q
+      - name: wheel runs from a clean install
+        shell: bash
+        run: |
+          python -m build --wheel
+          python -m venv clean
+          clean/bin/pip install dist/*.whl 2>/dev/null || clean/Scripts/pip install dist/*.whl
+          cd "$RUNNER_TEMP"
+          "$GITHUB_WORKSPACE"/clean/bin/retrogrid paths 2>/dev/null || "$GITHUB_WORKSPACE"/clean/Scripts/retrogrid paths

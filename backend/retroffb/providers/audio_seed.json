@@ -1,0 +1,226 @@
+{
+ "ARI": {
+  "station": "KMVP-FM Arizona Sports 98.7",
+  "url": "https://bonneville.cdnstream1.com/2699_48.aac",
+  "kind": "direct",
+  "verified": "2026-09-20",
+  "note": "Bonneville; Wikipedia lists KTAR-FM/AM as co-flagship"
+ },
+ "ATL": {
+  "station": "WZGC 92.9 The Game",
+  "url": null,
+  "kind": null,
+  "verified": null,
+  "note": "Audacy station; not in radio-browser and Audacy publishes streams only via its login-gated app API"
+ },
+ "BAL": {
+  "station": "WIYY 98 Rock",
+  "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WIYYFMAAC.aac",
+  "kind": "direct",
+  "verified": "2026-09-20",
+  "note": "co-flagship WBAL 1090: https://playerservices.streamtheworld.com/api/livestream-redirect/WBALAMAAC.aac (also verified)"
+ },
+ "BUF": {
+  "station": "WGRF 97 Rock",
+  "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WGRFFM.mp3",
+  "kind": "direct",
+  "verified": "2026-09-20",
+  "note": "new flagship for 2026 (was WGR 550); radio-browser lists mount WGRFFM on a numbered STW host that 403s, same mount via official playerservices redirect verified"
+ },
+ "CAR": {
+  "station": "WRFX 99.7 The Fox",
+  "url": "https://stream.revma.ihrhls.com/zc1613/hls.m3u8",
+  "kind": "hls",
+  "verified": "2026-09-20",
+  "note": "iHeart"
+ },
+ "CHI": {
+  "station": "WMVP ESPN 1000",
+  "url": "https://live.amperwave.net/direct/goodkarma-wmvpammp3-ibc1",
+  "kind": "direct",
+  "verified": "2026-09-20",
+  "note": "Good Karma"
+ },
+ "CIN": {
+  "station": "WLW 700",
+  "url": "https://stream.revma.ihrhls.com/zc1713/hls.m3u8",
+  "kind": "hls",
+  "verified": "2026-09-20",
+  "note": "iHeart; co-flagships WCKY 1530 / WEBN 102.7"
+ },
+ "CLE": {
+  "station": "WKNR ESPN 850",
+  "url": "https://live.amperwave.net/direct/goodkarma-wknrammp3-ibc2",
+  "kind": "direct",
+  "verified": "2026-09-20",
+  "note": "Good Karma; co-flagships WKRK 92.3 The Fan (Audacy) / WNCX 98.5; radio-browser lists the stream.abacast.net http alias of the same mount"
+ },
+ "DAL": {
+  "station": "KRLD-FM 105.3 The Fan",
+  "url": "https://live.amperwave.net/manifest/audacy-krldfmaac-hlsc.m3u8",
+  "kind": "hls",
+  "verified": "2026-09-20",
+  "note": "Audacy; radio-browser marks lastcheckok=0 but it returned 200 today"
+ },
+ "DEN": {
+  "station": "KOA 850",
+  "url": "http://stream.revma.ihrhls.com/zc389/hls.m3u8",
+  "kind": "hls",
+  "verified": "2026-09-20",
+  "note": "iHeart; re-verified"
+ },
+ "DET": {
+  "station": "WXYT-FM 97.1 The Ticket",
+  "url": "https://live.amperwave.net/manifest/audacy-wxytfmaac-hlsc.m3u8",
+  "kind": "hls",
+  "verified": "2026-09-20",
+  "note": "Audacy; radio-browser entry carried session query params, stripped to the bare manifest URL"
+ },
+ "GB": {
+  "station": "WRIT-FM 95.7 BIG FM",
+  "url": "https://stream.revma.ihrhls.com/zc2689",
+  "kind": "direct",
+  "verified": "2026-09-20",
+  "note": "iHeart Milwaukee; flagship moved from 97.3 The Game in 2025"
+ },
+ "HOU": {
+  "station": "KILT SportsRadio 610",
+  "url": null,
+  "kind": null,
+  "verified": null,
+  "note": "Audacy station; not in radio-browser and Audacy publishes streams only via its login-gated app API"
+ },
+ "IND": {
+  "station": "WFNI 107.5/93.5 The Fan (WIBC-HD2) / WLHK 97.1 HANK FM",
+  "url": null,
+  "kind": null,
+  "verified": null,
+  "note": "neither in radio-browser (only WIBC 93.1 news-talk main channel is, which does not carry games)"
+ },
+ "JAX": {
+  "station": "WJXL 1010 XL / 92.5 FM",
+  "url": "https://ice23.securenetsystems.net/WJXL",
+  "kind": "direct",
+  "verified": "2026-09-20",
+  "note": ""
+ },
+ "KC": {
+  "station": "WDAF-FM 106.5 The Wolf",
+  "url": null,
+  "kind": null,
+  "verified": null,
+  "note": "Audacy station; not in radio-browser and Audacy publishes streams only via its login-gated app API; co-flagship KFNZ 96.5 The Fan also Audacy"
+ },
+ "LA": {
+  "station": "KSPN ESPN LA 710",
+  "url": "https://live.amperwave.net/direct/goodkarma-kspnamaac-ibc",
+  "kind": "direct",
+  "verified": "2026-09-20",
+  "note": "Good Karma; co-flagship KCBS-FM 93.1 JACK FM (Audacy)"
+ },
+ "LAC": {
+  "station": "KYSR ALT 98.7",
+  "url": "https://stream.revma.ihrhls.com/zc201/hls.m3u8",
+  "kind": "hls",
+  "verified": "2026-09-20",
+  "note": "iHeart; KFI 640 was flagship 2024-25, back to KYSR for 2026 per search"
+ },
+ "LV": {
+  "station": "KOMP 92.3",
+  "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KOMPFM.mp3",
+  "kind": "direct",
+  "verified": "2026-09-20",
+  "note": "Lotus; co-flagship KRLV 920 Raider Nation Radio"
+ },
+ "MIA": {
+  "station": "WBGG-FM BIG 105.9",
+  "url": "https://stream.revma.ihrhls.com/zc557",
+  "kind": "direct",
+  "verified": "2026-09-20",
+  "note": "iHeart; co-flagship WINZ 940: https://stream.revma.ihrhls.com/zc565 (also verified)"
+ },
+ "MIN": {
+  "station": "KFAN 100.3",
+  "url": "https://stream.revma.ihrhls.com/zc1209",
+  "kind": "direct",
+  "verified": "2026-09-20",
+  "note": "iHeart; re-verified"
+ },
+ "NE": {
+  "station": "WBZ-FM 98.5 The Sports Hub",
+  "url": null,
+  "kind": null,
+  "verified": null,
+  "note": "Beasley station; not in radio-browser"
+ },
+ "NO": {
+  "station": "WWL 870 / 105.3",
+  "url": null,
+  "kind": null,
+  "verified": null,
+  "note": "Audacy station; not in radio-browser and Audacy publishes streams only via its login-gated app API"
+ },
+ "NYG": {
+  "station": "WFAN 660 / 101.9",
+  "url": "https://live.amperwave.net/direct/audacy-wfanamaac-imc",
+  "kind": "direct",
+  "verified": "2026-09-20",
+  "note": "Audacy; re-verified"
+ },
+ "NYJ": {
+  "station": "WAXQ Q104.3",
+  "url": "https://stream.revma.ihrhls.com/zc1465/hls.m3u8",
+  "kind": "hls",
+  "verified": "2026-09-20",
+  "note": "iHeart"
+ },
+ "PHI": {
+  "station": "WIP-FM SportsRadio 94WIP",
+  "url": "https://live.amperwave.net/manifest/audacy-wipfmaac-hlsc.m3u8",
+  "kind": "hls",
+  "verified": "2026-09-20",
+  "note": "Audacy; radio-browser marks lastcheckok=0 but it returned 200 today"
+ },
+ "PIT": {
+  "station": "WDVE 102.5",
+  "url": "https://stream.revma.ihrhls.com/zc2017",
+  "kind": "direct",
+  "verified": "2026-09-20",
+  "note": "iHeart; co-flagship WBGG 970"
+ },
+ "SEA": {
+  "station": "KIRO 710 Seattle Sports",
+  "url": "https://bonneville.cdnstream1.com/2642_48.aac",
+  "kind": "direct",
+  "verified": "2026-09-20",
+  "note": "Bonneville; co-flagship KIRO-FM 97.3: https://bonneville.cdnstream1.com/2643_48.aac (not re-verified)"
+ },
+ "SF": {
+  "station": "KNBR 680",
+  "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KNBRAM.mp3",
+  "kind": "direct",
+  "verified": "2026-09-20",
+  "note": "Cumulus; radio-browser lists mount KNBRAM on a numbered STW host (works), same mount via official https playerservices redirect verified; co-flagship KSAN 107.7 The Bone"
+ },
+ "TB": {
+  "station": "WXTB 97.9 98ROCK",
+  "url": "https://stream.revma.ihrhls.com/zc697",
+  "kind": "direct",
+  "verified": "2026-09-20",
+  "note": "iHeart"
+ },
+ "TEN": {
+  "station": "WGFX 104.5 The Zone",
+  "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WGFXFMAAC.aac",
+  "kind": "direct",
+  "verified": "2026-09-20",
+  "note": "Cumulus; mount from radio-browser, https playerservices redirect form verified"
+ },
+ "WAS": {
+  "station": "WBIG BIG 100.3",
+  "url": "https://stream.revma.ihrhls.com/zc2505",
+  "kind": "direct",
+  "verified": "2026-09-20",
+  "note": "iHeart; HLS variant https://stream.revma.ihrhls.com/zc2505/hls.m3u8 also verified"
+ }
+}

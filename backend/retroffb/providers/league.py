@@ -1,4 +1,9 @@
-"""Which league the console runs on: RETROFFB_LEAGUE=yahoo, else the synthetic one."""
+"""The fantasy layer is opt-in. RETROFFB_LEAGUE picks it:
+
+    (unset)  no league — the console is a plain NFL monitor
+    stub     the synthetic 12-team league drafted from the slate
+    yahoo    a real Yahoo league (docs/YAHOO.md)
+"""
 from __future__ import annotations
 
 import os
@@ -11,9 +16,12 @@ from .stub_league import USER_TEAM, SyntheticLeagueProvider
 
 
 def make_league(slate_dir: Path | str, directory: NflversePlayerDirectory, week: int, season: int,
-                seed: int = 1) -> LeagueProvider:
+                seed: int = 1) -> LeagueProvider | None:
     load_env()                                                # RETROFFB_LEAGUE may live in .env too
-    if os.environ.get("RETROFFB_LEAGUE", "").lower() == "yahoo":
+    kind = os.environ.get("RETROFFB_LEAGUE", "").lower()
+    if kind in ("", "0", "off", "none"):
+        return None
+    if kind == "yahoo":
         from .yahoo import YahooLeagueProvider
         from .yahoo_api import YahooClient
         return YahooLeagueProvider(YahooClient(), directory, week=week, season=season)

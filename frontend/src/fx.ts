@@ -36,8 +36,13 @@ export function banner(t: Threat, label: string, onTap: () => void): void {
   const hurt = t.kind === "hurt";
   el.className = hurt ? "them" : "you";
   if (t.lead_change) el.className = "alert";
-  const sign = t.delta >= 0 ? "+" : "";
-  el.innerHTML = `${hurt ? "⚠ THREAT" : "▲ ASSIST"} · ${t.name} ${sign}${t.delta.toFixed(1)} · ${t.headline} · ${label}<span class="k">[ENTER] VIEW</span>`;
+  if (t.delta === null) {                                     // NFL mode: an ACTION alert, nobody's fantasy points
+    el.className = t.kind === "fav" ? "gain" : "hot";
+    el.innerHTML = `⚡ ${t.name} · ${t.team ?? ""} · ${t.headline} · ${label}<span class="k">[ENTER] VIEW</span>`;
+  } else {
+    const sign = t.delta >= 0 ? "+" : "";
+    el.innerHTML = `${hurt ? "⚠ THREAT" : "▲ ASSIST"} · ${t.name} ${sign}${t.delta.toFixed(1)} · ${t.headline} · ${label}<span class="k">[ENTER] VIEW</span>`;
+  }
   if (t.lead_change) el.innerHTML = `◆ LEAD CHANGE · ` + el.innerHTML;
   el.onclick = () => { onTap(); hideBanner(); };
   requestAnimationFrame(() => el.classList.add("on"));

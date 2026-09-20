@@ -3,6 +3,7 @@
 import { palette } from "./palette";
 import { PixelLabel } from "./pixelfont";
 import { loadSprite, proceduralBust, tint, SP } from "./sprites";
+import type { Radio } from "./radio";
 import type { ActiveCard, ConsoleState, GhostInfo, Side } from "./types";
 
 const $ = (id: string) => document.getElementById(id)!;
@@ -33,6 +34,8 @@ export class Ui {
   private bust = document.createElement("canvas");
   private bustKey = "";
   private seenThreats = new Set<string>();
+  private seenChatter = new Set<string>();
+  rail: "lineup" | "chatter" = localStorage.getItem("ffb.rail") === "chatter" ? "chatter" : "lineup";   // ffb mode only
   private state: ConsoleState | null = null;
 
   constructor(private h: UiHandlers) {
@@ -42,7 +45,7 @@ export class Ui {
     $("delta").appendChild(this.delta.el);
     $("gt-you").append(this.gtYou.name.el, this.gtYou.meta.el, this.gtYou.pts.el);
     $("gt-them").append(this.gtThem.name.el, this.gtThem.meta.el, this.gtThem.pts.el);
-    this.logo.set("RETRO//FFB");
+    this.logo.set("RETRO//NFL");
     this.bust.className = "bust"; this.bust.width = this.bust.height = SP;
     $("scope").onclick = () => h.toggleScope();
     $("scrub").onclick = (e) => h.seek(e.clientX / window.innerWidth);
@@ -58,22 +61,28 @@ export class Ui {
 
   render(s: ConsoleState): void {
     this.state = s;
-    this.status(s); this.feeds(s); this.threats(s); this.lineup(s);
+    const root = document.documentElement;
+    if (root.dataset.mode !== s.mode) { root.dataset.mode = s.mode; this.logo.set(s.mode === "ffb" ? "RETRO//FFB" : "RETRO//NFL"); }
+    root.dataset.rail = s.mode === "ffb" ? this.rail : "chatter";
+    this.status(s); this.feeds(s); this.threats(s); this.lineup(s); this.chatter(s); this.keys(s);
     this.ghostTag(this.gtYou, s.ghosts.you); this.ghostTag(this.gtThem, s.ghosts.them);
     this.active(s.active);
   }
 
   private status(s: ConsoleState): void {
-    const { you, them } = s.matchup;
+    const nfl = s.mode === "nfl";
+    const you = s.matchup?.you ?? { name: "", points: 0 }, them = s.matchup?.them ?? { name: nfl ? "NO FEED IN FOCUS" : "", points: 0 };
+    const fmt = (n: number) => (nfl ? String(n) : pts(n));
     $("you-owner").textContent = you.name; $("them-owner").textContent = them.name;
-    this.youScore.set(pts(you.points)); this.themScore.set(pts(them.points));
+    this.youScore.set(s.matchup ? fmt(you.points) : ""); this.themScore.set(s.matchup ? fmt(them.points) : "");
     const d = you.points - them.points;
-    this.delta.set((d >= 0 ? "{" : "}") + pts(Math.abs(d)), d >= 0 ? "gain" : "them");
+    if (nfl) this.delta.set(s.matchup?.status ?? "", "hot");             // the game clock, not a fantasy margin
+    else this.delta.set((d >= 0 ? "{" : "}") + pts(Math.abs(d)), d >= 0 ? "gain" : "them");
     $("clock").textContent = s.clock.label;
     $("live").textContent = s.clock.paused ? "■ HOLD" : "● LIVE";
     $("live").classList.toggle("held", s.clock.paused);
     const rates = [1, 4, 15, 60];
-    $("transport").innerHTML = `<b class="${s.clock.auto ? "on" : ""}" data-auto title="auto-direct [A]">AUTO</b> SIM ` + rates.map((r, i) => `<b data-r="${r}" class="${s.clock.speed === r ? "on" : ""}" title="[${i + 1}]">${r}×</b>`).join("");
+    $("transport").innerHTML = `<b class="${s.clock.auto ? "on" : ""}" data-auto title="auto-direct [A]">AUTO</b> ` + (s.clock.live ? "" : "SIM ") + (s.clock.live ? [] : rates).map((r, i) => `<b data-r="${r}" class="${s.clock.speed === r ? "on" : ""}" title="[${i + 1}]">${r}×</b>`).join("");
     $("transport").querySelectorAll<HTMLElement>("b[data-r]").forEach((b) => (b.onclick = () => this.h.speed(Number(b.dataset.r))));
     ($("scrub").firstElementChild as HTMLElement).style.width = `${(100 * s.clock.sim) / Math.max(1, s.clock.duration)}%`;
     this.tug(you.points, them.points);
@@ -102,8 +111,9 @@ export class Ui {
     const live = s.feeds.filter((f) => !["FINAL", "PRE"].includes(f.status)).length;
     $("feeds-count").textContent = `${live} LIVE`;
     $("feeds").innerHTML = s.feeds.map((f) => {
-      const mark = f.mark === "hurt" ? `<span class="them">⚠</span>` : f.mark === "help" ? `<span class="you">▲</span>` : `<span></span>`;
-      return `<li data-g="${f.game_id}" class="${f.focused ? "focused" : ""} ${f.status === "FINAL" ? "final" : ""}">
+      const mark = f.mark === "hurt" ? `<span class="them">⚠</span>` : f.mark === "help" ? `<span class="you">▲</span>`
+        : f.mark === "hot" ? `<span class="alert">⚡</span>` : `<span></span>`;
+      return `<li data-g="${f.game_id}" class="${f.focused ? "focused" : ""} ${f.status === "FINAL" ? "final" : ""} ${f.fav ? "fav" : ""}">
         <span class="alert">${f.focused ? "▸" : ""}</span><span class="lbl">${esc(f.label)}</span>
         <span class="dim">${esc(f.score)}</span><span class="st dim">${esc(f.status)} ${f.status.startsWith("Q") || f.status === "OT" ? esc(f.clock) : ""}</span>${mark}</li>`;
     }).join("");
@@ -111,20 +121,71 @@ export class Ui {
   }
 
   private threats(s: ConsoleState): void {
-    $("scope").textContent = s.scope === "matchup" ? "◂MATCHUP▸" : "◂LEAGUE▸";
+    const nfl = s.mode === "nfl";
+    $("board-title").textContent = nfl ? "ACTION" : "THREATS";
+    $("scope").textContent = nfl ? (s.favs.length ? `★ ${s.favs.join(" ")}` : "★ FOLLOW [F]") : s.scope === "matchup" ? "◂MATCHUP▸" : "◂LEAGUE▸";
     $("threats").innerHTML = s.threats.map((t) => {
+      if (t.delta === null) {                                   // ACTION row: tag, team, what happened
+        const fresh = !this.seenThreats.has(t.id); this.seenThreats.add(t.id);
+        const cls = t.kind === "fav" ? "gain" : "hot";
+        return `<li data-p="${t.play_id}" class="${fresh ? "fresh" : ""} ${t.lead_change ? "lead" : ""}">
+          <span class="alert">⚡</span><span class="${cls}">${esc(t.name)} · ${esc(t.team ?? "")}</span>
+          <span class="dim">${esc(s.feeds.find((f) => f.game_id === t.game_id)?.label ?? "")}</span><span class="hl">${t.lead_change ? "◆ LEAD CHANGE · " : ""}${esc(t.headline)}</span></li>`;
+      }
       const cls = t.kind === "hurt" ? "them" : "you";
       const fresh = !this.seenThreats.has(t.id);
       this.seenThreats.add(t.id);
       return `<li data-p="${t.play_id}" class="${fresh ? "fresh" : ""} ${t.lead_change ? "lead" : ""}">
         <span class="${cls}">${t.kind === "hurt" ? "⚠" : "▲"}</span><span class="${cls}">${esc(t.name)}</span>
-        <span class="${cls}">${signed(t.delta)}</span><span class="hl">${t.lead_change ? "◆ LEAD CHANGE · " : ""}${esc(t.headline)}</span></li>`;
+        <span class="${cls}">${signed(t.delta ?? 0)}</span><span class="hl">${t.lead_change ? "◆ LEAD CHANGE · " : ""}${esc(t.headline)}</span></li>`;
     }).join("") || `<li class="dim">— QUIET —</li>`;
     $("threats").querySelectorAll<HTMLElement>("li[data-p]").forEach((li) => (li.onclick = () => this.h.focusPlay(li.dataset.p!)));
     if (this.seenThreats.size > 400) this.seenThreats = new Set(s.threats.map((t) => t.id));
   }
 
+  /** The crowd: newest at the bottom, a team's own sub in that team's light. */
+  private chatter(s: ConsoleState): void {
+    const g = s.feeds.find((f) => f.focused);
+    const [away, home] = g ? g.label.split("@") : ["", ""];
+    $("chatter-src").textContent = g ? g.label : "";
+    $("chatter").innerHTML = s.chatter.map((c) => {
+      const fresh = !this.seenChatter.has(c.id); this.seenChatter.add(c.id);
+      const cls = s.mode === "nfl" ? (c.team === away ? "you" : c.team === home ? "them" : "") : "";
+      return `<li class="${fresh ? "fresh" : ""}"><span class="src ${cls || "dim"}">${esc(c.source)}</span><span class="txt">${esc(c.text)}</span></li>`;
+    }).join("") || `<li class="dim">— ${g ? "CROWD QUIET" : "NO FEED"} —</li>`;
+    if (this.seenChatter.size > 2000) this.seenChatter = new Set(s.chatter.map((c) => c.id));
+  }
+
+  renderRadio(r: Radio, s: ConsoleState | null): void {
+    const el = $("radio");
+    const label = (id?: string) => s?.feeds.find((f) => f.game_id === id)?.label ?? "";
+    const st = r.stream;
+    if (r.state === "off") { el.className = "dim"; el.innerHTML = `♪ RADIO OFF <em>[M]</em>`; return; }
+    const vol = "▮".repeat(Math.round(r.volume * 5)).padEnd(5, "▯");
+    if (r.state === "dead") {
+      el.className = "them";
+      el.innerHTML = `♪ NO SIGNAL · ${esc(st?.station || st?.team || "")} <a class="dim" href="${r.game?.nfl_plus ?? "#"}" target="_blank" rel="noopener">NFL+ ▸</a> <em>[H] OTHER BOOTH</em>`;
+      return;
+    }
+    el.className = r.state === "on" ? "gain" : "alert";
+    el.innerHTML = `♪ ${r.state === "on" ? "" : "TUNING · "}${esc(st?.station ?? "")} · ${esc(st?.team ?? "")} CALL · ${esc(label(r.game?.game_id))} <em>${vol}</em>`;
+  }
+
+  private keys(s: ConsoleState): void {
+    const ffb = s.mode === "ffb";
+    const k = [
+      "[T] THEME · [F] FOLLOW TEAMS · [A] AUTO-DIRECT",
+      "[M] RADIO · [H] OTHER BOOTH · [-][=] VOL · [N] MUTE CUES",
+      s.clock.live ? "" : "[SPACE] HOLD · [1-4] RATE · [←→] SKIP",
+      `[C] REPLAY CYCLE <span id="cycle">${this.cycleText}</span> · [ [ ] ] PREV/NEXT · [/] LIVE`,
+      s.ffb_available ? `[X] FANTASY LAYER ${ffb ? "ON" : "OFF"}` + (ffb ? " · [V] VIEWER · [L] SCOPE · [TAB] LINEUP/CHATTER" : "") : "",
+    ].filter(Boolean).join("<br>");
+    if ($("keys").dataset.k !== k) { $("keys").dataset.k = k; $("keys").innerHTML = k; }
+  }
+  cycleText = "";
+
   private lineup(s: ConsoleState): void {
+    if (s.mode === "nfl" || !s.matchup) { $("lineup").innerHTML = ""; return; }
     const rows = s.lineup.map((r) => {
       const yl = r.you.points >= r.them.points;
       return `<li><span class="slot">${r.slot}</span>
@@ -157,7 +218,7 @@ export class Ui {
     el.innerHTML = `<span class="b"></span>
       <div class="who"><span class="n"></span><span class="dim">${esc(a.meta)}</span></div>
       <div class="mid"><div class="${cls}">${esc(a.statline)}</div><div class="hot">▸ ${esc(a.play_text)}</div><div class="dim">${esc(a.extra)}</div></div>
-      <div class="pts"><div><small>PTS</small><span class="p"></span></div><div><small>THIS PLAY</small><span class="d"></span></div></div>`;
+      <div class="pts"><div><small>${this.state?.mode === "nfl" ? "FPTS" : "PTS"}</small><span class="p"></span></div><div><small>THIS PLAY</small><span class="d"></span></div></div>`;
     el.querySelector(".b")!.replaceWith(this.bust);
     el.querySelector(".n")!.replaceWith(this.cardName.el);
     el.querySelector(".p")!.replaceWith(this.cardPts.el);

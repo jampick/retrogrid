@@ -171,3 +171,23 @@ h2 em { font-style: normal; order: 2; letter-spacing: .12em; cursor: pointer; }
 
 /* still/mini modes for the theme contact sheet */
 :root[data-mini="1"] #keys, :root[data-mini="1"] #boot { display: none; }
+
+/* ── NFL base layer: chatter rail, radio, follow marks ──────────────── */
+:root[data-rail="chatter"] #sec-lineup, :root[data-rail="lineup"] #sec-chatter { display: none; }
+#sec-chatter { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+#chatter { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 9px;
+  -webkit-mask-image: linear-gradient(transparent, #000 22%); mask-image: linear-gradient(transparent, #000 22%); }
+#chatter li { display: flex; flex-direction: column; gap: 1px; flex: none; }
+#chatter .src { font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; }
+#chatter .txt { text-transform: none; letter-spacing: .02em; font-size: 12.5px; line-height: 1.35; color: var(--ffb-hot); opacity: .88; overflow-wrap: anywhere; }
+#chatter li.fresh { animation: crowd-in .5s steps(6) 1; }
+@keyframes crowd-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+#radio { font-size: 10.5px; letter-spacing: .12em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#radio em { font-style: normal; color: var(--ffb-dim); text-shadow: none; margin-left: 6px; }
+#radio a { text-decoration: none; margin-left: 6px; }
+#feeds li.fav .lbl::after { content: " ★"; color: var(--ffb-gain); font-size: 9px; }
+#threats li span:nth-child(3).dim { font-size: 10.5px; }
+:root[data-mode="nfl"] #scope { cursor: default; }
+#keys { margin-top: 0; }
+:root[data-rail="lineup"] #radio { margin-top: auto; }
+:root[data-mini="1"] #radio { display: none; }

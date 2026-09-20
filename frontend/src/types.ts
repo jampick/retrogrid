@@ -15,7 +15,7 @@ export interface Theme {
 }
 
 export type Side = "you" | "them" | "league" | null;
-export type Mark = "help" | "hurt" | null;
+export type Mark = "help" | "hurt" | "hot" | null;      // hot: NFL mode, the game is where the action is
 
 export interface Feed {
   game_id: string;
@@ -25,15 +25,17 @@ export interface Feed {
   score: string;        // "21-17"
   mark: Mark;
   focused: boolean;
+  fav: boolean;         // a followed team is playing
 }
 
 export interface Threat {
   id: string;
   play_id: string;
   game_id: string;
-  kind: "help" | "hurt";
-  name: string;         // "ALLEN"
-  delta: number;
+  kind: "help" | "hurt" | "neutral" | "fav";   // neutral/fav: NFL mode ACTION rows
+  name: string;         // "ALLEN" — or the action tag, "TD"
+  team?: string;        // NFL mode: who it was good for
+  delta: number | null; // fantasy points; null in NFL mode
   headline: string;
   lead_change: boolean;
 }
@@ -56,15 +58,26 @@ export interface ActiveCard {
   sprite: string | null;
 }
 
+export interface ChatterLine { id: string; game_id: string; source: string; author: string; text: string; team: string | null }
+export interface StreamInfo { team: string; station: string; url: string | null; kind: "hls" | "direct" | null }
+export interface GameAudio { game_id: string; nfl_plus: string; home: StreamInfo; away: StreamInfo }
+
 export interface ConsoleState {
   type: "state";
-  clock: { label: string; sim: number; duration: number; speed: number; paused: boolean; auto: boolean };
-  viewer: { team_key: string; owner: string };
+  mode: "nfl" | "ffb";                // nfl: real scoreboard + ACTION; ffb: the fantasy layer on top
+  ffb_available: boolean;             // a league is configured server-side
+  clock: { label: string; sim: number; duration: number; speed: number; paused: boolean; auto: boolean; live: boolean };
+  viewer: { team_key: string; owner: string } | null;
   viewers: { team_key: string; owner: string; name: string }[];
-  matchup: { you: { name: string; points: number }; them: { name: string; points: number } };
+  // ffb: fantasy matchup. nfl: the focused game, away on the left — null with nothing in focus.
+  matchup: { you: { name: string; points: number }; them: { name: string; points: number }; status: string } | null;
+  favs: string[];
+  teams: string[];                    // every team on the slate
+  chatter: ChatterLine[];             // focused game, oldest first
+  audio: GameAudio | null;            // focused game
   feeds: Feed[];
   threats: Threat[];
-  scope: "matchup" | "league";
+  scope: "matchup" | "league" | "action";
   lineup: LineupRow[];
   ghosts: { you: GhostInfo | null; them: GhostInfo | null };
   active: ActiveCard | null;
@@ -76,7 +89,7 @@ export interface Actor {
   role: string;                       // "QB" "WR" "CB" "BALL" ...
   team: "off" | "def" | "ball" | "flag";
   label: string | null;               // set only for involved players
-  side: Side;                         // fantasy ownership relative to viewer
+  side: Side;                         // ffb: fantasy ownership relative to viewer. nfl: away = you, home = them
   involved: boolean;
   keys: Keyframe[];                   // field yards; x 0..53.3 across, y 0..120 along, offence moves +y
 }

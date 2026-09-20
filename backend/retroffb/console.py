@@ -1,4 +1,9 @@
-"""The console engine: one play stream in, twelve viewers' worth of frames out.
+"""The console engine: one play stream in, every viewer's frames out.
+
+The base layer is an NFL monitor: plays ranked by how much football they were
+(scoring.action), a crowd (providers.chatter), a radio (providers.audio). The
+fantasy layer — matchup bar, LINEUP, THREATS, ownership colours — sits on top
+and exists only when a league is configured *and* the session has it on.
 
 Everything here is downstream of the provider seams (DESIGN §7), so it is
 identical whether plays come from SIM SUNDAY or, later, from ESPN.
@@ -20,11 +25,14 @@ from fastapi import WebSocket
 from .grammar import compile_play
 from .models import SLOTS, PlayRow, StatDelta
 from .parser.desc import penalty_summary
+from .providers.audio import AudioTable
+from .providers.chatter import TEAMS, ChatterBox, RedditChatter, StubChatter
 from .providers.directory import NflversePlayerDirectory
 from .providers.nflverse_plays import SlatePlayProvider
 from .providers.slate import DEFAULT_SLATE_DIR, ROOT, load_slate, slate_available
 from .providers.league import default_viewer, make_league
-from .scoring import LeagueIndex, MatchupBoard, ScoringState, ThreatEvent, ThreatHub
+from .scoring import DEFAULT_RULES, ActionBoard, ActionEvent, LeagueIndex, MatchupBoard, ScoringState, ThreatEvent, ThreatHub
+from .scoring.action import HOT_THRESHOLD
 from .sim.clock import SimClock
 
 log = logging.getLogger("retroffb.console")
@@ -34,6 +42,8 @@ RECENT_HALF_LIFE = 900.0           # sim seconds; "who matters right now"
 ET = ZoneInfo("America/New_York")
 LIVE = os.environ.get("RETROFFB_LIVE") == "1"          # today's real games off ESPN (scripts/build_live.py)
 SLATE_DIR = ROOT / "data" / "live" if LIVE else DEFAULT_SLATE_DIR
+CHATTER = os.environ.get("RETROFFB_CHATTER", "reddit" if LIVE else "stub").lower()      # reddit | stub | off
+FAVS = [t for t in os.environ.get("RETROFFB_FAVS", "").upper().replace(",", " ").split() if t in TEAMS]
 
 _PREFIX = re.compile(r"^(\(\d*:?\d+\)\s*)?(\((Shotgun|No Huddle|No Huddle, Shotgun)\)\s*)*", re.I)
 _JERSEY = re.compile(r"\b\d{1,2}-(?=[A-Z][\w']*\.)")
@@ -55,7 +65,9 @@ def _air_estimator():
 @dataclass(eq=False)
 class Session:
     ws: WebSocket
-    viewer: str
+    viewer: str | None = None       # fantasy team key; None when there is no league
+    ffb: bool = False               # fantasy layer on for this session
+    favs: set[str] = field(default_factory=lambda: set(FAVS))     # NFL teams this viewer follows
     focus: str | None = None
     scope: str = "matchup"
     auto: bool = True               # AUTO-DIRECT: follow the action (demo / cast mode)
@@ -89,7 +101,13 @@ class Engine:
             self.provider = EspnPlayProvider(self.slate, self.clock, self.directory)
         self.week = self.slate.week
         self.team_game = {t: g.id for g in self.slate.games for t in (g.home, g.away)}
-        self.state = ScoringState(self.league.league().scoring_rules)
+        self.rules = self.league.league().scoring_rules if self.league else dict(DEFAULT_RULES)
+        self.state = ScoringState(self.rules)
+        self.action = ActionBoard(self.directory)
+        self.chatter = ChatterBox()
+        self.crowd = StubChatter(self.chatter, self.directory) if CHATTER == "stub" else None
+        self.audio = AudioTable()
+        self.by_team: dict[str, set[str]] = {}               # NFL team -> players seen making plays
         self.hub: ThreatHub | None = None
         self.boards: dict[str, MatchupBoard] = {}
         self.load_league()
@@ -106,6 +124,9 @@ class Engine:
     def load_league(self) -> None:
         """Read teams, rosters and matchups off the provider. Called again after
         every slow-lane refresh; boards keep their lead memory."""
+        if self.league is None:
+            self.teams, self.rosters, self.opponent, self.index, self.default_viewer = {}, {}, {}, None, None
+            return
         self.teams = {t.key: t for t in self.league.league().teams}
         self.default_viewer = default_viewer(self.league)
         self.rosters = {k: self.league.roster(k, self.week) for k in self.teams}
@@ -137,7 +158,7 @@ class Engine:
 
     async def league_pump(self, every: float = 300.0) -> None:
         """Lineup changes and late swaps; official points for drift."""
-        refresh = getattr(self.league, "refresh", None)
+        refresh = getattr(self.league, "refresh", None) if self.league else None
         while refresh is not None:
             await asyncio.sleep(every)
             try:
@@ -158,8 +179,11 @@ class Engine:
                     log.info("drift %-14s ours %6.2f  yahoo %6.2f  (%+.2f)", self.name(pid), ours, theirs, ours - theirs)
 
     # ── ingest ────────────────────────────────────────────────────────────
-    def ingest(self, play: PlayRow) -> dict[str, list[ThreatEvent]]:
+    def ingest(self, play: PlayRow) -> tuple[ActionEvent | None, dict[str, list[ThreatEvent]]]:
         deltas = self.state.apply(play)
+        act = self.action.ingest(play)
+        if self.crowd:
+            self.crowd.react(play, act.tag if act else None, act.team if act else None)
         self.plays_by_id[play.play_id] = play                 # live: the slate grows as we go
         self.deltas_by_play[play.play_id] = deltas
         self.last_by_game[play.game_id] = play
@@ -167,13 +191,18 @@ class Engine:
             pts = self.event_points(d)
             if pts:
                 self.recent.setdefault(d.player_id, []).append((play.sim_time, pts))
+                pl = self.directory.player(d.player_id)
+                if pl:
+                    self.by_team.setdefault(pl.team, set()).add(d.player_id)
         if play.play_type == "pass" and play.receiver_id and not play.sack:
             a = self.aux.setdefault(play.receiver_id, {"tgt": 0, "air": 0.0})
             a["tgt"] += 1
             a["air"] += play.air_yards or 0.0
+        if self.hub is None:
+            return act, {}
         flipped = {k for k, b in self.boards.items() if b.update()}
         real = [d for d in deltas if self.event_points(d)]    # no "game open +10" / "allows 3" noise
-        return self.hub.ingest(play, real, play.sim_time, flipped)
+        return act, self.hub.ingest(play, real, play.sim_time, flipped)
 
     DEF_EVENTS = ("def_sack", "def_int", "def_fum_rec", "def_td", "def_safety", "def_block")
 
@@ -182,12 +211,16 @@ class Engine:
         bookkeeping: it moves the score but is not a play anyone made."""
         if not d.player_id.startswith("DEF-"):
             return d.points
-        rules = self.league.league().scoring_rules
-        return sum(rules.get(k, 0.0) * d.stats.get(k, 0.0) for k in self.DEF_EVENTS)
+        return sum(self.rules.get(k, 0.0) * d.stats.get(k, 0.0) for k in self.DEF_EVENTS)
 
     def rebuild(self) -> None:
         now = self.clock.now()
-        self.state.reset(); self.hub.reset()
+        self.state.reset(); self.action.reset()
+        if self.hub:
+            self.hub.reset()
+        if self.crowd:
+            self.chatter.reset()                              # the stub crowd is re-derived from the plays
+        self.by_team.clear()
         self.recent.clear(); self.aux.clear(); self.deltas_by_play.clear(); self.last_by_game.clear()
         for b in self.boards.values():
             b.reset()
@@ -213,9 +246,9 @@ class Engine:
                     await self.catch_up(s)
                 if play.sim_time > self.clock.now() or play.play_id in self.deltas_by_play:
                     continue
-            events = self.ingest(play)
+            act, events = self.ingest(play)
             for s in list(self.sessions):
-                await self.deliver(s, play, events.get(s.viewer, []))
+                await self.deliver(s, play, act, events.get(s.viewer or "", []))
 
     async def ticker(self) -> None:
         while True:
@@ -231,19 +264,23 @@ class Engine:
                 await s.send(self.state_frame(s))
 
     # ── per-viewer delivery ───────────────────────────────────────────────
-    async def deliver(self, s: Session, play: PlayRow, events: list[ThreatEvent]) -> None:
-        board = self.hub.board(s.viewer)
-        alerts = [e for e in events if e.side in ("you", "them") and board.should_alert(e)]
-        top = max(alerts, key=lambda e: (e.lead_change, abs(e.delta_points)), default=None)
+    async def deliver(self, s: Session, play: PlayRow, act: ActionEvent | None, events: list[ThreatEvent]) -> None:
+        if s.ffb:
+            board = self.hub.board(s.viewer)
+            alerts = [e for e in events if e.side in ("you", "them") and board.should_alert(e)]
+            best = max(alerts, key=lambda e: (e.lead_change, abs(e.delta_points)), default=None)
+            top = self.threat_dict(best) if best else None
+        else:
+            top = self.action_dict(act, s) if act and self.action.should_alert(act, s.favs) else None
         if play.game_id == s.focus:
             s.last_play = play
             await s.send(self.play_frame(s, play, focus=True, alert=bool(top)))
         elif top and s.auto:
             s.focus, s.last_play = play.game_id, play
-            await s.send({"type": "banner", "threat": self.threat_dict(top)})
+            await s.send({"type": "banner", "threat": top})
             await s.send(self.play_frame(s, play, focus=True, alert=True))
         elif top:
-            await s.send({"type": "banner", "threat": self.threat_dict(top)})
+            await s.send({"type": "banner", "threat": top})
         await s.send(self.state_frame(s))
 
     async def catch_up(self, s: Session) -> None:
@@ -256,14 +293,21 @@ class Engine:
         await s.send(self.state_frame(s))
 
     def pick_focus(self, s: Session, live_only: bool = False) -> str | None:
-        """Start on the live game carrying the most of the viewer's matchup."""
+        """Start on the live game carrying the most of the viewer's matchup — or,
+        with no fantasy layer, a followed team's game, else wherever the action is."""
         now, stake = self.clock.now(), {}
-        mine = self.rosters[s.viewer].starters() + self.rosters[self.opponent[s.viewer]].starters()
-        for slot in mine:
-            p = self.directory.player(slot.player_id)
-            g = self.team_game.get(p.team) if p else None
-            if g:
-                stake[g] = stake.get(g, 0) + 1
+        if s.ffb:
+            mine = self.rosters[s.viewer].starters() + self.rosters[self.opponent[s.viewer]].starters()
+            for slot in mine:
+                p = self.directory.player(slot.player_id)
+                g = self.team_game.get(p.team) if p else None
+                if g:
+                    stake[g] = stake.get(g, 0) + 1
+        else:
+            stake = dict(self.action.heat(now))
+            for t in s.favs:
+                if t in self.team_game:
+                    stake[self.team_game[t]] = stake.get(self.team_game[t], 0) + 1000.0
         live = [g for g in self.provider.games_at(now) if g.status in (("live",) if live_only else ("live", "half"))]
         pool = live or self.provider.games_at(now)
         return max(pool, key=lambda g: (stake.get(g.id, 0), -g.kickoff)).id if pool else None
@@ -288,6 +332,26 @@ class Engine:
                 "name": self.name(e.player_id), "delta": round(e.delta_points, 1), "headline": e.headline,
                 "lead_change": e.lead_change}
 
+    def action_dict(self, e: ActionEvent, s: Session) -> dict:
+        """An ActionEvent in the THREATS wire shape: no points, a tag and the team it favoured."""
+        _, _, away, home = e.game_id.split("_")
+        return {"id": e.play_id, "play_id": e.play_id, "game_id": e.game_id,
+                "kind": "fav" if (away in s.favs or home in s.favs) else "neutral",
+                "name": e.tag, "team": e.team, "delta": None, "headline": e.headline, "lead_change": e.lead_change}
+
+    def side(self, s: Session, pid: str | None, game_id: str | None = None) -> str | None:
+        """The colour a player wears. Fantasy: whose roster. NFL: away is the
+        left-hand colour, home the right — same two lights, different meaning."""
+        if not pid:
+            return None
+        if s.ffb:
+            return self.index.side(s.viewer, pid)
+        pl = self.directory.player(pid)
+        if not pl or not game_id:
+            return None
+        _, _, away, home = game_id.split("_")
+        return "you" if pl.team == away else "them" if pl.team == home else None
+
     def label(self, game_id: str) -> str:
         _, _, away, home = game_id.split("_")
         return f"{away}@{home}"
@@ -300,8 +364,8 @@ class Engine:
         c = compile_play(p, pos_of, self.air_est)
         actors = []
         for a in c.actors:
-            side = self.index.side(s.viewer, a.player_id) if a.player_id else None
-            if a.team == "def" and a.player_id and side is None:
+            side = self.side(s, a.player_id, p.game_id) if a.involved else None
+            if s.ffb and a.team == "def" and a.player_id and side is None:
                 pl = self.directory.player(a.player_id)      # defender scoring for a rostered DEF
                 side = self.index.side(s.viewer, f"DEF-{pl.team}") if pl else None
             actors.append({
@@ -312,7 +376,7 @@ class Engine:
             })
         deltas = []
         net = 0.0
-        for d in self.deltas_by_play.get(p.play_id, []):
+        for d in self.deltas_by_play.get(p.play_id, []) if s.ffb else ():
             side = self.index.side(s.viewer, d.player_id)
             if side in ("you", "them") and abs(d.points) >= 0.05:
                 net += d.points if side == "you" else -d.points
@@ -326,10 +390,19 @@ class Engine:
             "type": "play", "play_id": p.play_id, "game_id": p.game_id, "label": self.label(p.game_id),
             "situation": self.situation(p), "desc": p.desc, "los": c.los, "to_go": c.to_go, "los_line": c.los_line,
             "duration": round(c.duration, 2), "actors": actors, "result": self.result(p),
-            "result_kind": "good" if net > 0.05 else "bad" if net < -0.05 else "neutral",
+            "result_kind": ("good" if net > 0.05 else "bad" if net < -0.05 else "neutral") if s.ffb else self.result_kind(s, p, off),
             "endzones": {"near": off, "far": other}, "deltas": deltas, "alert": alert, "focus": focus,
             "settled": settled, "template": c.template,
         }
+
+    def result_kind(self, s: Session, p: PlayRow, off: str) -> str:
+        """Good or bad for the offence — flipped when the viewer follows the defence."""
+        hit = next((e for e in reversed(self.action.events) if e.play_id == p.play_id), None)
+        kind = ("good" if hit.team == off else "bad") if hit else "good" if p.first_down else "neutral"
+        other = {p.posteam, p.defteam} - {off}
+        if kind != "neutral" and other & s.favs and off not in s.favs:
+            kind = "bad" if kind == "good" else "good"
+        return kind
 
     @staticmethod
     def situation(p: PlayRow) -> str:
@@ -378,9 +451,15 @@ class Engine:
             return "INCOMPLETE"
         return f"{p.yards_gained:+d}" + (" 1ST DOWN" if p.first_down else "")
 
-    def heat_pick(self, s: Session, side: str, roster_key: str, now: float) -> dict | None:
+    def heat_pick(self, s: Session, side: str, key: str | None, now: float) -> dict | None:
+        """The hologram for one flank. `key` is a fantasy roster — or, with no
+        fantasy layer, an NFL team: that side's hottest hand in the focused game."""
+        from .models import RosterSlot
+        if key is None:
+            return None
+        pool = self.rosters[key].starters() if s.ffb else [RosterSlot("", pid) for pid in sorted(self.by_team.get(key, ()))]
         best, best_score, best_slot = None, -1.0, ""
-        for slot in self.rosters[roster_key].starters():
+        for slot in pool:
             score = sum(abs(pts) * 0.5 ** ((now - t) / RECENT_HALF_LIFE) for t, pts in self.recent.get(slot.player_id, []) if t <= now)
             if slot.player_id.startswith("DEF-"):
                 score *= 0.5                                  # a shield is a poor ghost; faces first
@@ -422,16 +501,18 @@ class Engine:
         if not p:
             return None
         ranked = sorted(self.deltas_by_play.get(p.play_id, []), key=lambda d: (
-            self.index.side(s.viewer, d.player_id) in ("you", "them"), abs(d.points)), reverse=True)
+            s.ffb and self.index.side(s.viewer, d.player_id) in ("you", "them"),
+            not d.player_id.startswith("DEF-"), abs(d.points)), reverse=True)
         pid = ranked[0].player_id if ranked else (p.receiver_id or p.rusher_id or p.passer_id or p.kicker_id)
         if not pid:
             return None
         pl = self.directory.player(pid)
-        side = self.index.side(s.viewer, pid)
+        side = self.side(s, pid, p.game_id)
         aux = self.aux.get(pid)
         extra = [f"TGT {int(aux['tgt'])}", f"aDOT {aux['air'] / aux['tgt']:.1f}"] if aux and aux["tgt"] else []
-        owner = next((self.teams[k].name for k, r in self.rosters.items() if any(sl.player_id == pid for sl in r.slots)), None)
-        extra.append(f"ROSTERED · {owner}" if owner else "UNROSTERED")
+        if s.ffb:
+            owner = next((self.teams[k].name for k, r in self.rosters.items() if any(sl.player_id == pid for sl in r.slots)), None)
+            extra.append(f"ROSTERED · {owner}" if owner else "UNROSTERED")
         text = _JERSEY.sub("", _PREFIX.sub("", p.desc)).strip()
         return {
             "player_id": pid, "side": side if side in ("you", "them") else None,
@@ -444,10 +525,11 @@ class Engine:
 
     def state_frame(self, s: Session) -> dict:
         now = self.clock.now()
-        snap = self.boards[s.viewer].snapshot()
-        opp = self.opponent[s.viewer]
         games = {g.id: g for g in self.provider.games_at(now)}
-        marks = self.hub.board(s.viewer).per_game_status(now)
+        if s.ffb:
+            marks = self.hub.board(s.viewer).per_game_status(now)
+        else:
+            marks = {g: "hot" for g, h in self.action.heat(now).items() if h >= HOT_THRESHOLD}
 
         def live(pid: str | None) -> bool:
             pl = self.directory.player(pid) if pid else None
@@ -458,28 +540,50 @@ class Engine:
         feeds = [{
             "game_id": g.id, "label": self.label(g.id), "clock": g.clock, "score": f"{g.away_score}-{g.home_score}",
             "status": {"pre": "PRE", "half": "HT", "final": "FINAL"}.get(g.status, f"Q{g.quarter}" if g.quarter <= 4 else "OT"),
-            "mark": marks.get(g.id), "focused": g.id == s.focus,
+            "mark": marks.get(g.id), "focused": g.id == s.focus, "fav": g.home in s.favs or g.away in s.favs,
         } for g in sorted(games.values(), key=lambda g: (order[g.status], g.kickoff, g.id))]
+        wall = (self._t0 + timedelta(seconds=now)).astimezone(ET)
+        frame = {
+            "type": "state", "mode": "ffb" if s.ffb else "nfl", "ffb_available": self.league is not None,
+            "clock": {"label": f"WK{self.week} · {wall:%a %H:%M}".upper(), "sim": now, "duration": self.clock.duration,
+                      "speed": self.clock.speed, "paused": not self.clock.running, "auto": s.auto, "live": LIVE},
+            "feeds": feeds, "active": self.active_card(s),
+            "favs": sorted(s.favs), "teams": sorted(self.team_game),
+            "chatter": self.chatter.recent(s.focus), "audio": self.audio.for_game(s.focus),
+        }
+        return {**frame, **(self.ffb_layer(s, now, live) if s.ffb else self.nfl_layer(s, now, games.get(s.focus or "")))}
+
+    def nfl_layer(self, s: Session, now: float, g) -> dict:                       # noqa: ANN001
+        """Status bar = the focused game's real scoreboard; board = ACTION; ghosts = each side's hot hand."""
+        def team(abbr: str) -> str:
+            return f"{abbr} · {TEAMS[abbr][1].upper()}" if abbr in TEAMS else abbr
+        status = {"pre": "PRE", "half": "HALF", "final": "FINAL"}.get(g.status, f"Q{g.quarter} {g.clock}" if g.quarter <= 4 else f"OT {g.clock}") if g else ""
+        return {
+            "viewer": None, "viewers": [], "scope": "action", "lineup": [],
+            "matchup": {"you": {"name": team(g.away), "points": g.away_score}, "them": {"name": team(g.home), "points": g.home_score},
+                        "status": status} if g else None,
+            "threats": [self.action_dict(e, s) for e in self.action.top(7, now, s.favs)],
+            "ghosts": {"you": self.heat_pick(s, "you", g.away, now), "them": self.heat_pick(s, "them", g.home, now)} if g else {"you": None, "them": None},
+        }
+
+    def ffb_layer(self, s: Session, now: float, live) -> dict:                    # noqa: ANN001
+        snap = self.boards[s.viewer].snapshot()
+        opp = self.opponent[s.viewer]
         lineup = [{
             "slot": r.slot,
             "you": {"player_id": r.you.player_id, "name": self.name(r.you.player_id), "points": round(r.you.points, 1), "live": live(r.you.player_id)},
             "them": {"player_id": r.them.player_id, "name": self.name(r.them.player_id), "points": round(r.them.points, 1), "live": live(r.them.player_id)},
             "losing": r.losing,
         } for r in snap.rows]
-        wall = (self._t0 + timedelta(seconds=now)).astimezone(ET)
         return {
-            "type": "state",
-            "clock": {"label": f"WK{self.week} · {wall:%a %H:%M}".upper(), "sim": now, "duration": self.clock.duration,
-                      "speed": self.clock.speed, "paused": not self.clock.running, "auto": s.auto, "live": LIVE},
             "viewer": {"team_key": s.viewer, "owner": self.teams[s.viewer].owner},
             "viewers": [{"team_key": t.key, "owner": t.owner, "name": t.name} for t in self.teams.values()],
             "matchup": {"you": {"name": f"{self.teams[s.viewer].owner} · {self.teams[s.viewer].name}", "points": round(snap.you_total, 1)},
-                        "them": {"name": f"{self.teams[opp].name} · {self.teams[opp].owner}", "points": round(snap.them_total, 1)}},
-            "feeds": feeds,
+                        "them": {"name": f"{self.teams[opp].name} · {self.teams[opp].owner}", "points": round(snap.them_total, 1)},
+                        "status": ""},
             "threats": [self.threat_dict(e) for e in self.hub.board(s.viewer).top(12, now, s.scope) if abs(e.delta_points) >= 0.5 or e.lead_change][:7],
             "scope": s.scope, "lineup": lineup,
             "ghosts": {"you": self.heat_pick(s, "you", s.viewer, now), "them": self.heat_pick(s, "them", opp, now)},
-            "active": self.active_card(s),
         }
 
     # ── control ───────────────────────────────────────────────────────────
@@ -487,6 +591,15 @@ class Engine:
         t = m.get("type")
         if t == "viewer" and m.get("team_key") in self.teams:
             s.viewer, s.focus, s.ghost = m["team_key"], None, {"you": None, "them": None}
+            await self.catch_up(s)
+        elif t == "ffb" and self.league is not None:          # the fantasy layer, on or off
+            s.ffb = bool(m["on"]) if "on" in m else not s.ffb
+            s.ghost = {"you": None, "them": None}
+            await self.catch_up(s)
+        elif t == "favs" and isinstance(m.get("teams"), list):
+            s.favs = {x for x in m["teams"] if x in TEAMS}
+            if s.focus is None or not s.ffb and s.auto:
+                s.focus = None
             await self.catch_up(s)
         elif t == "focus_game" and m.get("game_id") in self.team_game.values():
             s.focus = m["game_id"]
@@ -563,7 +676,8 @@ def sample_plays(n: int = 24, seed: int = 0, family: str | None = None, viewer: 
             pool.append(p)
     rng = random.Random(seed)
     picks = pool if len(pool) <= n else rng.sample(pool, n)
-    s = Session(ws=None, viewer=viewer if viewer in engine.teams else engine.default_viewer)    # type: ignore[arg-type]
+    s = Session(ws=None, viewer=viewer if viewer in engine.teams else engine.default_viewer,    # type: ignore[arg-type]
+                ffb=engine.league is not None)
     frames = []
     for p in picks:
         f = engine.play_frame(s, p, focus=False, alert=False)
@@ -581,12 +695,15 @@ async def start(hub) -> list[asyncio.Task]:                   # noqa: ANN001
     if not slate_available(SLATE_DIR):
         raise RuntimeError("no slate — run scripts/fetch_nflverse.py then scripts/build_slate.py (or build_live.py)")
     engine = Engine()
-    return [asyncio.create_task(engine.run()), asyncio.create_task(engine.ticker()), asyncio.create_task(engine.league_pump())]
+    tasks = [asyncio.create_task(engine.run()), asyncio.create_task(engine.ticker()), asyncio.create_task(engine.league_pump())]
+    if CHATTER == "reddit":
+        tasks.append(asyncio.create_task(RedditChatter(engine.chatter, lambda: engine.provider.games_at(engine.clock.now())).run()))
+    return tasks
 
 
 async def on_connect(ws: WebSocket) -> None:
     if engine:
-        s = Session(ws, engine.default_viewer)
+        s = Session(ws, engine.default_viewer, ffb=engine.league is not None)
         _by_ws[ws] = s
         engine.sessions.add(s)
         await engine.catch_up(s)

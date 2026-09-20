@@ -2,6 +2,7 @@ import { Field } from "./field";
 import { banner, bannerVisible, boot, hideBanner, retune, sting, toggleMute } from "./fx";
 import { Ghosts } from "./ghosts";
 import { palette } from "./palette";
+import { Radio } from "./radio";
 import type { ConsoleState, Frame, PlayFrame, Theme, Threat } from "./types";
 import { Ui } from "./ui";
 
@@ -39,6 +40,10 @@ const ui = new Ui({
   seek: (f) => send({ type: "sim", action: "seek", value: f }),
 });
 
+const radio = new Radio();
+radio.onchange = () => ui.renderRadio(radio, state);
+let favs: string[] = JSON.parse(localStorage.getItem("ffb.favs") ?? "[]");
+
 // ── theme ────────────────────────────────────────────────────────────────────
 function resolveTheme(): Theme {
   if (choice === "system" && systemTheme) return systemTheme;
@@ -58,9 +63,10 @@ function choose(slug: string): void {
 // ── pickers ──────────────────────────────────────────────────────────────────
 type Item = { key: string; label: string; roles?: Theme["roles"]; current: boolean };
 let pickerItems: Item[] = [], pickerIdx = 0, pickerPick: (k: string) => void = () => {};
+let pickerMulti = false;                 // multi: [ENTER]/click toggles a row, [ESC] closes
 
-function openPicker(title: string, items: Item[], pick: (k: string) => void): void {
-  pickerItems = items; pickerPick = pick;
+function openPicker(title: string, items: Item[], pick: (k: string) => void, multi = false): void {
+  pickerItems = items; pickerPick = pick; pickerMulti = multi;
   pickerIdx = Math.max(0, items.findIndex((i) => i.current));
   const el = $("picker"); el.hidden = false;
   el.innerHTML = `<h2><span>${title}</span><em>[ESC]</em></h2><ul>` + items.map((it, i) =>
@@ -68,7 +74,7 @@ function openPicker(title: string, items: Item[], pick: (k: string) => void): vo
       ? `<span class="sw">${(["bg", "grid", "dim", "you", "them", "alert", "gain", "hot"] as const).map((r) => `<i style="background:${it.roles![r]}"></i>`).join("")}</span>` : ""}</li>`).join("") + "</ul>";
   el.querySelectorAll("li").forEach((li) => {
     li.onmouseenter = () => movePicker(Number(li.dataset.i) - pickerIdx);
-    li.onclick = () => { pickerPick(pickerItems[Number(li.dataset.i)].key); closePicker(); };
+    li.onclick = () => pickRow(Number(li.dataset.i));
   });
   movePicker(0);
 }
@@ -78,6 +84,13 @@ function movePicker(d: number): void {
   $("picker").querySelectorAll("li")[pickerIdx]?.scrollIntoView({ block: "nearest" });
 }
 function closePicker(): void { $("picker").hidden = true; }
+function pickRow(i: number): void {
+  const it = pickerItems[i];
+  pickerPick(it.key);
+  if (!pickerMulti) { closePicker(); return; }
+  it.current = !it.current;
+  $("picker").querySelectorAll("li")[i].classList.toggle("cur", it.current);
+}
 const pickerOpen = () => !$("picker").hidden;
 
 function themePicker(): void {
@@ -88,8 +101,17 @@ function themePicker(): void {
 }
 function viewerPicker(): void {
   if (!state) return;
-  openPicker("WHO AM I", state.viewers.map((v) => ({ key: v.team_key, label: `${v.owner} · ${v.name}`, current: v.team_key === state!.viewer.team_key })),
+  openPicker("WHO AM I", state.viewers.map((v) => ({ key: v.team_key, label: `${v.owner} · ${v.name}`, current: v.team_key === state!.viewer?.team_key })),
     (k) => { localStorage.setItem("ffb.viewer", k); send({ type: "viewer", team_key: k }); });
+}
+
+function favPicker(): void {
+  if (!state) return;
+  openPicker("FOLLOW TEAMS", state.teams.map((t) => ({ key: t, label: t, current: favs.includes(t) })), (t) => {
+    favs = favs.includes(t) ? favs.filter((x) => x !== t) : [...favs, t];
+    localStorage.setItem("ffb.favs", JSON.stringify(favs));
+    send({ type: "favs", teams: favs });
+  }, true);
 }
 
 // ── live + replay ────────────────────────────────────────────────────────────
@@ -123,7 +145,7 @@ function backToLive(): void {
   field.show(recent[recent.length - 1], true);
 }
 
-function cycleLabel(): void { $("cycle").textContent = cycle ? "ON" : "OFF"; }
+function cycleLabel(): void { ui.cycleText = cycle ? "ON" : "OFF"; const el = document.getElementById("cycle"); if (el) el.textContent = ui.cycleText; }
 
 // ── frames ───────────────────────────────────────────────────────────────────
 function onFrame(f: Frame): void {
@@ -132,14 +154,18 @@ function onFrame(f: Frame): void {
       themes = f.themes; systemTheme = f.system;
       applyChoice(!palette.theme);
       { const v = q.get("viewer") ?? localStorage.getItem("ffb.viewer"); if (v) send({ type: "viewer", team_key: v }); }
+      { const f = q.get("favs"); if (f) favs = f.toUpperCase().split(","); if (favs.length) send({ type: "favs", teams: favs }); }
+      { const x = q.get("ffb") ?? localStorage.getItem("ffb.layer"); if (x !== null) send({ type: "ffb", on: x === "1" }); }
       break;
     case "theme":
       systemTheme = f.system;
       if (choice === "system") applyChoice();
       break;
     case "state":
-      state = f;
-      ui.render(f);
+      // an older server (no NFL layer) sends none of these: it is the fantasy console, nothing more
+      state = { ...f, mode: f.mode ?? "ffb", ffb_available: f.ffb_available ?? true, favs: f.favs ?? [], teams: f.teams ?? [],
+                chatter: f.chatter ?? [], audio: f.audio ?? null };
+      ui.render(state); ui.renderRadio(radio, state);
       ghosts.set("you", f.ghosts.you); ghosts.set("them", f.ghosts.them);
       break;
     case "play":
@@ -199,13 +225,19 @@ window.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closePicker();
     else if (e.key === "ArrowDown" || e.key === "j") movePicker(1);
     else if (e.key === "ArrowUp" || e.key === "k") movePicker(-1);
-    else if (e.key === "Enter") { pickerPick(pickerItems[pickerIdx].key); closePicker(); }
+    else if (e.key === "Enter" || e.key === " ") pickRow(pickerIdx);
     e.preventDefault(); return;
   }
   const k = e.key.toLowerCase();
   if (k === "t") themePicker();
-  else if (k === "v") viewerPicker();
-  else if (k === "l") send({ type: "scope", scope: state?.scope === "matchup" ? "league" : "matchup" });
+  else if (k === "f") favPicker();
+  else if (k === "v" && state?.mode === "ffb") viewerPicker();
+  else if (k === "x" && state?.ffb_available) { const on = state.mode !== "ffb"; localStorage.setItem("ffb.layer", on ? "1" : "0"); send({ type: "ffb", on }); }
+  else if (k === "tab") { e.preventDefault(); if (state?.mode === "ffb") { ui.rail = ui.rail === "lineup" ? "chatter" : "lineup"; localStorage.setItem("ffb.rail", ui.rail); ui.render(state); } }
+  else if (k === "m") radio.toggle(state?.audio ?? null);
+  else if (k === "h") radio.swap();
+  else if (k === "-" || k === "=") radio.nudge(k === "=" ? 0.1 : -0.1);
+  else if (k === "l" && state?.mode === "ffb") send({ type: "scope", scope: state?.scope === "matchup" ? "league" : "matchup" });
   else if (k === " ") { send({ type: "sim", action: "pause" }); e.preventDefault(); }
   else if ("1234".includes(k)) send({ type: "sim", action: "speed", value: [1, 4, 15, 60][Number(k) - 1] });
   else if (k === "arrowright") send({ type: "sim", action: "skip", value: 300 });
@@ -215,7 +247,7 @@ window.addEventListener("keydown", (e) => {
   else if (k === "[" || k === ",") replay(-1);
   else if (k === "]" || k === ".") replay(1);
   else if (k === "\\" || k === "/") backToLive();
-  else if (k === "m") sting(toggleMute() ? "hurt" : "help");
+  else if (k === "n") sting(toggleMute() ? "hurt" : "help");
   else if (k === "enter" && bannerVisible() && pendingThreat) { send({ type: "focus_play", play_id: pendingThreat.play_id }); hideBanner(); }
   else if (k === "escape") hideBanner();
 });
@@ -226,5 +258,5 @@ cycleLabel();
 connect();
 layout();
 requestAnimationFrame(frame);
-if (!MINI) void boot(["RETRO//FFB  TACTICAL FANTASY CONSOLE", "PHOSPHOR ............ OK", "FEED UPLINK ......... OK", "THREAT MATRIX ....... ARMED", "OPERATOR ............ RECOGNISED"]);
+if (!MINI) void boot(["RETRO//NFL  TACTICAL GAMEDAY CONSOLE", "PHOSPHOR ............ OK", "FEED UPLINK ......... OK", "CROWD TAP ........... OK", "ACTION MATRIX ....... ARMED"]);
 else $("boot").remove();

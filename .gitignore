@@ -4,5 +4,5 @@ data/
 frontend/dist/
 __pycache__/
 *.pyc
-.chrome-profile/
+.chrome-profile*/
 .env

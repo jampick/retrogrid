@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>RETRO//FFB</title>
+<title>RETRO//NFL</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="/static/console.css">
 </head>
@@ -34,7 +34,7 @@
         <ul id="feeds"></ul>
       </section>
       <section>
-        <h2><span>THREATS</span><em id="scope" title="toggle scope [L]"></em></h2>
+        <h2><span id="board-title">THREATS</span><em id="scope" title="toggle scope [L]"></em></h2>
         <ul id="threats"></ul>
       </section>
     </aside>
@@ -47,11 +47,16 @@
     </main>
 
     <aside id="right">
-      <section>
+      <section id="sec-lineup">
         <h2><span>LINEUP</span><em>YOU · THEM</em></h2>
         <ul id="lineup"></ul>
       </section>
-      <div id="keys">[T] THEME · [V] VIEWER · [L] SCOPE · [A] AUTO-DIRECT<br>[SPACE] HOLD · [1-4] RATE · [←→] SKIP · [M] MUTE<br>[C] REPLAY CYCLE <span id="cycle"></span> · [ [ ] ] PREV/NEXT PLAY · [/] LIVE</div>
+      <section id="sec-chatter">
+        <h2><span>CHATTER</span><em id="chatter-src"></em></h2>
+        <ul id="chatter"></ul>
+      </section>
+      <div id="radio" title="radio [M] · other booth [H] · volume [-] [=]"></div>
+      <div id="keys"></div>
     </aside>
 
     <footer id="active"></footer>

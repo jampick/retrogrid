@@ -56,7 +56,7 @@ def test_kicks_have_a_fate_and_the_whistle_stops_everyone():
         if p.play_type not in ("punt", "kickoff"):
             continue
         c = compile_play(p)
-        if c.template.endswith("/flag"):                    # no-play penalty on the kick
+        if "/flag" in c.template:                            # no-play penalty on the kick
             continue
         fates.add(c.template)
         assert all(abs(a.end_t - c.duration) < 1e-6 for a in c.actors), c.template
@@ -94,3 +94,22 @@ def test_out_of_bounds_plays_finish_on_the_sideline():
             assert c.duration < 14, p.desc
             hits += 1
     assert hits > 50
+
+
+@pytest.mark.skipif(not slate_available(), reason="no slate data")
+def test_flags_replay_the_wiped_play_anonymously_or_never_snap():
+    called_back = dead = 0
+    for p in load_slate().plays:
+        if p.play_type != "no_play":
+            continue
+        c = compile_play(p)
+        flag = next(a for a in c.actors if a.team == "flag")
+        assert flag.keys[-1].t <= c.duration
+        assert all(a.player_id is None for a in c.actors), p.desc       # it never counted: no name plates
+        ball = next(a for a in c.actors if a.role == "BALL")
+        if c.template.endswith("/called back"):
+            called_back += 1
+        else:
+            dead += 1
+            assert ball.at(0) == ball.at(c.duration), p.desc             # nobody snapped it
+    assert called_back > 30 and dead > 30

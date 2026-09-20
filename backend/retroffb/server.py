@@ -64,7 +64,7 @@ app = FastAPI(lifespan=lifespan)
 async def revalidate_bundles(request, call_next):             # noqa: ANN001, ANN201
     """The bundle is rebuilt constantly; make the browser revalidate (ETag) instead of guessing freshness."""
     response = await call_next(request)
-    if request.url.path.startswith("/dist/"):
+    if not request.url.path.startswith(("/sprites/", "/api/")):      # pages and bundles alike
         response.headers["Cache-Control"] = "no-cache"
     return response
 

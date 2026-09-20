@@ -19,6 +19,7 @@ from fastapi import WebSocket
 
 from .grammar import compile_play
 from .models import PlayRow, StatDelta
+from .parser.desc import penalty_summary
 from .providers.directory import NflversePlayerDirectory
 from .providers.nflverse_plays import SlatePlayProvider
 from .providers.slate import load_slate, slate_available
@@ -278,7 +279,13 @@ class Engine:
     @staticmethod
     def result(p: PlayRow) -> str:
         if p.play_type == "no_play" or (p.penalty and "no play" in p.desc.lower()):
-            return "FLAG - NO PLAY"
+            team, foul, offsetting = penalty_summary(p.desc)
+            if offsetting:
+                return "OFFSETTING FLAGS - NO PLAY"
+            if not foul:
+                return "FLAG - NO PLAY"
+            short = foul.upper().replace("DEFENSIVE ", "DEF ").replace("OFFENSIVE ", "OFF ").replace("UNNECESSARY ", "")
+            return f"FLAG - {team + ' ' if team else ''}{short}"
         if p.touchdown:
             return "TOUCHDOWN"
         if p.interception:

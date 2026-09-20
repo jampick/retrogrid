@@ -9,12 +9,14 @@ from __future__ import annotations
 import math
 import random
 import re
+from dataclasses import replace
 from typing import Callable
 
 from . import constants as K
 from .core import Actor, Compiled, Key, Pt, dist, seeded, toward
 from .formations import defense, offense, pick_formation
 from ..models import PlayRow
+from ..parser.desc import parse_desc, penalty_summary
 
 PosOf = Callable[[str], str | None]
 DUMMY_ROUTES = ("go", "hitch", "dig", "out", "post", "flat", "corner")
@@ -82,6 +84,7 @@ def _weave(start: Pt, end: Pt, rng: random.Random) -> list[Pt]:
     return pts
 
 
+_NO_PLAY = re.compile(r"\bNo Play\b", re.I)
 _OB = re.compile(r"\b(?:pushed|ran) ob\b")
 
 
@@ -685,6 +688,87 @@ def _punt_or_kickoff(p: PlayRow, rng: random.Random) -> Compiled:
 
 
 # ── entry point ────────────────────────────────────────────────────────────
+# ── flags ──────────────────────────────────────────────────────────────────
+_FOUL_DOWNFIELD = ("pass interference", "defensive holding", "illegal contact")
+_FOUL_LINE = ("offensive holding", "illegal use of hands", "illegal block", "ineligible", "chop block", "tripping",
+              "offside", "neutral zone", "encroachment", "false start", "illegal formation", "illegal shift", "illegal motion")
+_FOUL_LATE = ("unnecessary roughness", "face mask", "horse collar", "taunting", "unsportsmanlike")
+
+
+def _throw_flag(actors: list[Actor], at: Pt, t: float) -> None:
+    at = (min(K.FIELD_W - 0.5, max(0.5, at[0])), at[1])
+    actors.append(Actor("flag", "FLAG", "flag", "K", [Key(max(0.0, t - 0.4), at[0] - 1.6, at[1] - 1.0), Key(t, *at)]))
+
+
+def _called_back(p: PlayRow, rng: random.Random, pos_of: PosOf, air_est, foul: str) -> Compiled | None:
+    """A post-snap No Play: replay what the sentence says happened — anonymously, it never counted —
+    and throw the flag where that foul lives."""
+    was = parse_desc(p.desc, p.posteam, nullify=False)
+    if was.play_type not in ("pass", "run") or was.two_point_attempt:
+        return None
+    ghost = replace(
+        p, play_type=was.play_type, penalty=False, desc=_NO_PLAY.sub("", p.desc), yards_gained=was.yards_gained or 0,
+        shotgun=was.shotgun, qb_scramble=was.qb_scramble, pass_length=was.pass_length, pass_location=was.pass_location,
+        run_location=was.run_location, run_gap=was.run_gap, complete=was.complete, touchdown=was.touchdown,
+        interception=was.interception, sack=was.sack, return_yards=was.return_yards or 0, air_yards=None,
+        interceptor_id="ghost" if was.interception else None, tackler_ids=["ghost"] if was.tacklers else [])
+    c = _dispatch(ghost, rng, pos_of, air_est)
+    ball = next(a for a in c.actors if a.role == "BALL")
+    star = next((a for a in c.actors if a.involved and a.team == "off" and a.role != "QB"), None)
+    qb = _by_role(c.actors, "QB")
+    end_t = c.duration - 0.5
+    if any(k in foul for k in _FOUL_DOWNFIELD) and star:
+        t = max(1.2, end_t * 0.7)
+        at = star.at(t)
+        at = (at[0] + rng.uniform(-1, 1), at[1] + 1.0)
+    elif "roughing the passer" in foul and qb:
+        t = end_t
+        at = qb.at(t)
+    elif any(k in foul for k in _FOUL_LATE):
+        t = end_t + 0.3
+        at = ball.at(end_t)
+    else:                                                   # line-of-scrimmage fouls, and anything unrecognised
+        early = any(k in foul for k in ("offside", "neutral zone", "encroachment"))
+        t = 0.5 if early else min(1.5, end_t)
+        at = (ball.start[0] + rng.choice((-1, 1)) * rng.uniform(2.5, 4.5), c.los + (0.8 if early else -1.5))
+    for a in c.actors:
+        a.player_id = None
+    _throw_flag(c.actors, at, t)
+    c.duration = max(c.duration, t + 0.8)
+    c.template = f"{c.template}/called back"
+    return c
+
+
+def _flag(p: PlayRow, rng: random.Random, pos_of: PosOf, air_est) -> Compiled:
+    _team, foul, _offsetting = penalty_summary(p.desc)
+    foul = (foul or "").lower()
+    back = _called_back(p, rng, pos_of, air_est, foul)
+    if back:
+        return back
+    # dead-ball foul: nobody snaps it. The offender flinches, the flag comes out, everyone stands up.
+    off, defs, ball, los, bx, form = _scrimmage(p, rng)
+    ball.keys.append(Key(0, bx, los))
+    actors = off + defs + [ball]
+    on_defense = _team == p.defteam and _team is not None
+    culprit: Actor | None = None
+    if "false start" in foul or (not on_defense and any(k in foul for k in ("offside", "illegal shift", "illegal motion"))):
+        culprit = rng.choice([a for a in off if a.kind in ("OL", "TE", "WR")])
+        culprit.hold(0.35)
+        culprit.move((culprit.start[0], culprit.start[1] - 0.8), 0.55)
+    elif on_defense and any(k in foul for k in ("offside", "neutral zone", "encroachment")):
+        culprit = rng.choice([d for d in defs if d.kind == "DL"])
+        culprit.hold(0.3)
+        culprit.move((culprit.start[0], los - 0.6), 0.55)
+    at = culprit.at(0.55) if culprit else (bx + rng.uniform(-6, 6), los + rng.uniform(-1, 1))
+    _throw_flag(actors, (at[0] + 0.8, at[1] + (0.9 if culprit in defs else -0.9) if culprit else at[1]), 0.95)
+    for a in off + defs:                                    # whistle: stand up out of the stance
+        if a is not culprit:
+            a.hold(1.1)
+            a.move((a.start[0] + rng.uniform(-0.4, 0.4), a.start[1] + (0.6 if a.team == "def" else -0.6)), 1.7)
+    ball.keys.append(Key(2.0, bx, los))
+    return Compiled(actors, 2.0, los, _to_go(p, los), template=f"{form}/flag {foul}".rstrip())
+
+
 def compile_play(p: PlayRow, pos_of: PosOf = lambda _id: None,
                  air_est: Callable[[PlayRow], float] | None = None) -> Compiled:
     """Never crash, never render nothing (§8 Degradation)."""
@@ -709,7 +793,7 @@ def compile_play(p: PlayRow, pos_of: PosOf = lambda _id: None,
 def _dispatch(p: PlayRow, rng: random.Random, pos_of: PosOf, air_est) -> Compiled:
     t = p.play_type
     if t == "no_play" or (p.penalty and "no play" in p.desc.lower()):
-        return _dead(p, rng, "flag")
+        return _flag(p, rng, pos_of, air_est)
     if t == "qb_kneel":
         return _dead(p, rng, "kneel")
     if t == "qb_spike":

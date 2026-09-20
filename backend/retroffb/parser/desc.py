@@ -644,7 +644,7 @@ def _blank_nullified(p: ParsedDesc) -> None:
 # ───────────────────────────────── public API ───────────────────────────────
 
 
-def _parse(desc: str, posteam: str | None) -> ParsedDesc:
+def _parse(desc: str, posteam: str | None, nullify: bool = True) -> ParsedDesc:
     p = ParsedDesc()
     text = RE_WS.sub(" ", desc).strip()
     if not text or RE_ADMIN.match(text):
@@ -682,19 +682,33 @@ def _parse(desc: str, posteam: str | None) -> ParsedDesc:
         p.td_scorer = _td_scorer(play)
     if p.play_type in _SCRIMMAGE or p.play_type in ("kickoff", "punt"):
         p.tacklers = _tacklers(play)
-    if RE_NO_PLAY.search(body) or (p.play_type is None and p.penalty):
+    if nullify and (RE_NO_PLAY.search(body) or (p.play_type is None and p.penalty)):
         _blank_nullified(p)
     return p
 
 
-def parse_desc(desc: str, posteam: str | None = None) -> ParsedDesc:
+def penalty_summary(desc: str) -> tuple[str | None, str | None, bool]:
+    """(team, foul, offsetting) of the penalty that decided the play — for labels and flag placement."""
+    clauses = list(RE_PENALTY_CLAUSE.finditer(desc or ""))
+    if not clauses:
+        return None, None, False
+    if any(re.search(r"\boffsetting\b", m.group(0), re.I) for m in clauses):
+        return None, clauses[0].group("type").strip(), True
+    live = next((m for m in clauses if not re.search(r"\bdeclined\b", m.group(0), re.I)), clauses[0])
+    return live.group("team"), live.group("type").strip(), False
+
+
+def parse_desc(desc: str, posteam: str | None = None, nullify: bool = True) -> ParsedDesc:
     """Parse one play description. Never raises.
+
+    `nullify=False` keeps what happened before a No Play flag wiped it — the
+    grammar replays that as the called-back play; scoring never uses it.
 
     `posteam` is optional and only sharpens one thing prose cannot always
     give: the direction of play, needed to net out yards on fumble plays.
     """
     try:
-        return _parse(desc if isinstance(desc, str) else "", posteam)
+        return _parse(desc if isinstance(desc, str) else "", posteam, nullify)
     except Exception:  # noqa: BLE001 - the live path must survive any prose
         try:
             return ParsedDesc(play_type=_guess_type(desc if isinstance(desc, str) else ""))

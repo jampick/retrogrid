@@ -20,12 +20,14 @@ let pendingThreat: Threat | null = null;
 const queue: PlayFrame[] = [];
 
 
-// Recent plays, so the dead time between snaps can be spent re-watching (CYCLE).
-const HISTORY = 8, LINGER_LIVE = 5, LINGER_REPLAY = 2.2;
+// Dead time between snaps re-runs the play just seen — that one only, and it says REPLAY.
+// Older plays are a deliberate act ([ and ]). AUTO-REPLAY off = the finished diagram just sits there.
+const HISTORY = 8, LINGER_LIVE = 6, LINGER_REPLAY = 10;
 const recent: PlayFrame[] = [];
 let cycle = localStorage.getItem("ffb.cycle") !== "0";
 let replayAt = -1;                      // index into recent; -1 = showing live
 let idle = 0;
+let redzone = (q.get("rz") ?? localStorage.getItem("ffb.redzone")) === "1";
 
 const send = (m: object) => ws?.readyState === 1 && ws.send(JSON.stringify(m));
 
@@ -38,6 +40,9 @@ const ui = new Ui({
   speed: (n) => send({ type: "sim", action: "speed", value: n }),
   pause: () => send({ type: "sim", action: "pause" }),
   seek: (f) => send({ type: "sim", action: "seek", value: f }),
+  auto: () => send({ type: "auto" }),
+  redzone: () => setRedzone(!state?.clock.redzone),
+  cycle: () => toggleCycle(),
 });
 
 const radio = new Radio();
@@ -122,29 +127,35 @@ function present(f: PlayFrame): void {
   const dup = recent.findIndex((r) => r.play_id === f.play_id);
   if (dup >= 0) recent.splice(dup, 1);
   recent.push(f); while (recent.length > HISTORY) recent.shift();
-  replayAt = -1; idle = 0; field.badge = "";
+  replayAt = -1; idle = 0;
+  // a catch-up frame is the last thing that happened, already over — not live, and it says so
+  field.badge = f.settled ? "LAST PLAY" : "LIVE"; field.badgeKind = f.settled ? "last" : "live";
   field.show(f, f.settled);
 }
 
-function replay(step: number, auto = false): void {
+/** step 0 = run the latest play again (the auto-replay); ±1 = walk the history by hand. */
+function replay(step: number): void {
   if (!recent.length) return;
-  let i = replayAt < 0 ? recent.length - 1 : replayAt;
-  for (let n = 0; n < recent.length; n++) {
-    i = (i + step + recent.length) % recent.length;
-    if (!auto || !DULL.test(recent[i].template)) break;
-  }
-  if (auto && DULL.test(recent[i].template)) return;
+  const last = recent.length - 1;
+  const i = step === 0 ? last : Math.min(last, Math.max(0, (replayAt < 0 ? last : replayAt) + step));
+  if (step === 0 && DULL.test(recent[i].template)) { idle = 0; return; }      // nobody re-watches a kneel
   replayAt = i; idle = 0;
-  field.badge = `REPLAY ${recent.length - i}/${recent.length}`;
+  field.badge = i === last ? "REPLAY" : `REPLAY -${last - i}`; field.badgeKind = "replay";
   field.show(recent[i]);
 }
 
 function backToLive(): void {
   if (replayAt < 0 || !recent.length) return;
-  replayAt = -1; idle = 0; field.badge = "";
+  replayAt = -1; idle = 0; field.badge = "LAST PLAY"; field.badgeKind = "last";
   field.show(recent[recent.length - 1], true);
 }
 
+function setRedzone(on: boolean): void {
+  redzone = on; localStorage.setItem("ffb.redzone", on ? "1" : "0");
+  send({ type: "redzone", on });
+}
+
+function toggleCycle(): void { cycle = !cycle; localStorage.setItem("ffb.cycle", cycle ? "1" : "0"); cycleLabel(); if (!cycle) backToLive(); }
 function cycleLabel(): void { ui.cycleText = cycle ? "ON" : "OFF"; const el = document.getElementById("cycle"); if (el) el.textContent = ui.cycleText; }
 
 // ── frames ───────────────────────────────────────────────────────────────────
@@ -155,6 +166,7 @@ function onFrame(f: Frame): void {
       applyChoice(!palette.theme);
       { const v = q.get("viewer") ?? localStorage.getItem("ffb.viewer"); if (v) send({ type: "viewer", team_key: v }); }
       { const f = q.get("favs"); if (f) favs = f.toUpperCase().split(","); if (favs.length) send({ type: "favs", teams: favs }); }
+      if (redzone) send({ type: "redzone", on: true });
       { const x = q.get("ffb") ?? localStorage.getItem("ffb.layer"); if (x !== null) send({ type: "ffb", on: x === "1" }); }
       break;
     case "theme":
@@ -213,7 +225,7 @@ function frame(now: number): void {
   if (field.finished && queue.length) present(queue.shift()!);
   else if (field.finished && cycle && !pickerOpen()) {
     idle += dt;
-    if (idle > (replayAt < 0 ? LINGER_LIVE : LINGER_REPLAY)) replay(-1, true);
+    if (idle > (replayAt < 0 ? LINGER_LIVE : LINGER_REPLAY)) replay(0);
   }
   field.tick(dt); ghosts.tick(dt);
   field.draw(); ghosts.draw();
@@ -243,7 +255,8 @@ window.addEventListener("keydown", (e) => {
   else if (k === "arrowright") send({ type: "sim", action: "skip", value: 300 });
   else if (k === "arrowleft") send({ type: "sim", action: "skip", value: -300 });
   else if (k === "a") send({ type: "auto" });
-  else if (k === "c") { cycle = !cycle; localStorage.setItem("ffb.cycle", cycle ? "1" : "0"); cycleLabel(); if (!cycle) backToLive(); }
+  else if (k === "r") setRedzone(!state?.clock.redzone);
+  else if (k === "c") toggleCycle();
   else if (k === "[" || k === ",") replay(-1);
   else if (k === "]" || k === ".") replay(1);
   else if (k === "\\" || k === "/") backToLive();

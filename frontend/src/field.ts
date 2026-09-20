@@ -35,7 +35,8 @@ export class Field {
   private camTarget = 20;
   private wall = 0;                 // free-running seconds, for blinks
   scale = 3;
-  badge = "";                       // "REPLAY 2/5" — anything on screen that is not the live play says so
+  badge = "";                       // what is on screen: "LIVE", "REPLAY", "LAST PLAY" — always said, never guessed
+  badgeKind: "live" | "replay" | "last" = "live";     // replay/last also lose the glow: tape, not signal
   glow = true;                      // light-model pass; the contact sheet turns it off for density
 
   constructor(private canvas: HTMLCanvasElement) {
@@ -239,10 +240,13 @@ export class Field {
     this.b.fillStyle = rgba(palette.role("bg"), 0.75); this.b.fillRect(0, 0, BW, 9);
     drawText(this.b, p.label, 3, 2, hot);
     drawText(this.b, p.situation, BW - 3 - textWidth(p.situation), 2, dim);
-    if (this.badge && (this.wall * 1.5) % 1 < 0.75) {
-      const w = textWidth(this.badge);
-      this.b.fillStyle = rgba(palette.role("bg"), 0.8); this.b.fillRect(BW - w - 7, 11, w + 6, 9);
-      drawText(this.b, this.badge, BW - w - 4, 13, palette.role("alert"));
+    if (this.badge) {                                    // steady, big, top-left: only the LIVE lamp pulses
+      const live = this.badgeKind === "live", c = palette.role(live ? "gain" : this.badgeKind === "replay" ? "alert" : "dim");
+      const lamp = live ? 9 : 0, w = textWidth(this.badge) * 2 + lamp;
+      this.b.fillStyle = rgba(palette.role("bg"), 0.85); this.b.fillRect(2, 11, w + 8, 16);
+      this.b.fillStyle = c; this.b.fillRect(2, 11, 1, 16);
+      if (live && (this.wall * 1.1) % 1 < 0.7) this.b.fillRect(6, 15, 6, 8);
+      drawText(this.b, this.badge, 6 + lamp, 14, c, 2);
     }
     if (this.t >= p.duration && p.result) {
       const since = this.t - p.duration;
@@ -289,9 +293,12 @@ export class Field {
     o.clearRect(0, 0, w, h);
     o.imageSmoothingEnabled = false;
     o.globalCompositeOperation = "source-over"; o.globalAlpha = 1; o.filter = "none";
+    const tape = this.badge !== "" && this.badgeKind !== "live";
+    o.globalAlpha = tape ? 0.72 : 1;
     o.drawImage(this.buf, 0, 0, w, h);
+    o.globalAlpha = 1;
     o.imageSmoothingEnabled = true;
-    if (!this.glow) return;
+    if (!this.glow || tape) return;
     if (palette.light) {                       // PRINTOUT: ink bleed
       o.globalCompositeOperation = "multiply";
       o.filter = `blur(${Math.max(1, s * 0.5)}px)`; o.globalAlpha = 0.55;

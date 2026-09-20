@@ -191,3 +191,8 @@ h2 em { font-style: normal; order: 2; letter-spacing: .12em; cursor: pointer; }
 #keys { margin-top: 0; }
 :root[data-rail="lineup"] #radio { margin-top: auto; }
 :root[data-mini="1"] #radio { display: none; }
+
+/* RED ZONE: the toggle, lit while a drive inside the 20 has the screen; RZ chip on any feed that is in there */
+#transport b.rz.on { color: var(--ffb-alert); }
+#transport b.rz.riding { text-shadow: 0 0 9px rgba(var(--ffb-alert-rgb), var(--glow)); animation: blink 1.6s steps(1) infinite; }
+#feeds li b.rz { color: var(--ffb-alert); font-weight: 500; }

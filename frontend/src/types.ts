@@ -26,6 +26,7 @@ export interface Feed {
   mark: Mark;
   focused: boolean;
   fav: boolean;         // a followed team is playing
+  rz?: boolean;         // a drive is inside the 20
 }
 
 export interface Threat {
@@ -66,7 +67,8 @@ export interface ConsoleState {
   type: "state";
   mode: "nfl" | "ffb";                // nfl: real scoreboard + ACTION; ffb: the fantasy layer on top
   ffb_available: boolean;             // a league is configured server-side
-  clock: { label: string; sim: number; duration: number; speed: number; paused: boolean; auto: boolean; live: boolean };
+  clock: { label: string; sim: number; duration: number; speed: number; paused: boolean; auto: boolean; live: boolean;
+           redzone?: boolean; riding?: boolean };      // RED ZONE mode on · committed to a drive inside the 20
   viewer: { team_key: string; owner: string } | null;
   viewers: { team_key: string; owner: string; name: string }[];
   // ffb: fantasy matchup. nfl: the focused game, away on the left — null with nothing in focus.

@@ -33,11 +33,13 @@ from .providers.slate import DEFAULT_SLATE_DIR, ROOT, load_slate, slate_availabl
 from .providers.league import default_viewer, make_league
 from .scoring import DEFAULT_RULES, ActionBoard, ActionEvent, LeagueIndex, MatchupBoard, ScoringState, ThreatEvent, ThreatHub
 from .scoring.action import HOT_THRESHOLD
+from .scoring.drive import DriveTracker
 from .sim.clock import SimClock
 
 log = logging.getLogger("retroffb.console")
 SPRITES = Path(__file__).resolve().parents[2] / "data" / "sprites"
 RATES = (1, 4, 15, 60)
+RZ_LINGER = 5.0                    # wall seconds a resolved drive keeps the screen after its last play ends
 RECENT_HALF_LIFE = 900.0           # sim seconds; "who matters right now"
 ET = ZoneInfo("America/New_York")
 LIVE = os.environ.get("RETROFFB_LIVE") == "1"          # today's real games off ESPN (scripts/build_live.py)
@@ -71,6 +73,9 @@ class Session:
     focus: str | None = None
     scope: str = "matchup"
     auto: bool = True               # AUTO-DIRECT: follow the action (demo / cast mode)
+    redzone: bool = False           # RED ZONE: ride whichever drive is inside the 20 until it resolves
+    rz_lock: tuple[str, int] | None = None      # (game, drive seq) being ridden — or pinned by hand
+    rz_hold: float = 0.0            # loop time before which the screen may not be taken away
     last_play: PlayRow | None = None
     ghost: dict[str, str | None] = field(default_factory=lambda: {"you": None, "them": None})
 
@@ -104,6 +109,7 @@ class Engine:
         self.rules = self.league.league().scoring_rules if self.league else dict(DEFAULT_RULES)
         self.state = ScoringState(self.rules)
         self.action = ActionBoard(self.directory)
+        self.drives = DriveTracker()
         self.chatter = ChatterBox()
         self.crowd = StubChatter(self.chatter, self.directory) if CHATTER == "stub" else None
         self.audio = AudioTable()
@@ -182,6 +188,7 @@ class Engine:
     def ingest(self, play: PlayRow) -> tuple[ActionEvent | None, dict[str, list[ThreatEvent]]]:
         deltas = self.state.apply(play)
         act = self.action.ingest(play)
+        self.drives.ingest(play)
         if self.crowd:
             self.crowd.react(play, act.tag if act else None, act.team if act else None)
         self.plays_by_id[play.play_id] = play                 # live: the slate grows as we go
@@ -215,7 +222,7 @@ class Engine:
 
     def rebuild(self) -> None:
         now = self.clock.now()
-        self.state.reset(); self.action.reset()
+        self.state.reset(); self.action.reset(); self.drives.reset()
         if self.hub:
             self.hub.reset()
         if self.crowd:
@@ -243,6 +250,7 @@ class Engine:
                 epoch = self.clock.epoch
                 self.rebuild()
                 for s in list(self.sessions):
+                    s.rz_lock, s.rz_hold = None, 0.0          # drive numbering restarted with the rebuild
                     await self.catch_up(s)
                 if play.sim_time > self.clock.now() or play.play_id in self.deltas_by_play:
                     continue
@@ -255,7 +263,9 @@ class Engine:
             await asyncio.sleep(0.5)
             status = {g.id: g.status for g in self.provider.games_at(self.clock.now())}
             for s in list(self.sessions):
-                if s.auto and status.get(s.focus or "") != "live" and "live" in status.values():
+                if await self.rz_direct(s, status):
+                    continue
+                if s.auto and not self.rz_riding(s) and status.get(s.focus or "") != "live" and "live" in status.values():
                     nxt = self.pick_focus(s, live_only=True)       # don't sit on a halftime feed
                     if nxt and nxt != s.focus:
                         s.focus = nxt
@@ -274,8 +284,11 @@ class Engine:
             top = self.action_dict(act, s) if act and self.action.should_alert(act, s.favs) else None
         if play.game_id == s.focus:
             s.last_play = play
-            await s.send(self.play_frame(s, play, focus=True, alert=bool(top)))
-        elif top and s.auto:
+            frame = self.play_frame(s, play, focus=True, alert=bool(top))
+            if s.redzone and (top or (s.rz_lock and s.rz_lock[0] == s.focus)):    # let a ridden drive's play be watched before cutting away
+                s.rz_hold = asyncio.get_running_loop().time() + 0.9 + frame["duration"] + RZ_LINGER
+            await s.send(frame)
+        elif top and s.auto and not self.rz_riding(s):
             s.focus, s.last_play = play.game_id, play
             await s.send({"type": "banner", "threat": top})
             await s.send(self.play_frame(s, play, focus=True, alert=True))
@@ -291,6 +304,35 @@ class Engine:
         if last:
             await s.send(self.play_frame(s, last, focus=True, alert=False, settled=True))
         await s.send(self.state_frame(s))
+
+    # ── RED ZONE ──────────────────────────────────────────────────────────
+    def rz_riding(self, s: Session) -> bool:
+        """Is the session committed to a drive (or a hand-picked feed) right now?"""
+        if not (s.redzone and s.rz_lock):
+            return False
+        game, seq = s.rz_lock
+        return game == s.focus and self.drives.get(game).seq == seq
+
+    async def rz_direct(self, s: Session, status: dict[str, str]) -> bool:
+        """Stay on a red-zone drive until it resolves, then cut to the next one.
+        Followed teams first, then whoever is closest to the goal line."""
+        if not s.redzone:
+            return False
+        if self.rz_riding(s) and status.get(s.focus or "") == "live":
+            return False
+        if asyncio.get_running_loop().time() < s.rz_hold:
+            return False
+        s.rz_lock = None
+        hot = [(g, d) for g, d in self.drives.drives.items() if d.red_zone and status.get(g) == "live"]
+        if not hot:
+            return False
+        game, d = min(hot, key=lambda gd: (gd[0] != s.focus, not ({*gd[0].split("_")[2:]} & s.favs), gd[1].spot, gd[1].since))
+        s.rz_lock = (game, d.seq)
+        if game == s.focus:
+            return False
+        s.focus = game
+        await self.catch_up(s)
+        return True
 
     def pick_focus(self, s: Session, live_only: bool = False) -> str | None:
         """Start on the live game carrying the most of the viewer's matchup — or,
@@ -541,12 +583,14 @@ class Engine:
             "game_id": g.id, "label": self.label(g.id), "clock": g.clock, "score": f"{g.away_score}-{g.home_score}",
             "status": {"pre": "PRE", "half": "HT", "final": "FINAL"}.get(g.status, f"Q{g.quarter}" if g.quarter <= 4 else "OT"),
             "mark": marks.get(g.id), "focused": g.id == s.focus, "fav": g.home in s.favs or g.away in s.favs,
+            "rz": g.status == "live" and self.drives.get(g.id).red_zone,
         } for g in sorted(games.values(), key=lambda g: (order[g.status], g.kickoff, g.id))]
         wall = (self._t0 + timedelta(seconds=now)).astimezone(ET)
         frame = {
             "type": "state", "mode": "ffb" if s.ffb else "nfl", "ffb_available": self.league is not None,
             "clock": {"label": f"WK{self.week} · {wall:%a %H:%M}".upper(), "sim": now, "duration": self.clock.duration,
-                      "speed": self.clock.speed, "paused": not self.clock.running, "auto": s.auto, "live": LIVE},
+                      "speed": self.clock.speed, "paused": not self.clock.running, "auto": s.auto, "live": LIVE,
+                      "redzone": s.redzone, "riding": self.rz_riding(s) and self.drives.get(s.focus or "").red_zone},
             "feeds": feeds, "active": self.active_card(s),
             "favs": sorted(s.favs), "teams": sorted(self.team_game),
             "chatter": self.chatter.recent(s.focus), "audio": self.audio.for_game(s.focus),
@@ -603,14 +647,20 @@ class Engine:
             await self.catch_up(s)
         elif t == "focus_game" and m.get("game_id") in self.team_game.values():
             s.focus = m["game_id"]
+            s.rz_lock = (s.focus, self.drives.get(s.focus).seq)   # a hand-picked feed is kept until its drive resolves
             await self.catch_up(s)
         elif t == "focus_play" and m.get("play_id") in self.deltas_by_play:
             p = self.plays_by_id[m["play_id"]]
             s.focus, s.last_play = p.game_id, p
+            s.rz_lock = (s.focus, self.drives.get(s.focus).seq)
             await s.send(self.play_frame(s, p, focus=True, alert=True))
             await s.send(self.state_frame(s))
         elif t == "scope" and m.get("scope") in ("matchup", "league"):
             s.scope = m["scope"]
+            await s.send(self.state_frame(s))
+        elif t == "redzone":
+            s.redzone = bool(m["on"]) if "on" in m else not s.redzone
+            s.rz_lock, s.rz_hold = None, 0.0
             await s.send(self.state_frame(s))
         elif t == "auto":
             s.auto = not s.auto

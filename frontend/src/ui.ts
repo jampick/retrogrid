@@ -19,6 +19,9 @@ export interface UiHandlers {
   speed(n: number): void;
   pause(): void;
   seek(frac: number): void;
+  auto(): void;
+  redzone(): void;
+  cycle(): void;
 }
 
 export class Ui {
@@ -79,10 +82,13 @@ export class Ui {
     if (nfl) this.delta.set(s.matchup?.status ?? "", "hot");             // the game clock, not a fantasy margin
     else this.delta.set((d >= 0 ? "{" : "}") + pts(Math.abs(d)), d >= 0 ? "gain" : "them");
     $("clock").textContent = s.clock.label;
-    $("live").textContent = s.clock.paused ? "■ HOLD" : "● LIVE";
+    $("live").textContent = s.clock.paused ? "■ HOLD" : "● ON AIR";
     $("live").classList.toggle("held", s.clock.paused);
     const rates = [1, 4, 15, 60];
-    $("transport").innerHTML = `<b class="${s.clock.auto ? "on" : ""}" data-auto title="auto-direct [A]">AUTO</b> ` + (s.clock.live ? "" : "SIM ") + (s.clock.live ? [] : rates).map((r, i) => `<b data-r="${r}" class="${s.clock.speed === r ? "on" : ""}" title="[${i + 1}]">${r}×</b>`).join("");
+    $("transport").innerHTML = `<b class="${s.clock.auto ? "on" : ""}" data-auto title="auto-direct: cut to big plays [A]">AUTO</b> `
+      + `<b class="rz ${s.clock.redzone ? "on" : ""} ${s.clock.riding ? "riding" : ""}" data-rz title="red zone: ride any drive inside the 20 until it resolves [R]">${s.clock.redzone ? "☑" : "☐"} RED ZONE</b> ` + (s.clock.live ? "" : "SIM ") + (s.clock.live ? [] : rates).map((r, i) => `<b data-r="${r}" class="${s.clock.speed === r ? "on" : ""}" title="[${i + 1}]">${r}×</b>`).join("");
+    ($("transport").querySelector("b[data-auto]") as HTMLElement).onclick = () => this.h.auto();
+    ($("transport").querySelector("b[data-rz]") as HTMLElement).onclick = () => this.h.redzone();
     $("transport").querySelectorAll<HTMLElement>("b[data-r]").forEach((b) => (b.onclick = () => this.h.speed(Number(b.dataset.r))));
     ($("scrub").firstElementChild as HTMLElement).style.width = `${(100 * s.clock.sim) / Math.max(1, s.clock.duration)}%`;
     this.tug(you.points, them.points);
@@ -113,9 +119,10 @@ export class Ui {
     $("feeds").innerHTML = s.feeds.map((f) => {
       const mark = f.mark === "hurt" ? `<span class="them">⚠</span>` : f.mark === "help" ? `<span class="you">▲</span>`
         : f.mark === "hot" ? `<span class="alert">⚡</span>` : `<span></span>`;
+      const rz = f.rz ? `<b class="rz">RZ</b> ` : "";
       return `<li data-g="${f.game_id}" class="${f.focused ? "focused" : ""} ${f.status === "FINAL" ? "final" : ""} ${f.fav ? "fav" : ""}">
         <span class="alert">${f.focused ? "▸" : ""}</span><span class="lbl">${esc(f.label)}</span>
-        <span class="dim">${esc(f.score)}</span><span class="st dim">${esc(f.status)} ${f.status.startsWith("Q") || f.status === "OT" ? esc(f.clock) : ""}</span>${mark}</li>`;
+        <span class="dim">${esc(f.score)}</span><span class="st dim">${rz}${esc(f.status)} ${f.status.startsWith("Q") || f.status === "OT" ? esc(f.clock) : ""}</span>${mark}</li>`;
     }).join("");
     $("feeds").querySelectorAll("li").forEach((li) => (li.onclick = () => this.h.focusGame(li.dataset.g!)));
   }
@@ -174,10 +181,11 @@ export class Ui {
   private keys(s: ConsoleState): void {
     const ffb = s.mode === "ffb";
     const k = [
-      "[T] THEME · [F] FOLLOW TEAMS · [A] AUTO-DIRECT",
+      "[T] THEME · [F] FOLLOW TEAMS",
+      `[A] AUTO-DIRECT ${s.clock.auto ? "ON" : "OFF"} · [R] RED ZONE ${s.clock.redzone ? "ON" : "OFF"}`,
       "[M] RADIO · [H] OTHER BOOTH · [-][=] VOL · [N] MUTE CUES",
       s.clock.live ? "" : "[SPACE] HOLD · [1-4] RATE · [←→] SKIP",
-      `[C] REPLAY CYCLE <span id="cycle">${this.cycleText}</span> · [ [ ] ] PREV/NEXT · [/] LIVE`,
+      `[C] AUTO-REPLAY <span id="cycle">${this.cycleText}</span> · [ [ ] ] STEP · [/] BACK`,
       s.ffb_available ? `[X] FANTASY LAYER ${ffb ? "ON" : "OFF"}` + (ffb ? " · [V] VIEWER · [L] SCOPE · [TAB] LINEUP/CHATTER" : "") : "",
     ].filter(Boolean).join("<br>");
     if ($("keys").dataset.k !== k) { $("keys").dataset.k = k; $("keys").innerHTML = k; }

@@ -85,6 +85,10 @@ def _f(v: Any) -> float | None:
     return None if pd.isna(v) else float(v)
 
 
+def _r4(v: Any) -> float | None:
+    return None if v is None or pd.isna(v) else round(float(v), 4)
+
+
 def _b(v: Any) -> bool:
     return (not pd.isna(v)) and bool(v)
 
@@ -160,6 +164,8 @@ def to_play_row(r: Any, seq: int, sim_time: float) -> PlayRow:
         fumbler_id=_s(r.fumbled_1_player_id),
         home_score=_i(r.total_home_score) or 0,
         away_score=_i(r.total_away_score) or 0,
+        wpa=_r4(getattr(r, "wpa", None)),
+        epa=_r4(getattr(r, "epa", None)),
     )
 
 

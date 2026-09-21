@@ -66,6 +66,36 @@ closest to the goal line.
 
 <img alt="RED ZONE mode under the built-in NEON theme" src="https://raw.githubusercontent.com/jampick/retrogrid/main/docs/media/neon.png" width="100%">
 
+### REEL
+
+`retrogrid reel` is for Tuesday through Saturday. It loops the big plays of the
+weeks already played on the same field, so the side monitor has something on it
+when no games are. One loop is a Top 10 countdown for the latest week (each play
+runs twice), your followed teams, two or three plays from every other game, then
+the top five of a couple of older weeks. With two weeks cached that is about 15
+minutes, and the game order and the older weeks change every loop.
+
+Plays are ranked on win probability added from nflverse, so a 9 yard catch on
+4th and 8 with a minute left beats a 60 yard touchdown in a blowout. A flat
+bonus keeps the 60 yarder in the show anyway, along with return touchdowns,
+blocked kicks, strip sacks and 50 yard field goals. A made kick under 50 yards
+only gets 60% of its WPA, because a walk-off chip shot is the dullest part of
+the drive that set it up. Every game gets at least 2 plays and at most 6 out of
+the week's 40.
+
+A highlight means nothing outside its game, so each play opens on a card with
+the week, the score going in, the clock, and the down and distance. The
+scoreboard turns over when the play ends. The badge says `HIGHLIGHT · WK 2` and
+the lamp never pulses, because LIVE still means one thing. There is no real
+video in any of this. NFL footage is licensed, so it is the same schematic
+replay as LIVE.
+
+At launch, and hourly while it runs, it asks nflverse whether the season file
+changed (one HEAD request per file) and ranks any new week. nflverse republishes
+overnight, so Sunday shows up on Monday morning. With nothing downloaded it
+ranks the shipped SIM SUNDAY slate, and that slate has no WPA, so it falls back
+to the ACTION weights.
+
 ### Themes
 
 I run [Omarchy](https://omarchy.org), and the console follows its system theme
@@ -119,6 +149,7 @@ The full design is in [docs/DESIGN.md](docs/DESIGN.md).
 uv tool install retrogrid        # or: pipx install retrogrid   (Python 3.12+)
 retrogrid                        # SIM SUNDAY: 2025 wk 15, 14 games. No downloads, no keys.
 retrogrid live                   # today's real games off ESPN (pulls a few MB of rosters first)
+retrogrid reel                   # midweek: the big plays of the weeks already played, on a loop
 ```
 
 > The first PyPI release is tracked in [#2](https://github.com/jampick/retrogrid/issues/2).
@@ -133,7 +164,7 @@ the 1 s poll, install the optional hook:
 
 Flags: `--league stub|yahoo` · `--favs "KC BUF"` · `--speed 15` · `--port N` ·
 `--chatter reddit|stub|off`. Data tools: `retrogrid fetch | build-slate |
-sprites | yahoo-auth | find-stream` (each takes `--help`).
+build-reel | sprites | yahoo-auth | find-stream` (each takes `--help`).
 
 ## Keys
 
@@ -149,6 +180,7 @@ sprites | yahoo-auth | find-stream` (each takes `--help`).
 | `C` · `[` `]` · `/` | auto-replay in dead time · step through recent plays · back to live |
 | `X` | fantasy layer, then `V` who-am-I · `L` threat scope · `Tab` lineup/chatter |
 | `Space` · `1` to `4` · `←` `→` | SIM only: hold · rate 1×/4×/15×/60× · skip 5 min |
+| `Space` · `←` `→` | REEL: hold · previous / next play. Click a row in the rundown or the finals to jump. |
 
 ## Develop
 
@@ -185,6 +217,16 @@ scoreboard + summary feeds (`providers/espn.py`, no credentials), polled every
 are split in two, and booth amendments trigger a rebuild. `--keep` reuses
 today's league instead of redrafting. Sim controls are inert in LIVE.
 
+**REEL.** `retrogrid build-reel` writes one file per week to `data/reel/<season>_wk<NN>.json`
+(about 60 KB: the 40 picks as PlayRows, the score going into each, each play's
+star with his final line, and the players the diagrams name), so the show itself
+reads no parquet. The ranker is `scoring/reel.py`, the show is `reel_console.py`.
+A cached week is left alone except the newest, which is rebuilt whenever the
+play-by-play file is newer than it. `/plays?reel=1` is the contact sheet in rank
+order for the newest week (`reel=N` for week N), which is how I check the picks.
+`build-reel --from-slate data/live` ranks an ESPN day before nflverse has it.
+`--keep` skips the nflverse check.
+
 **CHATTER.** Reddit's JSON API is walled (403 without an approved OAuth app) but
 its Atom feeds are not, at one request a minute per IP. So `providers/chatter.py`
 makes one combined `/r/nfl+<team subs>/comments/.rss` poll every ~65 s and buckets
@@ -214,8 +256,9 @@ only links to it.
 | 7 Polish | open |
 | 8 ESPN live plays | working (first pass) |
 | 8 Yahoo league adapter, hosting | needs credentials |
+| REEL: highlight show of finished weeks ([#11](https://github.com/jampick/retrogrid/issues/11)) | working (first pass); the fantasy-swings segment waits on a real league |
 
-`pytest` runs 198 tests.
+`pytest` runs 209 tests.
 
 Everything I'm working on is in the [issues](https://github.com/jampick/retrogrid/issues). If a play draws wrong or your team's radio stream is dead, open one.
 

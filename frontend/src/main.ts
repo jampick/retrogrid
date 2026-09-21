@@ -3,7 +3,7 @@ import { banner, bannerVisible, boot, hideBanner, retune, sting, toggleMute } fr
 import { Ghosts } from "./ghosts";
 import { palette } from "./palette";
 import { Radio } from "./radio";
-import type { ConsoleState, Frame, PlayFrame, Theme, Threat } from "./types";
+import type { ConsoleState, Frame, PlayFrame, ReelCard, Theme, Threat } from "./types";
 import { Ui } from "./ui";
 
 const q = new URLSearchParams(location.search);
@@ -43,6 +43,8 @@ const ui = new Ui({
   auto: () => send({ type: "auto" }),
   redzone: () => setRedzone(!state?.clock.redzone),
   cycle: () => toggleCycle(),
+  skip: (d) => send({ type: "sim", action: "skip", value: d }),
+  reelJump: (i) => send({ type: "reel_jump", index: i }),
 });
 
 const radio = new Radio();
@@ -122,7 +124,24 @@ function favPicker(): void {
 // ── live + replay ────────────────────────────────────────────────────────────
 const DULL = /\/(flag|kneel|spike|hold)$|^fallback$/;
 
+/** REEL: the context card holds the stage until the play it introduces arrives. */
+function reelCard(c: ReelCard | null): void {
+  const el = $("reelcard");
+  el.hidden = !c;
+  if (!c) return;
+  const esc = (s: string) => s.replace(/[&<>]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[ch]!));
+  el.innerHTML = `<div class="seg">${esc(c.segment)}</div>${c.number ? `<div class="num">${esc(c.number)}</div>` : ""}`
+    + `<div class="game">${esc(c.label)}</div><div class="score">${esc(c.score)}</div><div class="sit">${esc(c.clock)} · ${esc(c.situation)}</div>`;
+}
+
 function present(f: PlayFrame): void {
+  reelCard(null);
+  if (f.reel) {                                                // a show, and it says which week: never LIVE
+    recent.length = 0; recent.push(f); replayAt = -1; idle = 0;
+    field.badge = `${f.reel.replay ? "REPLAY" : "HIGHLIGHT"} · WK ${f.reel.week}`; field.badgeKind = "reel";
+    field.show(f, f.settled);
+    return;
+  }
   if (f.settled) recent.length = 0;                            // focus moved: old game's plays are stale
   const dup = recent.findIndex((r) => r.play_id === f.play_id);
   if (dup >= 0) recent.splice(dup, 1);
@@ -186,6 +205,9 @@ function onFrame(f: Frame): void {
       else if (field.finished || replayAt >= 0) present(f);           // live always pre-empts a replay
       else { queue.push(f); while (queue.length > 2) queue.shift(); }
       break;
+    case "reel_card":
+      queue.length = 0; reelCard(f);
+      break;
     case "banner":
       pendingThreat = f.threat;
       banner(f.threat, state?.feeds.find((g) => g.game_id === f.threat.game_id)?.label ?? "", () => send({ type: "focus_play", play_id: f.threat.play_id }));
@@ -223,7 +245,7 @@ function frame(now: number): void {
   requestAnimationFrame(frame);
   if (!palette.theme) return;                 // nothing may draw before a palette exists
   if (field.finished && queue.length) present(queue.shift()!);
-  else if (field.finished && cycle && !pickerOpen()) {
+  else if (field.finished && cycle && !pickerOpen() && !state?.reel) {      // the reel runs its own replays
     idle += dt;
     if (idle > (replayAt < 0 ? LINGER_LIVE : LINGER_REPLAY)) replay(0);
   }
@@ -252,6 +274,7 @@ window.addEventListener("keydown", (e) => {
   else if (k === "l" && state?.mode === "ffb") send({ type: "scope", scope: state?.scope === "matchup" ? "league" : "matchup" });
   else if (k === " ") { send({ type: "sim", action: "pause" }); e.preventDefault(); }
   else if ("1234".includes(k)) send({ type: "sim", action: "speed", value: [1, 4, 15, 60][Number(k) - 1] });
+  else if (state?.reel && (k === "[" || k === "]" || k === "," || k === "." || k === "/" || k === "\\")) { /* the reel has no history to step */ }
   else if (k === "arrowright") send({ type: "sim", action: "skip", value: 300 });
   else if (k === "arrowleft") send({ type: "sim", action: "skip", value: -300 });
   else if (k === "a") send({ type: "auto" });

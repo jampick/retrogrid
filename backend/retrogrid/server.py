@@ -88,8 +88,10 @@ def api_theme_poke() -> dict:
 
 @app.get("/api/plays/sample")
 def api_plays_sample(n: int = 24, seed: int = 0, family: str | None = None, viewer: str = "t01",
-                     play: str | None = None, grep: str | None = None) -> JSONResponse:
-    from .console import sample_plays
+                     play: str | None = None, grep: str | None = None, reel: int = 0) -> JSONResponse:
+    from .console import sample_plays, sample_reel
+    if reel:                                                   # 1 = the newest cached week, anything else = that week
+        return JSONResponse(sample_reel(max(1, min(n, 96)), None if reel == 1 else reel))
     return JSONResponse(sample_plays(max(1, min(n, 96)), seed, family, viewer, play, grep))
 
 

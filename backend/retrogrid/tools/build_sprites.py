@@ -7,7 +7,7 @@ Output is *data, not colour*: a 96x96 PNG where
 The console palette-maps it at draw time, so one sprite serves every theme
 and both sides of a matchup.
 
-Usage: retrogrid sprites [--live] [--all]    (default: rostered players only)
+Usage: retrogrid sprites [--live] [--all] [--reel]    (default: rostered players only)
 """
 from __future__ import annotations
 
@@ -121,18 +121,28 @@ async def run(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--live", action="store_true", help="rosters of today's LIVE league (data/live) instead of the sim slate")
     ap.add_argument("--all", action="store_true", help="every player who appears in the slate, not just rostered")
+    ap.add_argument("--reel", action="store_true", help="the star of every play in the reel cache (data/reel)")
     args = ap.parse_args(argv)
     OUT.mkdir(parents=True, exist_ok=True)
     RAW.mkdir(parents=True, exist_ok=True)
-    slate_dir = paths.LIVE_SLATE if args.live else paths.DATA / "slate"
-    slate = load_slate(slate_dir)
-    directory = NflversePlayerDirectory.from_data_dir(week=slate.week, season=slate.season)
-    league = make_league(slate_dir, directory, slate.week, slate.season)
-    if league is not None:
+    league = None
+    if args.reel:                                # the week files carry their own players: no parquet needed
+        from ..providers.reel import ReelDirectory, load_weeks
+        weeks = load_weeks()
+        directory = ReelDirectory(weeks)
+        ids = {s.player_id for w in weeks for s in w.stars.values()}
+    else:
+        slate_dir = paths.LIVE_SLATE if args.live else paths.DATA / "slate"
+        slate = load_slate(slate_dir)
+        directory = NflversePlayerDirectory.from_data_dir(week=slate.week, season=slate.season)
+        league = make_league(slate_dir, directory, slate.week, slate.season)
+    if args.reel:
+        pass
+    elif league is not None:
         ids = {s.player_id for t in league.league().teams for s in league.roster(t.key, slate.week).slots}
     else:                                        # plain NFL monitor: the hot hands come from the top of the pool
         ids = {e.id for e in load_pool(slate_dir)[:POOL_TOP]}
-    if args.all:
+    if args.all and not args.reel:
         for p in slate.plays:
             ids |= {i for i in (p.passer_id, p.receiver_id, p.rusher_id, p.kicker_id) if i}
     todo = [i for i in sorted(ids) if not (OUT / f"{i}.png").is_file()]

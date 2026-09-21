@@ -36,7 +36,7 @@ export class Field {
   private wall = 0;                 // free-running seconds, for blinks
   scale = 3;
   badge = "";                       // what is on screen: "LIVE", "REPLAY", "LAST PLAY" — always said, never guessed
-  badgeKind: "live" | "replay" | "last" = "live";     // replay/last also lose the glow: tape, not signal
+  badgeKind: "live" | "replay" | "last" | "reel" = "live";     // replay/last also lose the glow: tape, not signal. reel: a show, full brightness, no lamp
   glow = true;                      // light-model pass; the contact sheet turns it off for density
 
   constructor(private canvas: HTMLCanvasElement) {
@@ -241,7 +241,7 @@ export class Field {
     drawText(this.b, p.label, 3, 2, hot);
     drawText(this.b, p.situation, BW - 3 - textWidth(p.situation), 2, dim);
     if (this.badge) {                                    // steady, big, top-left: only the LIVE lamp pulses
-      const live = this.badgeKind === "live", c = palette.role(live ? "gain" : this.badgeKind === "replay" ? "alert" : "dim");
+      const live = this.badgeKind === "live", c = palette.role(live ? "gain" : this.badgeKind === "replay" ? "alert" : this.badgeKind === "reel" ? "hot" : "dim");
       const lamp = live ? 9 : 0, w = textWidth(this.badge) * 2 + lamp;
       this.b.fillStyle = rgba(palette.role("bg"), 0.85); this.b.fillRect(2, 11, w + 8, 16);
       this.b.fillStyle = c; this.b.fillRect(2, 11, 1, 16);
@@ -293,7 +293,7 @@ export class Field {
     o.clearRect(0, 0, w, h);
     o.imageSmoothingEnabled = false;
     o.globalCompositeOperation = "source-over"; o.globalAlpha = 1; o.filter = "none";
-    const tape = this.badge !== "" && this.badgeKind !== "live";
+    const tape = this.badge !== "" && this.badgeKind !== "live" && this.badgeKind !== "reel";
     o.globalAlpha = tape ? 0.72 : 1;
     o.drawImage(this.buf, 0, 0, w, h);
     o.globalAlpha = 1;

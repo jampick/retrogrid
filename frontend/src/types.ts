@@ -39,7 +39,23 @@ export interface Threat {
   delta: number | null; // fantasy points; null in NFL mode
   headline: string;
   lead_change: boolean;
+  label?: string;       // REEL: the row's own game ("KC@BUF"); the feeds list is another week's finals
+  current?: boolean;    // REEL: the item on screen
 }
+
+// REEL: the highlight show of finished weeks. Present on state frames only in that mode.
+export interface ReelState {
+  title: string;        // "TOP 10 · WK 2"
+  number: string;       // "#7" in a countdown
+  index: number; total: number;
+  at: string;           // "4/10" within the segment
+  phase: "card" | "play" | "result" | "replay";
+  week: number; season: number;
+  segments: { title: string; count: number; start: number; current: boolean }[];
+}
+export interface ReelTag { week: number; number: string; rank: number; score: number; tag: string; headline: string; wpa: number | null; replay: boolean }
+/** What a highlight loses when it leaves its game: shown before the snap. */
+export interface ReelCard { type: "reel_card"; segment: string; number: string; week: number; label: string; score: string; clock: string; situation: string; seconds: number }
 
 export interface LineupCell { player_id: string; name: string; points: number; live: boolean }
 export interface LineupRow { slot: string; you: LineupCell; them: LineupCell; losing: boolean }
@@ -83,6 +99,7 @@ export interface ConsoleState {
   lineup: LineupRow[];
   ghosts: { you: GhostInfo | null; them: GhostInfo | null };
   active: ActiveCard | null;
+  reel?: ReelState;
 }
 
 export interface Keyframe { t: number; x: number; y: number; z?: number }   // z: ball height, yards
@@ -116,9 +133,10 @@ export interface PlayFrame {
   focus: boolean;                     // server suggests showing it now
   settled: boolean;                   // catch-up: show the finished diagram, don't replay
   template: string;
+  reel?: ReelTag;
 }
 
 export interface BannerFrame { type: "banner"; threat: Threat }
 export interface HelloFrame { type: "hello"; system: Theme | null; themes: Theme[] }
 export interface ThemeFrame { type: "theme"; system: Theme }
-export type Frame = ConsoleState | PlayFrame | BannerFrame | HelloFrame | ThemeFrame;
+export type Frame = ConsoleState | PlayFrame | BannerFrame | HelloFrame | ThemeFrame | ReelCard;

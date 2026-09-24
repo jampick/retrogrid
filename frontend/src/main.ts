@@ -183,6 +183,7 @@ function onFrame(f: Frame): void {
     case "hello":
       themes = f.themes; systemTheme = f.system;
       applyChoice(!palette.theme);
+      if (f.update) ui.update(f.update);
       { const v = q.get("viewer") ?? localStorage.getItem("ffb.viewer"); if (v) send({ type: "viewer", team_key: v }); }
       { const f = q.get("favs"); if (f) favs = f.toUpperCase().split(","); if (favs.length) send({ type: "favs", teams: favs }); }
       if (redzone) send({ type: "redzone", on: true });
@@ -191,6 +192,9 @@ function onFrame(f: Frame): void {
     case "theme":
       systemTheme = f.system;
       if (choice === "system") applyChoice();
+      break;
+    case "update":
+      ui.update(f);
       break;
     case "state":
       // an older server (no NFL layer) sends none of these: it is the fantasy console, nothing more

@@ -10,7 +10,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import paths
+from . import paths, update
 from .theme.provider import BundledThemeProvider, OmarchyThemeProvider
 
 log = logging.getLogger("retrogrid")
@@ -46,6 +46,7 @@ async def _theme_pump() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     tasks = [asyncio.create_task(_theme_pump())] if system.available else []
+    tasks.append(asyncio.create_task(update.announce(hub)))
     try:
         from .console import start as start_console      # game engine, optional until data exists
         tasks += await start_console(hub)
@@ -129,7 +130,7 @@ async def ws_endpoint(ws: WebSocket) -> None:
     await ws.accept()
     hub.sockets.add(ws)
     try:
-        await ws.send_text(json.dumps({"type": "hello", **themes_payload()}))
+        await ws.send_text(json.dumps({"type": "hello", **themes_payload(), "update": update.result()}))
         try:
             from .console import on_connect
             await on_connect(ws)

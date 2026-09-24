@@ -87,6 +87,10 @@ h2 em { font-style: normal; order: 2; letter-spacing: .12em; cursor: pointer; }
 #lineup .lose.idle { opacity: .38; }
 #lineup li.total { margin-top: 10px; padding-top: 8px; position: relative; }
 #lineup li.total::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(var(--ffb-dim-rgb), .5), transparent); }
+#update { margin-top: auto; font-size: 9.5px; letter-spacing: .12em; color: rgba(var(--ffb-dim-rgb), .7); line-height: 1.8; }
+#update:empty { display: none; }
+#update:not(:empty) + #keys { margin-top: 0; }
+#update em { font-style: normal; color: var(--ffb-hot); }
 #keys { margin-top: auto; font-size: 9.5px; letter-spacing: .12em; color: rgba(var(--ffb-dim-rgb), .7); line-height: 1.8; }
 
 /* ── stage ──────────────────────────────────────────────────────────── */
@@ -170,7 +174,7 @@ h2 em { font-style: normal; order: 2; letter-spacing: .12em; cursor: pointer; }
 @keyframes warm { 0% { transform: scaleY(.004) scaleX(.6); filter: brightness(5); } 40% { transform: scaleY(.004) scaleX(1); filter: brightness(5); } 100% { transform: none; filter: none; } }
 
 /* still/mini modes for the theme contact sheet */
-:root[data-mini="1"] #keys, :root[data-mini="1"] #boot { display: none; }
+:root[data-mini="1"] #keys, :root[data-mini="1"] #update, :root[data-mini="1"] #boot { display: none; }
 
 /* ── NFL base layer: chatter rail, radio, follow marks ──────────────── */
 :root[data-rail="chatter"] #sec-lineup, :root[data-rail="lineup"] #sec-chatter { display: none; }

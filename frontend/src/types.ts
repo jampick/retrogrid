@@ -137,6 +137,8 @@ export interface PlayFrame {
 }
 
 export interface BannerFrame { type: "banner"; threat: Threat }
-export interface HelloFrame { type: "hello"; system: Theme | null; themes: Theme[] }
+export interface Update { latest: string; current: string; hint: string }
+export interface HelloFrame { type: "hello"; system: Theme | null; themes: Theme[]; update: Update | null }
 export interface ThemeFrame { type: "theme"; system: Theme }
-export type Frame = ConsoleState | PlayFrame | BannerFrame | HelloFrame | ThemeFrame | ReelCard;
+export interface UpdateFrame extends Update { type: "update" }
+export type Frame = ConsoleState | PlayFrame | BannerFrame | HelloFrame | ThemeFrame | UpdateFrame | ReelCard;

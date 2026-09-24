@@ -1,0 +1,20 @@
+[Desktop Entry]
+Type=Application
+Name=RETRO//GRID
+GenericName=NFL gameday console
+Comment=Every live game, the plays that matter as neon diagrams
+Exec=retrogrid
+Icon=retrogrid
+Terminal=true
+Categories=Game;Sports;
+Keywords=nfl;football;fantasy;omarchy;
+StartupWMClass=retrogrid
+Actions=live;reel;
+
+[Desktop Action live]
+Name=LIVE: today's games
+Exec=retrogrid live
+
+[Desktop Action reel]
+Name=REEL: this week's highlights
+Exec=retrogrid reel

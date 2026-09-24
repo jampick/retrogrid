@@ -21,6 +21,7 @@ pkgbase = retrogrid
 	depends = python-numpy
 	depends = python-httpx
 	depends = python-platformdirs
+	depends = hicolor-icon-theme
 	optdepends = chromium: chromeless app window (any Chromium-family browser works)
 	optdepends = omarchy: theme-set hook for an instant retune, see /usr/share/retrogrid
 	source = https://github.com/jampick/retrogrid/releases/download/v0.1.0/retrogrid-0.1.0.tar.gz

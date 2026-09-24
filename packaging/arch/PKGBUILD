@@ -6,8 +6,12 @@ pkgdesc="Cyberpunk NFL gameday console: every live game, the plays that matter a
 arch=('any')
 url="https://github.com/jampick/retrogrid"
 license=('MIT')
+# namcap flags python-websockets and python-pyarrow as "may not be needed": both
+# are pulled in one layer down. uvicorn refuses to serve /ws without a websocket
+# library (Arch's uvicorn does not depend on one), and pandas needs pyarrow to
+# read the nflverse parquet files.
 depends=('python' 'python-fastapi' 'uvicorn' 'python-websockets' 'python-pandas' 'python-pyarrow'
-         'python-pillow' 'python-numpy' 'python-httpx' 'python-platformdirs')
+         'python-pillow' 'python-numpy' 'python-httpx' 'python-platformdirs' 'hicolor-icon-theme')
 makedepends=('python-build' 'python-installer' 'python-wheel' 'python-setuptools')
 checkdepends=('python-pytest' 'python-pytest-asyncio')
 optdepends=('chromium: chromeless app window (any Chromium-family browser works)'

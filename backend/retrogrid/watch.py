@@ -124,10 +124,11 @@ async def swap(new, tasks: list[asyncio.Task]) -> list[asyncio.Task]:           
         ns = console.Session(ws, s.viewer if s.viewer in new.teams else new.default_viewer,
                              ffb=s.ffb and new.league is not None, favs=set(s.favs), auto=s.auto, redzone=s.redzone)
         console._by_ws[ws] = ns
-        new.sessions.add(ns)
-        await new.catch_up(ns)
+        await new.attach(ns)
     if old is not None:
         old.sessions.clear()
+        if old.reel is not None:
+            old.reel.sessions.clear()
     return fresh
 
 

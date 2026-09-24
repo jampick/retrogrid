@@ -53,7 +53,13 @@ pushed through a scanline filter. The strip along the bottom names whoever was
 just involved, his stat line so far, and the official play-by-play line.
 
 The right rail shows Reddit comments from r/nfl and both teams' subreddits for
-the game in focus.
+the game in focus. It starts asking three hours before kickoff, because the game
+thread usually goes up early and people are already in it.
+
+Before anything has kicked off the console plays last week's REEL instead of an
+empty field, with today's games still listed in FEEDS. Click one, or press `B`,
+to sit on the pregame feed instead; `B` again goes back. The first kickoff cuts
+everyone over to the live game.
 
 With `A` on, the console picks its own shots and cuts to whichever game just
 produced something. If six seconds go by with nothing new it replays the last
@@ -173,6 +179,7 @@ build-reel | sprites | yahoo-auth | find-stream` (each takes `--help`).
 | `X` | fantasy layer, then `V` who-am-I · `L` threat scope · `Tab` lineup/chatter |
 | `Space` · `1` to `4` · `←` `→` | SIM only: hold · rate 1×/4×/15×/60× · skip 5 min |
 | `Space` · `←` `→` | REEL: hold · previous / next play. Click a row in the rundown or the finals to jump. |
+| `B` | before kickoff: last week's reel, or today's feed |
 
 ## Develop
 
@@ -231,7 +238,17 @@ order for the newest week (`reel=N` for week N), which is how I check the picks.
 its Atom feeds are not, at one request a minute per IP. So `providers/chatter.py`
 makes one combined `/r/nfl+<team subs>/comments/.rss` poll every ~65 s and buckets
 comments per game by thread title + subreddit. At peak that is a sample of the
-thread, not all of it. In SIM a stub crowd reacts to the plays.
+thread, not all of it. Polling runs from 3 h before a game's kickoff (`PREGAME`)
+until it ends. In SIM a stub crowd reacts to the plays.
+
+**Before kickoff.** A live `Engine` builds a `PregameReel` (`reel_console.py`) in
+a thread at launch: `refresh_cache()`, then the finished weeks of this season on
+disk, none means no reel. Sessions on it live in `engine.reel.sessions` instead of
+`engine.sessions`, so they get the show's frames and none of the feed's; the
+reel's state frame borrows the host's FEEDS rail and kickoff time. `Session.reel`
+is `None` (undecided), `True` (on the reel) or `False` (asked for the feed, so an
+engine tick never puts them back). `Engine.end_wait()` in the ticker moves everyone
+to the feed at the first kickoff.
 
 **RADIO.** Best effort. `providers/audio_seed.json` lists each team's flagship
 station and a stream URL where one was verified to open (26/32); whether a

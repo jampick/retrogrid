@@ -22,10 +22,10 @@ from zoneinfo import ZoneInfo
 from fastapi import WebSocket
 
 from .grammar import compile_play
-from .models import SLOTS, PlayRow, StatDelta
+from .models import SLOTS, Game, PlayRow, StatDelta
 from .parser.desc import penalty_summary
 from .providers.audio import AudioTable
-from .providers.chatter import TEAMS, ChatterBox, RedditChatter, StubChatter
+from .providers.chatter import TEAMS, ChatterBox, RedditChatter, StubChatter, worth_polling
 from .providers.directory import NflversePlayerDirectory
 from .providers.nflverse_plays import SlatePlayProvider
 from . import paths
@@ -78,6 +78,7 @@ class Session:
     rz_hold: float = 0.0            # loop time before which the screen may not be taken away
     last_play: PlayRow | None = None
     ghost: dict[str, str | None] = field(default_factory=lambda: {"you": None, "them": None})
+    reel: bool | None = None        # before kickoff: on last week's reel (True), or on the feed by choice (False)
 
     async def send(self, frame: dict) -> None:
         try:
@@ -132,6 +133,7 @@ class Engine:
         self.deltas_by_play: dict[str, list[StatDelta]] = {}
         self.last_by_game: dict[str, PlayRow] = {}
         self.sessions: set[Session] = set()
+        self.reel = None                                     # PregameReel, once launch() has one: what plays before kickoff
         self.air_est = _air_estimator()
         self._t0 = datetime.fromisoformat(self.slate.start_utc.replace("Z", "+00:00"))
 
@@ -276,6 +278,7 @@ class Engine:
         while True:
             await asyncio.sleep(0.5)
             status = {g.id: g.status for g in self.provider.games_at(self.clock.now())}
+            await self.end_wait()
             for s in list(self.sessions):
                 if await self.rz_direct(s, status):
                     continue
@@ -318,6 +321,56 @@ class Engine:
         if last:
             await s.send(self.play_frame(s, last, focus=True, alert=False, settled=True))
         await s.send(self.state_frame(s))
+
+    # ── before kickoff ────────────────────────────────────────────────────
+    def waiting(self) -> bool:
+        """Nothing has kicked off yet: the field would be empty and the board quiet."""
+        games = self.provider.games_at(self.clock.now())
+        return bool(games) and all(g.status == "pre" for g in games)
+
+    def crowd_games(self) -> list[Game]:
+        """The games the Reddit poller should be asking about right now."""
+        now = self.clock.now()
+        return worth_polling(self.provider.games_at(now), now)
+
+    def kickoff_label(self) -> str:
+        """"KICKOFF THU 20:15" (US Eastern) for the next game up; "" once everything is under way."""
+        now = self.clock.now()
+        pre = [g.kickoff for g in self.provider.games_at(now) if g.status == "pre"]
+        return f"KICKOFF {(self._t0 + timedelta(seconds=min(pre))).astimezone(ET):%a %H:%M}".upper() if pre else ""
+
+    async def attach(self, s: Session) -> None:
+        """A session arrives (a connect, or carried over an engine swap). Before
+        kickoff it gets last week's reel unless it asked for the feed; otherwise the feed."""
+        if self.reel is not None and self.waiting() and s.reel is not False:
+            await self.enter_reel(s)
+        else:
+            self.sessions.add(s)
+            await self.catch_up(s)
+
+    def detach(self, s: Session) -> None:
+        self.sessions.discard(s)
+        if self.reel is not None:
+            self.reel.sessions.discard(s)
+
+    async def enter_reel(self, s: Session) -> None:
+        s.reel = True
+        self.sessions.discard(s)                              # the reel's frames, not the feed's, until it leaves
+        self.reel.sessions.add(s)
+        await self.reel.catch_up(s)
+
+    async def end_wait(self) -> None:
+        """Kickoff: the reel was only ever filling the wait, so everyone on it comes back to the feed."""
+        if self.reel is not None and self.reel.sessions and not self.waiting():
+            for s in list(self.reel.sessions):
+                await self.leave_reel(s, by_hand=False)
+
+    async def leave_reel(self, s: Session, by_hand: bool) -> None:
+        s.reel = False if by_hand else None                   # asked for the feed: stay on it, even if the reel is offered again
+        if self.reel is not None:
+            self.reel.sessions.discard(s)
+        self.sessions.add(s)
+        await self.catch_up(s)
 
     # ── RED ZONE ──────────────────────────────────────────────────────────
     def rz_riding(self, s: Session) -> bool:
@@ -578,24 +631,34 @@ class Engine:
             g = games.get(self.team_game.get(pl.team, "")) if pl else None
             return bool(g and g.status in ("live", "half"))
 
+        frame = {
+            "type": "state", "mode": "ffb" if s.ffb else "nfl", "ffb_available": self.league is not None,
+            "clock": {"label": self.wall_label(now), "sim": now, "duration": self.clock.duration,
+                      "speed": self.clock.speed, "paused": not self.clock.running, "auto": s.auto, "live": self.live,
+                      "redzone": s.redzone, "riding": self.rz_riding(s) and self.drives.get(s.focus or "").red_zone},
+            "feeds": self.feed_rows(s, games, marks), "active": self.active_card(s),
+            "favs": sorted(s.favs), "teams": sorted(self.team_game),
+            "chatter": self.chatter.recent(s.focus), "audio": self.audio.for_game(s.focus),
+            "pregame": self.reel is not None and self.waiting(),        # the reel is there to go back to [B]
+        }
+        return {**frame, **(self.ffb_layer(s, now, live) if s.ffb else self.nfl_layer(s, now, games.get(s.focus or "")))}
+
+    def wall_label(self, now: float) -> str:
+        wall = (self._t0 + timedelta(seconds=now)).astimezone(ET)
+        return f"WK{self.week} · {wall:%a %H:%M}".upper()
+
+    def feed_rows(self, s: Session, games: dict[str, Game] | None = None, marks: dict[str, str] | None = None) -> list[dict]:
+        """The FEEDS rail: on now first, then by kickoff. `marks` come from the layer that is up."""
+        if games is None:
+            games = {g.id: g for g in self.provider.games_at(self.clock.now())}
+        marks = marks or {}
         order = {"live": 0, "half": 0, "pre": 1, "final": 2}
-        feeds = [{
+        return [{
             "game_id": g.id, "label": self.label(g.id), "clock": g.clock, "score": f"{g.away_score}-{g.home_score}",
             "status": {"pre": "PRE", "half": "HT", "final": "FINAL"}.get(g.status, f"Q{g.quarter}" if g.quarter <= 4 else "OT"),
             "mark": marks.get(g.id), "focused": g.id == s.focus, "fav": g.home in s.favs or g.away in s.favs,
             "rz": g.status == "live" and self.drives.get(g.id).red_zone,
         } for g in sorted(games.values(), key=lambda g: (order[g.status], g.kickoff, g.id))]
-        wall = (self._t0 + timedelta(seconds=now)).astimezone(ET)
-        frame = {
-            "type": "state", "mode": "ffb" if s.ffb else "nfl", "ffb_available": self.league is not None,
-            "clock": {"label": f"WK{self.week} · {wall:%a %H:%M}".upper(), "sim": now, "duration": self.clock.duration,
-                      "speed": self.clock.speed, "paused": not self.clock.running, "auto": s.auto, "live": self.live,
-                      "redzone": s.redzone, "riding": self.rz_riding(s) and self.drives.get(s.focus or "").red_zone},
-            "feeds": feeds, "active": self.active_card(s),
-            "favs": sorted(s.favs), "teams": sorted(self.team_game),
-            "chatter": self.chatter.recent(s.focus), "audio": self.audio.for_game(s.focus),
-        }
-        return {**frame, **(self.ffb_layer(s, now, live) if s.ffb else self.nfl_layer(s, now, games.get(s.focus or "")))}
 
     def nfl_layer(self, s: Session, now: float, g) -> dict:                       # noqa: ANN001
         """Status bar = the focused game's real scoreboard; board = ACTION; ghosts = each side's hot hand."""
@@ -633,6 +696,22 @@ class Engine:
     # ── control ───────────────────────────────────────────────────────────
     async def handle(self, s: Session, m: dict) -> None:
         t = m.get("type")
+        if t == "reel" and self.reel is not None:              # [B]: the pregame reel or the feed, by choice
+            on = bool(m["on"]) if "on" in m else not s.reel
+            if on and not s.reel and self.waiting():
+                await self.enter_reel(s)
+            elif not on and s.reel:
+                await self.leave_reel(s, by_hand=True)
+            return
+        if s.reel:
+            if t == "focus_game" and m.get("game_id") in self.team_game.values():     # picking today's feed is leaving the reel
+                await self.leave_reel(s, by_hand=True)
+                await self.handle(s, m)
+                return
+            if t == "favs" and isinstance(m.get("teams"), list):                    # kept for the feed, when it comes
+                s.favs = {x for x in m["teams"] if x in TEAMS}
+            await self.reel.handle(s, m)
+            return
         if t == "viewer" and m.get("team_key") in self.teams:
             s.viewer, s.focus, s.ghost = m["team_key"], None, {"you": None, "them": None}
             await self.catch_up(s)
@@ -765,8 +844,30 @@ def launch(e: Engine) -> list[asyncio.Task]:
     """The tasks that play one engine out; cancel them all to retire it."""
     tasks = [asyncio.create_task(e.run()), asyncio.create_task(e.ticker()), asyncio.create_task(e.league_pump())]
     if e.chatter_kind == "reddit":
-        tasks.append(asyncio.create_task(RedditChatter(e.chatter, lambda: e.provider.games_at(e.clock.now())).run()))
+        tasks.append(asyncio.create_task(RedditChatter(e.chatter, e.crowd_games).run()))
+    if e.live:
+        tasks.append(asyncio.create_task(pregame_reel(e)))
     return tasks
+
+
+async def pregame_reel(e: Engine) -> None:
+    """Build last week's reel off to the side and, while nothing has kicked off,
+    play it to the sessions that have not asked for the feed. Cancelled with
+    the engine's other tasks. Nothing cached and nothing fetchable: no reel,
+    and the field waits the way it always did."""
+    from .reel_console import PregameReel
+    try:
+        reel = await asyncio.to_thread(PregameReel.build, e)
+    except Exception as exc:                                  # noqa: BLE001 — a task's exception is otherwise never seen
+        log.warning("pregame reel not built: %s", exc)
+        return
+    if reel is None:
+        return
+    e.reel = reel
+    for s in list(e.sessions):
+        if e.waiting() and s.reel is not False:
+            await e.enter_reel(s)
+    await asyncio.gather(reel.run(), reel.ticker())
 
 
 async def start(hub) -> list[asyncio.Task]:                   # noqa: ANN001
@@ -783,8 +884,7 @@ async def on_connect(ws: WebSocket) -> None:
     if engine:
         s = Session(ws, engine.default_viewer, ffb=engine.league is not None)
         _by_ws[ws] = s
-        engine.sessions.add(s)
-        await engine.catch_up(s)
+        await engine.attach(s)
 
 
 async def on_message(ws: WebSocket, msg: dict) -> None:
@@ -796,4 +896,4 @@ async def on_message(ws: WebSocket, msg: dict) -> None:
 def on_disconnect(ws: WebSocket) -> None:
     s = _by_ws.pop(ws, None)
     if engine and s:
-        engine.sessions.discard(s)
+        engine.detach(s)

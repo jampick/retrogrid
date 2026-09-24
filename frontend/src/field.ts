@@ -52,6 +52,9 @@ export class Field {
     this.canvas.style.width = `${BW * this.scale}px`; this.canvas.style.height = `${BH * this.scale}px`;
   }
 
+  /** Back to the empty field: the play on it belonged to another show. */
+  clear(): void { this.play = null; this.badge = ""; this.t = 0; }
+
   show(play: PlayFrame, settled = false): void {
     this.play = play;
     this.t = settled ? play.duration + 30 : -PRE_ROLL;

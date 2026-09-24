@@ -5,7 +5,7 @@ from pathlib import Path
 
 from retrogrid.models import Game, PlayRow
 from retrogrid.providers.audio import AudioTable
-from retrogrid.providers.chatter import TEAMS, ChatterBox, ChatterLine, RedditChatter, StubChatter, clean, parse_feed, route
+from retrogrid.providers.chatter import PREGAME, TEAMS, ChatterBox, ChatterLine, RedditChatter, StubChatter, clean, parse_feed, route, worth_polling
 
 FEED = Path(__file__).parent / "fixtures" / "reddit" / "comments.rss"
 GAMES = [Game("2026_02_CLE_TB", "TB", "CLE", 0, "live"), Game("2026_02_PHI_TEN", "TEN", "PHI", 0, "live"),
@@ -49,6 +49,18 @@ def test_reddit_url_is_one_request_for_every_live_game():
     url = RedditChatter(ChatterBox(), lambda: GAMES).url(GAMES)
     assert url.startswith("https://www.reddit.com/r/nfl+") and url.endswith("/comments/.rss?limit=100")
     assert "buccaneers" in url and "CHIBears" in url and url.count("+") == 8
+
+
+def test_reddit_is_asked_before_kickoff_but_not_all_morning():
+    """The game thread goes up early and people are in it; the rail should be too. A 1 pm
+    game at 8 am is not worth a request a minute, and a game that is over never is."""
+    soon = Game("2026_03_ATL_GB", "GB", "ATL", 20_000, "pre")
+    later = Game("2026_03_KC_BUF", "BUF", "KC", 20_000 + PREGAME + 1, "pre")
+    on = Game("2026_03_SEA_SF", "SF", "SEA", 0, "live")
+    done = Game("2026_03_NYJ_MIA", "MIA", "NYJ", 0, "final")
+    assert [g.id for g in worth_polling([soon, later, on, done], now=19_000)] == [soon.id, on.id]
+    assert [g.id for g in worth_polling([soon, later], now=0)] == []
+    assert [g.id for g in worth_polling([soon], now=30_000)] == [soon.id]         # kickoff pushed back: still "pre", still asked
 
 
 def test_stub_crowd_is_deterministic_and_two_sided():

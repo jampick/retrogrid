@@ -196,13 +196,18 @@ function onFrame(f: Frame): void {
     case "update":
       ui.update(f);
       break;
-    case "state":
+    case "state": {
+      // the pregame reel and the feed share one socket: a play left over from the other one comes off the field
+      const cur = field.current;
+      if (cur && !!cur.reel !== !!f.reel) { field.clear(); recent.length = 0; queue.length = 0; replayAt = -1; }
       // an older server (no NFL layer) sends none of these: it is the fantasy console, nothing more
       state = { ...f, mode: f.mode ?? "ffb", ffb_available: f.ffb_available ?? true, favs: f.favs ?? [], teams: f.teams ?? [],
                 chatter: f.chatter ?? [], audio: f.audio ?? null };
       ui.render(state); ui.renderRadio(radio, state);
+      field.hint = state.pregame && !state.reel ? "PRESS B: LAST WEEK'S REEL" : "";
       ghosts.set("you", f.ghosts.you); ghosts.set("them", f.ghosts.them);
       break;
+    }
     case "play":
       if (!f.focus) break;
       if (f.settled || f.alert) { queue.length = 0; present(f); }     // catch-up, tapped or auto-directed
@@ -282,6 +287,7 @@ window.addEventListener("keydown", (e) => {
   else if (k === "arrowright") send({ type: "sim", action: "skip", value: 300 });
   else if (k === "arrowleft") send({ type: "sim", action: "skip", value: -300 });
   else if (k === "a") send({ type: "auto" });
+  else if (k === "b" && (state?.reel?.pregame || state?.pregame)) send({ type: "reel", on: !state?.reel });
   else if (k === "r") setRedzone(!state?.clock.redzone);
   else if (k === "c") toggleCycle();
   else if (k === "[" || k === ",") replay(-1);

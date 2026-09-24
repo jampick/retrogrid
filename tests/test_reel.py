@@ -179,3 +179,51 @@ def test_the_show_runs_card_play_result_and_never_says_live(monkeypatch):
     assert next(t for t in shown["threats"] if t["current"])["headline"] == first.headline
     assert shown["active"]["player_id"] == e.weeks[0].stars[first.play.play_id].player_id
     assert e._jump == 1                                                            # [→] asked for the next item
+
+
+def test_pregame_reel_fills_the_wait_and_leaves_at_kickoff(monkeypatch):
+    """Before anything kicks off a live console shows last week's reel; picking today's feed
+    (or [B]) is a choice that sticks, and the first kickoff brings everyone back to the feed."""
+    from conftest import needs_slate
+    from retrogrid import console, reel_console as rc
+    if needs_slate.args[0]:
+        return
+    monkeypatch.setenv("RETROGRID_LEAGUE", "")
+    monkeypatch.setenv("RETROGRID_START", "0")                                    # the sim slate, an hour before its first game
+    monkeypatch.setattr(rc, "refresh_cache", lambda: None)
+
+    async def go() -> None:
+        e = console.Engine()
+        e.rebuild()
+        assert e.waiting() and e.kickoff_label().startswith("KICKOFF ")
+        e.reel = rc.PregameReel(e, _weeks())
+        sock = _Sock()
+        s = console.Session(ws=sock)                                               # type: ignore[arg-type]
+        await e.attach(s)
+        assert s.reel is True and s in e.reel.sessions and s not in e.sessions
+        state = next(f for f in sock.frames if f["type"] == "state")
+        assert state["reel"]["pregame"] == e.kickoff_label() and state["reel"]["week"] == 15
+        assert [f["status"] for f in state["feeds"]] == ["PRE"] * len(e.slate.games)        # today's games, not last week's finals
+        game = state["feeds"][0]["game_id"]
+
+        sock.frames.clear()
+        await e.handle(s, {"type": "focus_game", "game_id": game})                  # clicking today's feed leaves the reel
+        assert s.reel is False and s in e.sessions and s not in e.reel.sessions
+        state = sock.frames[-1]
+        assert state["type"] == "state" and "reel" not in state and state["pregame"] is True
+        await e.end_wait()
+        assert s.reel is False                                                     # a pregame tick changes nothing
+        await e.handle(s, {"type": "reel"})                                        # [B]: back to the reel
+        assert s.reel is True and sock.frames[-1]["type"] == "state" and "reel" in sock.frames[-1]
+
+        e.clock.seek(min(g.kickoff for g in e.slate.games) + 1)
+        assert not e.waiting()
+        await e.end_wait()
+        assert s.reel is None and s in e.sessions and not e.reel.sessions
+        await e.handle(s, {"type": "reel", "on": True})                            # nothing to go back to once the day is on
+        assert s.reel is None and sock.frames[-1].get("pregame") is False
+        late = console.Session(ws=_Sock())                                         # type: ignore[arg-type]
+        await e.attach(late)
+        assert late.reel is None and late in e.sessions
+
+    asyncio.run(go())

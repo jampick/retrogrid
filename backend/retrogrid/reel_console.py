@@ -122,6 +122,7 @@ class ReelEngine(Engine):
         self.deltas_by_play: dict = {}
         self.air_est = _air_estimator()
         self.sessions: set[Session] = set()
+        self.reel = None               # a live Engine's pregame reel is one of these; this one is the whole show
         self.favs: set[str] = set(FAVS)
         self.rng = random.Random(seed)
         self.segments, self.items = build_rundown(self.weeks, self.favs, self.rng)
@@ -375,12 +376,59 @@ class ReelEngine(Engine):
         await s.send(self.state_frame(s))
 
 
+class PregameReel(ReelEngine):
+    """The same show, filling a live console's wait for kickoff. Only finished
+    weeks on disk (never the shipped sim ranked on the spot: a 2025 Sunday is
+    not "last week"), and today's feeds stay in the rail so one click, or [B],
+    brings the real game back. The host Engine decides who is watching."""
+
+    def __init__(self, host: Engine, weeks: list[ReelWeek]) -> None:
+        super().__init__(weeks=weeks)
+        self.host = host
+
+    @classmethod
+    def build(cls, host: Engine) -> PregameReel | None:
+        """Blocking: refresh the cache if nflverse moved (offline is fine), then
+        load it. None when no finished week of this season is on disk."""
+        refresh_cache()
+        weeks = load_weeks(season=host.slate.season)
+        if not weeks:
+            return None
+        try:
+            from .tools.build_sprites import main as sprites
+            sprites(["--reel"])
+        except Exception as e:                             # noqa: BLE001 — busts are a nicety
+            log.warning("pregame reel: sprites skipped (%s)", e)
+        return cls(host, weeks)
+
+    async def ticker(self) -> None:
+        """Hourly while the wait is on; once the day is under way the cache can wait for next time."""
+        while True:
+            await asyncio.sleep(60.0)
+            if time.monotonic() - self._checked >= REFRESH and self.host.waiting():
+                self._checked = time.monotonic()
+                await asyncio.to_thread(refresh_cache)
+
+    def reload(self) -> None:
+        weeks = load_weeks(season=self.host.slate.season) or self.weeks
+        self.weeks, self.directory = weeks, ReelDirectory(weeks)
+        self.segments, self.items = build_rundown(self.weeks, self.favs, self.rng)
+
+    def state_frame(self, s: Session) -> dict:
+        f = super().state_frame(s)
+        f["feeds"] = self.host.feed_rows(s)                # today's games, PRE, where the viewer can click back to them
+        f["clock"]["label"] = self.host.wall_label(self.host.clock.now())
+        if "reel" in f:
+            f["reel"]["pregame"] = self.host.kickoff_label()
+        return f
+
+
 def refresh_cache() -> None:
     """Blocking: ask nflverse whether the season file moved, and rank whatever is new.
     Offline is fine: the show goes on with what is on disk."""
     if os.environ.get("RETROGRID_REEL_REFRESH", "1") == "0":
         return
-    from .cli import season_now
+    from .watch import season_now
     from .tools.build_reel import refresh
     try:
         built = refresh(season_now())

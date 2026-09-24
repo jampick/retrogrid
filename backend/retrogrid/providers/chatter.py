@@ -31,6 +31,7 @@ log = logging.getLogger("retrogrid.chatter")
 UA = "RetroGrid/0.1 (personal hobby app)"
 KEEP = 60                          # lines remembered per game
 MAX_LEN = 160
+PREGAME = 3 * 3600.0               # seconds before kickoff the game thread is looked for; r/nfl's bot posts it about an hour out
 
 # abbr: (city, nickname, subreddit)
 TEAMS: dict[str, tuple[str, str, str]] = {
@@ -152,11 +153,19 @@ def parse_feed(xml: str, games: Iterable[Game]) -> list[ChatterLine]:
     return out[::-1]
 
 
+def worth_polling(games: Iterable[Game], now: float) -> list[Game]:
+    """The games a poll is for: on now, or kicking off within PREGAME. The game
+    thread often goes up early and the crowd is already in it; a rail that only
+    wakes at kickoff misses that, and the check costs one request a minute."""
+    return [g for g in games if g.status in ("live", "half") or g.status == "pre" and g.kickoff - now <= PREGAME]
+
+
 class RedditChatter:
-    """One combined feed, once a minute, for as long as any game is on."""
+    """One combined feed, once a minute, from a few hours before the first
+    kickoff until the last game ends."""
 
     def __init__(self, box: ChatterBox, games_now, every: float = 65.0) -> None:   # noqa: ANN001
-        self.box, self.games_now, self.every = box, games_now, every
+        self.box, self.games_now, self.every = box, games_now, every       # games_now: the games worth a poll right now
 
     def url(self, games: Iterable[Game]) -> str:
         subs = ["nfl"] + sorted({TEAMS[t][2] for g in games for t in (g.home, g.away) if t in TEAMS})
@@ -175,7 +184,7 @@ class RedditChatter:
     async def run(self) -> None:
         while True:
             wait = self.every
-            games = [g for g in self.games_now() if g.status in ("live", "half")]
+            games = list(self.games_now())
             if games:
                 try:
                     status, body, reset = await asyncio.to_thread(self.fetch, self.url(games))

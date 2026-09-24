@@ -51,6 +51,7 @@ export interface ReelState {
   at: string;           // "4/10" within the segment
   phase: "card" | "play" | "result" | "replay";
   week: number; season: number;
+  pregame?: string;     // "KICKOFF THU 20:15": this reel is filling a live console's wait; today's feeds are in the rail
   segments: { title: string; count: number; start: number; current: boolean }[];
 }
 export interface ReelTag { week: number; number: string; rank: number; score: number; tag: string; headline: string; wpa: number | null; replay: boolean }
@@ -100,6 +101,7 @@ export interface ConsoleState {
   ghosts: { you: GhostInfo | null; them: GhostInfo | null };
   active: ActiveCard | null;
   reel?: ReelState;
+  pregame?: boolean;    // live, before kickoff, and the reel is there to go back to [B]
 }
 
 export interface Keyframe { t: number; x: number; y: number; z?: number }   // z: ball height, yards

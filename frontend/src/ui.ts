@@ -125,8 +125,9 @@ export class Ui {
 
   private feeds(s: ConsoleState): void {
     const live = s.feeds.filter((f) => !["FINAL", "PRE"].includes(f.status)).length;
-    $("feeds-title").textContent = s.reel ? "FINALS" : "FEEDS";
-    $("feeds-count").textContent = s.reel ? `WK ${s.reel.week}` : `${live} LIVE`;
+    const pregame = s.reel?.pregame;                                   // the reel is filling the wait: today's feeds stay listed
+    $("feeds-title").textContent = s.reel && !pregame ? "FINALS" : "FEEDS";
+    $("feeds-count").textContent = pregame ? pregame : s.reel ? `WK ${s.reel.week}` : `${live} LIVE`;
     $("feeds").innerHTML = s.feeds.map((f) => {
       const mark = f.mark === "hurt" ? `<span class="them">⚠</span>` : f.mark === "help" ? `<span class="you">▲</span>`
         : f.mark === "hot" ? `<span class="alert">⚡</span>` : `<span></span>`;
@@ -203,8 +204,10 @@ export class Ui {
       "[T] THEME · [F] FOLLOW TEAMS",
       "[←→] PREV / NEXT PLAY · [SPACE] HOLD",
       "CLICK A ROW TO JUMP · [N] MUTE CUES",
-    ].join("<br>") : [
+      s.reel.pregame ? "[B] TODAY'S FEED · OR CLICK IT" : "",
+    ].filter(Boolean).join("<br>") : [
       "[T] THEME · [F] FOLLOW TEAMS",
+      s.pregame ? "[B] LAST WEEK'S REEL WHILE YOU WAIT" : "",
       `[A] AUTO-DIRECT ${s.clock.auto ? "ON" : "OFF"} · [R] RED ZONE ${s.clock.redzone ? "ON" : "OFF"}`,
       "[M] RADIO · [H] OTHER BOOTH · [-][=] VOL · [N] MUTE CUES",
       s.clock.live ? "" : "[SPACE] HOLD · [1-4] RATE · [←→] SKIP",

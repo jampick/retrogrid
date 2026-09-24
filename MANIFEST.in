@@ -1,0 +1,3 @@
+# setuptools auto-includes tests/test*.py but not the support files the tests import.
+recursive-include tests *.py *.rss *.json *.csv *.parquet *.toml *.txt
+global-exclude __pycache__ *.pyc

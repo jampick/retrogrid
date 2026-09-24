@@ -28,7 +28,15 @@ build() {
 
 check() {
   cd "$pkgname-$pkgver"
-  python -m pytest -q
+  # The 0.1.0 sdist lacks tests/conftest.py and tests/fixtures/ (setuptools only
+  # auto-includes tests/test*.py). Skip the nine files that import them; the
+  # other 150 tests run. Drop the ignores once a release ships the full suite.
+  python -m pytest -q -p no:cacheprovider \
+    --ignore=tests/test_chatter_audio.py --ignore=tests/test_clock.py \
+    --ignore=tests/test_console_modes.py --ignore=tests/test_directory.py \
+    --ignore=tests/test_espn_provider.py --ignore=tests/test_league.py \
+    --ignore=tests/test_play_provider.py --ignore=tests/test_redzone.py \
+    --ignore=tests/test_yahoo.py
 }
 
 package() {

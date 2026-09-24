@@ -1,6 +1,6 @@
 pkgbase = retrogrid
 	pkgdesc = Cyberpunk NFL gameday console: every live game, the plays that matter as neon diagrams, follows the Omarchy theme
-	pkgver = 0.1.0
+	pkgver = 0.1.1
 	pkgrel = 1
 	url = https://github.com/jampick/retrogrid
 	arch = any
@@ -24,13 +24,7 @@ pkgbase = retrogrid
 	depends = hicolor-icon-theme
 	optdepends = chromium: chromeless app window (any Chromium-family browser works)
 	optdepends = omarchy: theme-set hook for an instant retune, see /usr/share/retrogrid
-	source = https://github.com/jampick/retrogrid/releases/download/v0.1.0/retrogrid-0.1.0.tar.gz
-	source = retrogrid.desktop
-	source = retrogrid.svg
-	source = omarchy-theme-hook.sh
-	sha256sums = eabe58a4bb08b6f17eb2987567407f783eb64e5f2ad66271fb6d7f05b25186c1
-	sha256sums = 054f4eb7259e650c33acea5af3e33932f70548627a82a9dc1260ca4d0b61879b
-	sha256sums = ca07a0ffa7da6f9fd9fc35eecfddc3ffe36be47fd696dda2973f7c132ac1c8f1
-	sha256sums = 74548fb6bcee2fe1f61bb377d2facb9a29e791c3cc25e534a10b4f6e1d4a736d
+	source = https://github.com/jampick/retrogrid/releases/download/v0.1.1/retrogrid-0.1.1.tar.gz
+	sha256sums = SKIP
 
 pkgname = retrogrid

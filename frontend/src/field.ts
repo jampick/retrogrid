@@ -38,6 +38,7 @@ export class Field {
   badge = "";                       // what is on screen: "LIVE", "REPLAY", "LAST PLAY" — always said, never guessed
   badgeKind: "live" | "replay" | "last" | "reel" = "live";     // replay/last also lose the glow: tape, not signal. reel: a show, full brightness, no lamp
   glow = true;                      // light-model pass; the contact sheet turns it off for density
+  hint = "";                        // under AWAITING FEED, steady: what else the empty field could be showing
 
   constructor(private canvas: HTMLCanvasElement) {
     this.buf.width = BW; this.buf.height = BH;
@@ -53,7 +54,7 @@ export class Field {
   }
 
   /** Back to the empty field: the play on it belonged to another show. */
-  clear(): void { this.play = null; this.badge = ""; this.t = 0; }
+  clear(): void { this.play = null; this.badge = ""; this.t = 0; this.camY = this.camTarget = 20; }
 
   show(play: PlayFrame, settled = false): void {
     this.play = play;
@@ -238,6 +239,7 @@ export class Field {
         const s = "AWAITING FEED";
         drawText(this.b, s, Math.round((BW - textWidth(s)) / 2), 120, dim);
       }
+      if (this.hint) drawText(this.b, this.hint, Math.round((BW - textWidth(this.hint)) / 2), 132, hot);
       return;
     }
     this.b.fillStyle = rgba(palette.role("bg"), 0.75); this.b.fillRect(0, 0, BW, 9);

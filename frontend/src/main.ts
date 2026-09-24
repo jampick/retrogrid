@@ -204,6 +204,7 @@ function onFrame(f: Frame): void {
       state = { ...f, mode: f.mode ?? "ffb", ffb_available: f.ffb_available ?? true, favs: f.favs ?? [], teams: f.teams ?? [],
                 chatter: f.chatter ?? [], audio: f.audio ?? null };
       ui.render(state); ui.renderRadio(radio, state);
+      field.hint = state.pregame && !state.reel ? "PRESS B: LAST WEEK'S REEL" : "";
       ghosts.set("you", f.ghosts.you); ghosts.set("them", f.ghosts.them);
       break;
     }

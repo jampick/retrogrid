@@ -33,6 +33,7 @@ from .providers.slate import DEFAULT_SLATE_DIR, load_slate, slate_available
 from .providers.league import default_viewer, make_league
 from .scoring import DEFAULT_RULES, ActionBoard, ActionEvent, LeagueIndex, MatchupBoard, ScoringState, ThreatEvent, ThreatHub
 from .scoring.action import HOT_THRESHOLD
+from .scoring.engine import statline_text
 from .scoring.drive import DriveTracker
 from .sim.clock import SimClock
 
@@ -42,6 +43,7 @@ RZ_LINGER = 5.0                    # wall seconds a resolved drive keeps the scr
 RECENT_HALF_LIFE = 900.0           # sim seconds; "who matters right now"
 ET = ZoneInfo("America/New_York")
 LIVE = os.environ.get("RETROGRID_LIVE") == "1"          # today's real games off ESPN (scripts/build_live.py)
+REEL = os.environ.get("RETROGRID_REEL") == "1"          # the highlight show of finished weeks (reel_console.py)
 SLATE_DIR = paths.LIVE_SLATE if LIVE else DEFAULT_SLATE_DIR
 CHATTER = os.environ.get("RETROGRID_CHATTER", "reddit" if LIVE else "stub").lower()      # reddit | stub | off
 FAVS = [t for t in os.environ.get("RETROGRID_FAVS", "").upper().replace(",", " ").split() if t in TEAMS]
@@ -524,21 +526,7 @@ class Engine:
                 "heat": max(0.0, min(1.0, pts / 24.0)), "sprite": self.sprite(best)}
 
     def statline(self, pid: str) -> str:
-        st = self.state.statline(pid)
-        g = lambda k: int(round(st.get(k, 0)))                # noqa: E731
-        parts = []
-        if st.get("pass_att"):
-            parts.append(f"{g('pass_cmp')}/{g('pass_att')} · {g('pass_yd')} YD · {g('pass_td')} TD" + (f" · {g('pass_int')} INT" if st.get("pass_int") else ""))
-        if st.get("rush_att"):
-            parts.append(f"{g('rush_att')} CAR · {g('rush_yd')} YD" + (f" · {g('rush_td')} TD" if st.get("rush_td") else ""))
-        if st.get("tgt"):
-            parts.append(f"{g('rec')} REC · {g('rec_yd')} YD" + (f" · {g('rec_td')} TD" if st.get("rec_td") else ""))
-        if st.get("fg_att") or st.get("xp_att"):
-            made = sum(g(k) for k in ("fg_0_39", "fg_40_49", "fg_50"))
-            parts.append(f"{made}/{g('fg_att')} FG · {g('xp')}/{g('xp_att')} XP")
-        if pid.startswith("DEF-"):
-            parts.append(f"{g('pts_allowed')} PA · {g('def_sack')} SACK · {g('def_int') + g('def_fum_rec')} TO" + (f" · {g('def_td')} TD" if st.get("def_td") else ""))
-        return "   ".join(parts) or "NO STATS YET"
+        return statline_text(self.state.statline(pid), pid.startswith("DEF-"))
 
     def active_card(self, s: Session) -> dict | None:
         p = s.last_play
@@ -704,6 +692,27 @@ def play_family(p: PlayRow) -> str:
     return "other"
 
 
+def sample_reel(n: int = 40, week: int | None = None) -> dict:
+    """The reel's picks for one cached week (default: the newest), best first:
+    the contact sheet as a check on the ranker rather than the grammar."""
+    from .reel_console import ReelEngine, load_reel
+    weeks = engine.weeks if isinstance(engine, ReelEngine) else load_reel()
+    w = next((x for x in weeks if x.week == week), weeks[0] if weeks else None)
+    if w is None:
+        return {"plays": [], "families": {}, "pool": 0}
+    e = ReelEngine([w])
+    s = Session(ws=None)                                      # type: ignore[arg-type]
+    frames, counts = [], {}
+    for k in w.picks[:n]:
+        f = Engine.play_frame(e, s, k.play, focus=False, alert=False)
+        f["family"] = play_family(k.play)
+        f["reel"] = {"week": w.week, "number": f"#{k.rank}", "rank": k.rank, "score": k.score, "tag": k.tag,
+                     "headline": k.headline, "wpa": k.play.wpa, "replay": False}
+        counts[k.tag] = counts.get(k.tag, 0) + 1
+        frames.append(f)
+    return {"plays": frames, "families": dict(sorted(counts.items())), "pool": len(w.picks), "weeks": [x.week for x in weeks]}
+
+
 def sample_plays(n: int = 24, seed: int = 0, family: str | None = None, viewer: str = "t01",
                  only: str | None = None, grep: str | None = None) -> dict:
     """N seeded-random compiled plays from the slate, as ordinary PlayFrames.
@@ -744,6 +753,10 @@ _by_ws: dict[WebSocket, Session] = {}
 
 async def start(hub) -> list[asyncio.Task]:                   # noqa: ANN001
     global engine
+    if REEL:
+        from .reel_console import ReelEngine
+        engine = ReelEngine()
+        return [asyncio.create_task(engine.run()), asyncio.create_task(engine.ticker())]
     if not slate_available(SLATE_DIR):
         raise RuntimeError("no slate — run scripts/fetch_nflverse.py then scripts/build_slate.py (or build_live.py)")
     engine = Engine()

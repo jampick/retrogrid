@@ -20,6 +20,7 @@ let n = Number(q.get("n") ?? 28);
 let speed = Number(q.get("speed") ?? 1);
 let settled = q.get("settled") === "1";
 const grep = q.get("grep") ?? "";          // narrow the pool to descriptions containing this text
+const reel = Number(q.get("reel") ?? 0);   // 1: the reel's picks for the newest cached week, in rank order. N>1: week N
 let paused = false;
 let cells: Cell[] = [];
 let zoom: Cell | null = null;
@@ -32,12 +33,17 @@ const seen = new IntersectionObserver((es) => {
 function url(): void {
   const p = new URLSearchParams({ family, seed: String(seed), n: String(n), speed: String(speed), settled: settled ? "1" : "0" });
   if (grep) p.set("grep", grep);
+  if (reel) p.set("reel", String(reel));
   history.replaceState(null, "", `?${p}`);
 }
 
 function esc(s: string): string { return s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!)); }
 
 function caption(p: SheetPlay): string {
+  if (p.reel) {
+    const wpa = p.reel.wpa === null ? "no wpa" : `wpa ${(p.reel.wpa * 100).toFixed(0)}%`;
+    return `<b>${esc(p.reel.number)} · ${p.reel.score.toFixed(1)} · ${esc(p.reel.tag)}</b><span>${esc(p.reel.headline)}</span><p>${esc(p.label)} · ${esc(p.situation)} · ${wpa}<br>${esc(p.desc)}</p>`;
+  }
   return `<b>${esc(p.template)}</b><span>${esc(p.result)}</span><p>${esc(p.desc)}</p>`;
 }
 
@@ -55,7 +61,7 @@ async function load(): Promise<void> {
   url();
   const only = q.get("play");
   const r = await fetch(`/api/plays/sample?n=${n}&seed=${seed}&family=${family}` + (only ? `&play=${encodeURIComponent(only)}` : "")
-    + (grep ? `&grep=${encodeURIComponent(grep)}` : ""));
+    + (grep ? `&grep=${encodeURIComponent(grep)}` : "") + (reel ? `&reel=${reel}` : ""));
   const data: Sample = await r.json();
   flags = await (await fetch("/api/plays/flags")).json();
   const total = Object.entries(data.families).filter(([k]) => k !== "td").reduce((a, [, v]) => a + v, 0);

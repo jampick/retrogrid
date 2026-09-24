@@ -2,7 +2,8 @@
 
     retrogrid                 SIM SUNDAY: the shipped slate, no downloads, no keys
     retrogrid live            today's real games off ESPN (fetches a few MB first)
-    retrogrid fetch | build-slate | sprites | yahoo-auth | find-stream
+    retrogrid reel            a looping highlight show of the weeks already played
+    retrogrid fetch | build-slate | build-reel | sprites | yahoo-auth | find-stream
                               the data tools (each takes --help)
     retrogrid paths           where data lives on this machine
 """
@@ -21,7 +22,7 @@ from datetime import date
 from importlib import import_module
 from pathlib import Path
 
-TOOLS = {"fetch": "fetch_nflverse", "build-slate": "build_slate", "build-live": "build_live",
+TOOLS = {"fetch": "fetch_nflverse", "build-slate": "build_slate", "build-live": "build_live", "build-reel": "build_reel",
          "sprites": "build_sprites", "yahoo-auth": "yahoo_auth", "find-stream": "find_stream"}
 STALE = 6 * 3600.0            # LIVE re-pulls this season's rosters/stats when older than this
 BROWSERS = ("chromium", "chromium-browser", "google-chrome-stable", "google-chrome", "brave", "brave-browser",
@@ -83,6 +84,26 @@ def prepare_live(args: argparse.Namespace) -> int:
     return tool("sprites", ["--live"])
 
 
+def prepare_reel(args: argparse.Namespace) -> int:
+    """Best effort: every step can fail (offline, offseason) and the show still
+    runs on whatever is cached, or on the shipped Sunday if nothing is."""
+    from .providers.reel import load_weeks
+    from .tools.build_reel import refresh
+    for season in (season_now(), season_now() - 1):                        # last year only while this one has no games
+        if not args.keep:
+            try:
+                refresh(season)
+            except Exception as e:                                         # noqa: BLE001
+                print(f"reel: could not refresh {season} ({e}); using what is on disk", file=sys.stderr)
+        if load_weeks(season=season):
+            break
+    try:
+        tool("sprites", ["--reel"])
+    except Exception as e:                                                 # noqa: BLE001
+        print(f"reel: sprites skipped ({e})", file=sys.stderr)
+    return 0
+
+
 def serve(args: argparse.Namespace) -> int:
     for flag, var in (("league", "LEAGUE"), ("favs", "FAVS"), ("speed", "SPEED"), ("start", "START"), ("chatter", "CHATTER")):
         if (v := getattr(args, flag, None)) is not None:
@@ -91,13 +112,17 @@ def serve(args: argparse.Namespace) -> int:
         os.environ["RETROGRID_LIVE"] = "1"
         if rc := prepare_live(args):
             return rc
+    if args.cmd == "reel":
+        os.environ["RETROGRID_REEL"] = "1"
+        prepare_reel(args)
     from . import paths
     if not (paths.WEB / "dist" / "app.js").is_file():
         print("frontend bundle missing — in a checkout, run `npm install && npm run build`", file=sys.stderr)
         return 1
     import uvicorn
     url = f"http://{args.host}:{args.port}/"
-    print(f"RETRO//GRID {'LIVE' if args.cmd == 'live' else 'SIM SUNDAY'} -> {url}   (data: {paths.DATA})")
+    mode = {"live": "LIVE", "reel": "REEL"}.get(args.cmd, "SIM SUNDAY")
+    print(f"RETRO//GRID {mode} -> {url}   (data: {paths.DATA})")
     if not args.no_window:
         paths.DATA.mkdir(parents=True, exist_ok=True)
         threading.Thread(target=open_window, args=(url, args.port, paths.DATA / "chrome-profile"), daemon=True).start()
@@ -125,8 +150,8 @@ def main(argv: list[str] | None = None) -> int:
 
     ap = argparse.ArgumentParser(prog="retrogrid", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name in ("sim", "live"):
-        p = sub.add_parser(name, help="SIM SUNDAY (default)" if name == "sim" else "today's real games")
+    for name in ("sim", "live", "reel"):
+        p = sub.add_parser(name, help={"sim": "SIM SUNDAY (default)", "live": "today's real games", "reel": "highlights of finished weeks, on a loop"}[name])
         p.add_argument("--port", type=int, default=int(os.environ.get("RETROGRID_PORT", "8082")))
         p.add_argument("--host", default="127.0.0.1")
         p.add_argument("--no-window", action="store_true", help="serve only; open the URL yourself")
@@ -134,7 +159,9 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("--favs", help='teams you follow, e.g. "KC BUF"')
         p.add_argument("--chatter", choices=("reddit", "stub", "off"))
         p.add_argument("-v", "--verbose", action="store_true")
-        if name == "sim":
+        if name == "reel":
+            p.add_argument("--keep", action="store_true", help="skip the nflverse check; play what is cached")
+        elif name == "sim":
             p.add_argument("--speed", type=float, help="sim clock multiplier (default 4)")
             p.add_argument("--start", type=float, help="sim seconds to start at")
         else:

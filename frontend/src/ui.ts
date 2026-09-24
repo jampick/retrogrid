@@ -22,6 +22,8 @@ export interface UiHandlers {
   auto(): void;
   redzone(): void;
   cycle(): void;
+  skip(dir: number): void;
+  reelJump(index: number): void;
 }
 
 export class Ui {
@@ -67,6 +69,7 @@ export class Ui {
     const root = document.documentElement;
     if (root.dataset.mode !== s.mode) { root.dataset.mode = s.mode; this.logo.set(s.mode === "ffb" ? "RETRO//GRID" : "RETRO//GRID"); }
     root.dataset.rail = s.mode === "ffb" ? this.rail : "chatter";
+    root.dataset.reel = s.reel ? "1" : "0";
     this.status(s); this.feeds(s); this.threats(s); this.lineup(s); this.chatter(s); this.keys(s);
     this.ghostTag(this.gtYou, s.ghosts.you); this.ghostTag(this.gtThem, s.ghosts.them);
     this.active(s.active);
@@ -82,8 +85,15 @@ export class Ui {
     if (nfl) this.delta.set(s.matchup?.status ?? "", "hot");             // the game clock, not a fantasy margin
     else this.delta.set((d >= 0 ? "{" : "}") + pts(Math.abs(d)), d >= 0 ? "gain" : "them");
     $("clock").textContent = s.clock.label;
-    $("live").textContent = s.clock.paused ? "■ HOLD" : "● ON AIR";
+    $("live").textContent = s.clock.paused ? "■ HOLD" : s.reel ? "▶ REEL" : "● ON AIR";
     $("live").classList.toggle("held", s.clock.paused);
+    if (s.reel) {                                                        // a rundown, not a clock: step through it
+      $("transport").innerHTML = `<b data-d="-1" title="previous play [←]">◂ PREV</b> ${s.reel.index + 1}/${s.reel.total} <b data-d="1" title="next play [→]">NEXT ▸</b>`;
+      $("transport").querySelectorAll<HTMLElement>("b[data-d]").forEach((b) => (b.onclick = () => this.h.skip(Number(b.dataset.d))));
+      ($("scrub").firstElementChild as HTMLElement).style.width = `${(100 * s.clock.sim) / Math.max(1, s.clock.duration)}%`;
+      this.tug(you.points, them.points);
+      return;
+    }
     const rates = [1, 4, 15, 60];
     $("transport").innerHTML = `<b class="${s.clock.auto ? "on" : ""}" data-auto title="auto-direct: cut to big plays [A]">AUTO</b> `
       + `<b class="rz ${s.clock.redzone ? "on" : ""} ${s.clock.riding ? "riding" : ""}" data-rz title="red zone: ride any drive inside the 20 until it resolves [R]">${s.clock.redzone ? "☑" : "☐"} RED ZONE</b> ` + (s.clock.live ? "" : "SIM ") + (s.clock.live ? [] : rates).map((r, i) => `<b data-r="${r}" class="${s.clock.speed === r ? "on" : ""}" title="[${i + 1}]">${r}×</b>`).join("");
@@ -115,7 +125,8 @@ export class Ui {
 
   private feeds(s: ConsoleState): void {
     const live = s.feeds.filter((f) => !["FINAL", "PRE"].includes(f.status)).length;
-    $("feeds-count").textContent = `${live} LIVE`;
+    $("feeds-title").textContent = s.reel ? "FINALS" : "FEEDS";
+    $("feeds-count").textContent = s.reel ? `WK ${s.reel.week}` : `${live} LIVE`;
     $("feeds").innerHTML = s.feeds.map((f) => {
       const mark = f.mark === "hurt" ? `<span class="them">⚠</span>` : f.mark === "help" ? `<span class="you">▲</span>`
         : f.mark === "hot" ? `<span class="alert">⚡</span>` : `<span></span>`;
@@ -129,15 +140,15 @@ export class Ui {
 
   private threats(s: ConsoleState): void {
     const nfl = s.mode === "nfl";
-    $("board-title").textContent = nfl ? "ACTION" : "THREATS";
-    $("scope").textContent = nfl ? (s.favs.length ? `★ ${s.favs.join(" ")}` : "★ FOLLOW [F]") : s.scope === "matchup" ? "◂MATCHUP▸" : "◂LEAGUE▸";
+    $("board-title").textContent = s.reel ? s.reel.title : nfl ? "ACTION" : "THREATS";
+    $("scope").textContent = s.reel ? s.reel.at : nfl ? (s.favs.length ? `★ ${s.favs.join(" ")}` : "★ FOLLOW [F]") : s.scope === "matchup" ? "◂MATCHUP▸" : "◂LEAGUE▸";
     $("threats").innerHTML = s.threats.map((t) => {
       if (t.delta === null) {                                   // ACTION row: tag, team, what happened
         const fresh = !this.seenThreats.has(t.id); this.seenThreats.add(t.id);
         const cls = t.kind === "fav" ? "gain" : "hot";
-        return `<li data-p="${t.play_id}" class="${fresh ? "fresh" : ""} ${t.lead_change ? "lead" : ""}">
-          <span class="alert">⚡</span><span class="${cls}">${esc(t.name)} · ${esc(t.team ?? "")}</span>
-          <span class="dim">${esc(s.feeds.find((f) => f.game_id === t.game_id)?.label ?? "")}</span><span class="hl">${t.lead_change ? "◆ LEAD CHANGE · " : ""}${esc(t.headline)}</span></li>`;
+        return `<li data-p="${t.play_id}" class="${fresh && !s.reel ? "fresh" : ""} ${t.lead_change ? "lead" : ""} ${t.current ? "current" : ""}">
+          <span class="alert">${s.reel ? (t.current ? "▸" : "") : "⚡"}</span><span class="${t.current ? "hot" : cls}">${esc(t.name)}${t.team ? " · " + esc(t.team) : ""}</span>
+          <span class="dim">${esc(t.label ?? s.feeds.find((f) => f.game_id === t.game_id)?.label ?? "")}</span><span class="hl">${t.lead_change ? "◆ LEAD CHANGE · " : ""}${esc(t.headline)}</span></li>`;
       }
       const cls = t.kind === "hurt" ? "them" : "you";
       const fresh = !this.seenThreats.has(t.id);
@@ -152,6 +163,14 @@ export class Ui {
 
   /** The crowd: newest at the bottom, a team's own sub in that team's light. */
   private chatter(s: ConsoleState): void {
+    $("chatter-title").textContent = s.reel ? "RUNDOWN" : "CHATTER";
+    if (s.reel) {                                               // midweek there is no crowd: the rail is the show's running order
+      $("chatter-src").textContent = `${s.reel.season}`;
+      $("chatter").innerHTML = s.reel.segments.map((g) =>
+        `<li data-i="${g.start}" class="seg ${g.current ? "current" : ""}"><span class="src ${g.current ? "alert" : "dim"}">${g.current ? "▸" : ""}</span><span class="txt ${g.current ? "hot" : ""}">${esc(g.title)} <em class="dim">${g.count}</em></span></li>`).join("");
+      $("chatter").querySelectorAll<HTMLElement>("li[data-i]").forEach((li) => (li.onclick = () => this.h.reelJump(Number(li.dataset.i))));
+      return;
+    }
     const g = s.feeds.find((f) => f.focused);
     const [away, home] = g ? g.label.split("@") : ["", ""];
     $("chatter-src").textContent = g ? g.label : "";
@@ -180,7 +199,11 @@ export class Ui {
 
   private keys(s: ConsoleState): void {
     const ffb = s.mode === "ffb";
-    const k = [
+    const k = s.reel ? [
+      "[T] THEME · [F] FOLLOW TEAMS",
+      "[←→] PREV / NEXT PLAY · [SPACE] HOLD",
+      "CLICK A ROW TO JUMP · [N] MUTE CUES",
+    ].join("<br>") : [
       "[T] THEME · [F] FOLLOW TEAMS",
       `[A] AUTO-DIRECT ${s.clock.auto ? "ON" : "OFF"} · [R] RED ZONE ${s.clock.redzone ? "ON" : "OFF"}`,
       "[M] RADIO · [H] OTHER BOOTH · [-][=] VOL · [N] MUTE CUES",

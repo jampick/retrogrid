@@ -130,6 +130,8 @@ class PlayRow(_Wire):
     fumbler_id: str | None = None
     home_score: int = 0                 # score AFTER the play
     away_score: int = 0
+    wpa: float | None = None            # win probability added, posteam's view. nflverse only: the reel ranks on it
+    epa: float | None = None
 
 
 @dataclass

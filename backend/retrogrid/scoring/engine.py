@@ -390,3 +390,21 @@ class ScoringState:
     def game_score(self, game_id: str) -> tuple[int, int] | None:
         """(home, away) as last seen, or None for an unopened game."""
         return self._scores.get(game_id)
+
+
+def statline_text(st: Mapping[str, float], is_def: bool = False) -> str:
+    """A `ScoringState.statline` as the one line the console prints under a name."""
+    g = lambda k: int(round(st.get(k, 0)))                # noqa: E731
+    parts = []
+    if st.get("pass_att"):
+        parts.append(f"{g('pass_cmp')}/{g('pass_att')} · {g('pass_yd')} YD · {g('pass_td')} TD" + (f" · {g('pass_int')} INT" if st.get("pass_int") else ""))
+    if st.get("rush_att"):
+        parts.append(f"{g('rush_att')} CAR · {g('rush_yd')} YD" + (f" · {g('rush_td')} TD" if st.get("rush_td") else ""))
+    if st.get("tgt"):
+        parts.append(f"{g('rec')} REC · {g('rec_yd')} YD" + (f" · {g('rec_td')} TD" if st.get("rec_td") else ""))
+    if st.get("fg_att") or st.get("xp_att"):
+        made = sum(g(k) for k in ("fg_0_39", "fg_40_49", "fg_50"))
+        parts.append(f"{made}/{g('fg_att')} FG · {g('xp')}/{g('xp_att')} XP")
+    if is_def:
+        parts.append(f"{g('pts_allowed')} PA · {g('def_sack')} SACK · {g('def_int') + g('def_fum_rec')} TO" + (f" · {g('def_td')} TD" if st.get("def_td") else ""))
+    return "   ".join(parts) or "NO STATS YET"

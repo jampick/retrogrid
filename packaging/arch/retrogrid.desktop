@@ -9,11 +9,15 @@ Terminal=false
 Categories=Game;Sports;
 Keywords=nfl;football;fantasy;omarchy;
 StartupWMClass=retrogrid
-Actions=live;reel;
+Actions=live;sim;reel;
 
 [Desktop Action live]
 Name=LIVE: today's games
 Exec=retrogrid live
+
+[Desktop Action sim]
+Name=SIM SUNDAY: the shipped 2025 slate
+Exec=retrogrid sim
 
 [Desktop Action reel]
 Name=REEL: this week's highlights

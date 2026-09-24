@@ -28,6 +28,7 @@ SRC = paths.NFLVERSE
 OUT = paths.LIVE_SLATE
 ET = ZoneInfo("America/New_York")
 LEAD, TAIL = 2 * 3600.0, 4.5 * 3600.0       # the axis opens before the first kickoff, closes after the last
+THIN = 4                                     # fewer games than this (a Thursday, a Monday) and two rosters make too thin a pool
 
 
 def _stats(name: str, seasons: list[int]) -> pd.DataFrame:
@@ -68,7 +69,7 @@ def build_pool(season: int, week: int, teams: set[str]) -> list[dict]:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--date", default=None, help="slate day in US Eastern, YYYY-MM-DD (default: today)")
-    ap.add_argument("--all-teams", action="store_true", help="draft from the whole week (a one-game day is too thin a pool)")
+    ap.add_argument("--all-teams", action="store_true", help=f"draft from the whole week (automatic on a day with fewer than {THIN} games)")
     args = ap.parse_args(argv)
     day = args.date or datetime.now(ET).date().isoformat()
 
@@ -83,7 +84,8 @@ def main(argv: list[str] | None = None) -> int:
     meta = [{"id": g["id"], "home": g["home"], "away": g["away"], "kickoff": (k - t0).total_seconds(),
              "kickoff_utc": g["kickoff_utc"], "home_score": 0, "away_score": 0, "event": g["event"]}
             for g, k in sorted(zip(games, kicks), key=lambda gk: (gk[1], gk[0]["id"]))]
-    pool = build_pool(season, week, {t for g in (scoreboard_games(httpx.get(f"{SITE}/scoreboard", timeout=30.0).json()) if args.all_teams else games)
+    wide = args.all_teams or len(games) < THIN
+    pool = build_pool(season, week, {t for g in (scoreboard_games(httpx.get(f"{SITE}/scoreboard", timeout=30.0).json()) if wide else games)
                                       for t in (g["home"], g["away"])})
 
     OUT.mkdir(parents=True, exist_ok=True)
@@ -93,7 +95,7 @@ def main(argv: list[str] | None = None) -> int:
     }, indent=2))
     (OUT / PLAYS_FILE).write_text("")
     (OUT / POOL_FILE).write_text(json.dumps(pool, indent=1))
-    print(f"live: {season} week {week}, {day}, {len(games)} games, pool {len(pool)}")
+    print(f"live: {season} week {week}, {day}, {len(games)} games, pool {len(pool)}{' (whole week)' if wide else ''}")
     return 0
 
 

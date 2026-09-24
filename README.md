@@ -136,7 +136,8 @@ The full design is in [docs/DESIGN.md](docs/DESIGN.md).
 
 ```bash
 uv tool install retrogrid        # or: pipx install retrogrid   (Python 3.12+)
-retrogrid                        # SIM SUNDAY: 2025 wk 15, 14 games. No downloads, no keys.
+retrogrid                        # today's real games if the NFL is playing, else SIM SUNDAY
+retrogrid sim                    # SIM SUNDAY: 2025 wk 15, 14 games. No downloads, no keys.
 retrogrid live                   # today's real games off ESPN (pulls a few MB of rosters first)
 retrogrid reel                   # midweek: the big plays of the weeks already played, on a loop
 ```
@@ -200,13 +201,21 @@ LIVE · `off`), `RETROGRID_START` (sim seconds), `RETROGRID_SPEED`, `RETROGRID_S
 `RETROGRID_PROSE=1` (rehearse the live path: every play rebuilt from its
 description alone, using the parser, name resolution and an air-yards prior).
 
-**LIVE.** `retrogrid live` runs today's real games (it fetches this season's nflverse
-rosters/stats, `tools/build_live.py` drafts the synthetic league from teams playing
-today, then serves with `RETROGRID_LIVE=1`). Plays come from ESPN's public
-scoreboard + summary feeds (`providers/espn.py`, no credentials), polled every
-8 s; a play lands once its text holds still for a poll, touchdown+try entries
-are split in two, and booth amendments trigger a rebuild. `--keep` reuses
-today's league instead of redrafting. Sim controls are inert in LIVE.
+**LIVE.** Plain `retrogrid` asks ESPN's scoreboard once at startup: games today
+(US Eastern, so a Thursday night kickoff counts as Thursday) means LIVE, otherwise
+the sim. `watch.py` then asks again every 5 minutes and swaps the engine under the
+open windows when the answer moves, preferences intact: a server left up since
+Sunday rolls to Monday night once the Sunday axis runs out (4.5 h after the last
+kickoff), back to the sim on Tuesday, to the night game on Thursday. `retrogrid live`
+is the same without the sim fallback; `live --date` replays one day and never
+re-checks. Going live fetches this season's nflverse rosters/stats, and
+`tools/build_live.py` drafts the synthetic league from the teams playing today
+(the whole week when fewer than 4 games are on, or with `--all-teams`). Plays
+come from ESPN's public scoreboard + summary feeds (`providers/espn.py`, no
+credentials), polled every 8 s; a play lands once its text holds still for a
+poll, touchdown+try entries are split in two, and booth amendments trigger a
+rebuild. `--keep` reuses today's league instead of redrafting, if the cached one
+is today's. Sim controls are inert in LIVE.
 
 **REEL.** `retrogrid build-reel` writes one file per week to `data/reel/<season>_wk<NN>.json`
 (about 60 KB: the 40 picks as PlayRows, the score going into each, each play's

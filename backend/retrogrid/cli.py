@@ -1,6 +1,7 @@
 """`retrogrid` — the one command an install needs.
 
-    retrogrid                 SIM SUNDAY: the shipped slate, no downloads, no keys
+    retrogrid                 today's real games when ESPN lists any, else SIM SUNDAY; re-checked every 5 min
+    retrogrid sim             SIM SUNDAY: the shipped slate, no downloads, no keys
     retrogrid live            today's real games off ESPN (fetches a few MB first)
     retrogrid reel            a looping highlight show of the weeks already played
     retrogrid fetch | build-slate | build-reel | sprites | yahoo-auth | find-stream
@@ -18,13 +19,11 @@ import sys
 import threading
 import time
 import webbrowser
-from datetime import date
 from importlib import import_module
 from pathlib import Path
 
 TOOLS = {"fetch": "fetch_nflverse", "build-slate": "build_slate", "build-live": "build_live", "build-reel": "build_reel",
          "sprites": "build_sprites", "yahoo-auth": "yahoo_auth", "find-stream": "find_stream"}
-STALE = 6 * 3600.0            # LIVE re-pulls this season's rosters/stats when older than this
 BROWSERS = ("chromium", "chromium-browser", "google-chrome-stable", "google-chrome", "brave", "brave-browser",
             "microsoft-edge", "msedge", "chrome")
 APP_PATHS = (
@@ -73,30 +72,12 @@ def open_window(url: str, port: int, profile: Path, server) -> None:
         webbrowser.open(url)
 
 
-def season_now() -> int:
-    today = date.today()
-    return today.year if today.month >= 3 else today.year - 1
-
-
-def prepare_live(args: argparse.Namespace) -> int:
-    from . import paths
-    season = season_now()
-    roster = paths.NFLVERSE / f"roster_weekly_{season}.parquet"
-    stale = not roster.exists() or time.time() - roster.stat().st_mtime > STALE
-    tool("fetch", ["--season", str(season - 1), "--lite"])             # last year seeds the draft pool early on
-    if rc := tool("fetch", ["--season", str(season), "--lite"] + (["--force"] if stale else [])):
-        return rc
-    if not args.keep:
-        if rc := tool("build-live", (["--date", args.date] if args.date else []) + (["--all-teams"] if args.all_teams else [])):
-            return rc
-    return tool("sprites", ["--live"])
-
-
 def prepare_reel(args: argparse.Namespace) -> int:
     """Best effort: every step can fail (offline, offseason) and the show still
     runs on whatever is cached, or on the shipped Sunday if nothing is."""
     from .providers.reel import load_weeks
     from .tools.build_reel import refresh
+    from .watch import season_now
     for season in (season_now(), season_now() - 1):                        # last year only while this one has no games
         if not args.keep:
             try:
@@ -116,10 +97,16 @@ def serve(args: argparse.Namespace) -> int:
     for flag, var in (("league", "LEAGUE"), ("favs", "FAVS"), ("speed", "SPEED"), ("start", "START"), ("chatter", "CHATTER")):
         if (v := getattr(args, flag, None)) is not None:
             os.environ[f"RETROGRID_{var}"] = str(v)
-    if args.cmd == "live":
-        os.environ["RETROGRID_LIVE"] = "1"
-        if rc := prepare_live(args):
-            return rc
+    if args.cmd in ("live", "auto"):
+        from .watch import games_today, prepare_live
+        if args.cmd == "live" or games_today():                # auto asks ESPN once; offline or no games = the sim for now
+            rc = prepare_live(args.date, args.all_teams, args.keep)
+            if rc and args.cmd == "live":
+                return rc
+            if not rc:
+                os.environ["RETROGRID_LIVE"] = "1"
+    if args.cmd != "reel":
+        os.environ["RETROGRID_MODE"] = "hold" if getattr(args, "date", None) else args.cmd
     if args.cmd == "reel":
         os.environ["RETROGRID_REEL"] = "1"
         prepare_reel(args)
@@ -129,7 +116,9 @@ def serve(args: argparse.Namespace) -> int:
         return 1
     import uvicorn
     url = f"http://{args.host}:{args.port}/"
-    mode = {"live": "LIVE", "reel": "REEL"}.get(args.cmd, "SIM SUNDAY")
+    mode = "REEL" if args.cmd == "reel" else "LIVE" if os.environ.get("RETROGRID_LIVE") == "1" else "SIM SUNDAY"
+    if args.cmd == "auto":
+        mode += " (watching ESPN for today's games)"
     print(f"RETRO//GRID {mode} -> {url}   (data: {paths.DATA})")
     server = uvicorn.Server(uvicorn.Config("retrogrid.server:app", host=args.host, port=args.port,
                                            log_level="warning" if not args.verbose else "info"))
@@ -156,12 +145,13 @@ def main(argv: list[str] | None = None) -> int:
     if argv and argv[0] == "paths":
         return show_paths()
     if not argv or argv[0].startswith("-") and argv[0] not in ("-h", "--help"):
-        argv.insert(0, "sim")
+        argv.insert(0, "auto")
 
     ap = argparse.ArgumentParser(prog="retrogrid", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name in ("sim", "live", "reel"):
-        p = sub.add_parser(name, help={"sim": "SIM SUNDAY (default)", "live": "today's real games", "reel": "highlights of finished weeks, on a loop"}[name])
+    for name in ("auto", "sim", "live", "reel"):
+        p = sub.add_parser(name, help={"auto": "today's real games if there are any, else SIM SUNDAY (default)", "sim": "SIM SUNDAY",
+                                       "live": "today's real games", "reel": "highlights of finished weeks, on a loop"}[name])
         p.add_argument("--port", type=int, default=int(os.environ.get("RETROGRID_PORT", "8082")))
         p.add_argument("--host", default="127.0.0.1")
         p.add_argument("--no-window", action="store_true", help="serve only; open the URL yourself")
@@ -175,9 +165,10 @@ def main(argv: list[str] | None = None) -> int:
             p.add_argument("--speed", type=float, help="sim clock multiplier (default 4)")
             p.add_argument("--start", type=float, help="sim seconds to start at")
         else:
-            p.add_argument("--keep", action="store_true", help="reuse today's slate instead of rebuilding it")
-            p.add_argument("--date", help="slate day, US Eastern, YYYY-MM-DD")
-            p.add_argument("--all-teams", action="store_true", help="draft the stub league from the whole week")
+            p.add_argument("--keep", action="store_true", help="reuse today's slate if it is cached instead of rebuilding it")
+            p.add_argument("--all-teams", action="store_true", help="draft the stub league from the whole week (automatic on thin days)")
+            p.add_argument("--date", help="slate day, US Eastern, YYYY-MM-DD (live only: replays that day, no re-check)" if name == "live" else argparse.SUPPRESS,
+                           default=None)
     return serve(ap.parse_args(argv))
 
 

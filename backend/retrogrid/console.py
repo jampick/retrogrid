@@ -29,7 +29,7 @@ from .providers.chatter import TEAMS, ChatterBox, RedditChatter, StubChatter
 from .providers.directory import NflversePlayerDirectory
 from .providers.nflverse_plays import SlatePlayProvider
 from . import paths
-from .providers.slate import DEFAULT_SLATE_DIR, load_slate, slate_available
+from .providers.slate import DEFAULT_SLATE_DIR, load_slate
 from .providers.league import default_viewer, make_league
 from .scoring import DEFAULT_RULES, ActionBoard, ActionEvent, LeagueIndex, MatchupBoard, ScoringState, ThreatEvent, ThreatHub
 from .scoring.action import HOT_THRESHOLD
@@ -42,10 +42,9 @@ RATES = (1, 4, 15, 60)
 RZ_LINGER = 5.0                    # wall seconds a resolved drive keeps the screen after its last play ends
 RECENT_HALF_LIFE = 900.0           # sim seconds; "who matters right now"
 ET = ZoneInfo("America/New_York")
-LIVE = os.environ.get("RETROGRID_LIVE") == "1"          # today's real games off ESPN (scripts/build_live.py)
+LIVE = os.environ.get("RETROGRID_LIVE") == "1"          # start on today's real games off ESPN (watch.py may switch later)
 REEL = os.environ.get("RETROGRID_REEL") == "1"          # the highlight show of finished weeks (reel_console.py)
-SLATE_DIR = paths.LIVE_SLATE if LIVE else DEFAULT_SLATE_DIR
-CHATTER = os.environ.get("RETROGRID_CHATTER", "reddit" if LIVE else "stub").lower()      # reddit | stub | off
+CHATTER = os.environ.get("RETROGRID_CHATTER", "").lower()      # reddit | stub | off; default reddit when live, else stub
 FAVS = [t for t in os.environ.get("RETROGRID_FAVS", "").upper().replace(",", " ").split() if t in TEAMS]
 
 _PREFIX = re.compile(r"^(\(\d*:?\d+\)\s*)?(\((Shotgun|No Huddle|No Huddle, Shotgun)\)\s*)*", re.I)
@@ -88,13 +87,19 @@ class Session:
 
 
 class Engine:
-    def __init__(self) -> None:
-        self.slate = load_slate(SLATE_DIR)
-        if SLATE_DIR == paths.BUNDLED_SLATE:                  # the shipped sim carries its own directory: no downloads
+    """One slate, played out: the shipped Sunday on the sim clock, or one real
+    day (live=True) on the wall clock with ESPN filling the plays in."""
+
+    def __init__(self, live: bool | None = None) -> None:
+        self.live = LIVE if live is None else live
+        self.slate_dir = paths.LIVE_SLATE if self.live else DEFAULT_SLATE_DIR
+        self.chatter_kind = CHATTER or ("reddit" if self.live else "stub")
+        self.slate = load_slate(self.slate_dir)
+        if self.slate_dir == paths.BUNDLED_SLATE:             # the shipped sim carries its own directory: no downloads
             self.directory = NflversePlayerDirectory.from_snapshot(paths.BUNDLED_DIRECTORY)
         else:
             self.directory = NflversePlayerDirectory.from_data_dir(week=self.slate.week, season=self.slate.season)
-        self.league = make_league(SLATE_DIR, self.directory, self.slate.week, self.slate.season,
+        self.league = make_league(self.slate_dir, self.directory, self.slate.week, self.slate.season,
                                   seed=int(os.environ.get("RETROGRID_SEED", "1")))
         self.clock = SimClock(self.slate.duration, speed=float(os.environ.get("RETROGRID_SPEED", "4")),
                               start_at=float(os.environ.get("RETROGRID_START", "420")))
@@ -103,7 +108,7 @@ class Engine:
             self.slate.plays[:] = [reparse(p, self.directory) for p in self.slate.plays]
             log.info("PROSE mode: %d plays rebuilt from their descriptions", len(self.slate.plays))
         self.provider = SlatePlayProvider(self.slate, self.clock)
-        if LIVE:                                             # wall-clock time, plays as ESPN posts them
+        if self.live:                                        # wall-clock time, plays as ESPN posts them
             from .providers.espn import EspnPlayProvider
             t0 = datetime.fromisoformat(self.slate.start_utc)
             self.clock = SimClock(self.slate.duration, speed=1.0, start_at=(datetime.now(t0.tzinfo) - t0).total_seconds())
@@ -115,7 +120,7 @@ class Engine:
         self.action = ActionBoard(self.directory)
         self.drives = DriveTracker()
         self.chatter = ChatterBox()
-        self.crowd = StubChatter(self.chatter, self.directory) if CHATTER == "stub" else None
+        self.crowd = StubChatter(self.chatter, self.directory) if self.chatter_kind == "stub" else None
         self.audio = AudioTable()
         self.by_team: dict[str, set[str]] = {}               # NFL team -> players seen making plays
         self.hub: ThreatHub | None = None
@@ -242,25 +247,30 @@ class Engine:
             self.ingest(p)
 
     async def run(self) -> None:
-        if LIVE:
-            await self.provider.prime()                       # whatever has already been played today
-            asyncio.get_running_loop().create_task(self.provider.run())
-        self.rebuild()
-        self.clock.start()
-        epoch = self.clock.epoch
-        stream = self.provider.stream_plays(after=self.clock.now())
-        async for play in stream:
-            if self.clock.epoch != epoch:
-                epoch = self.clock.epoch
-                self.rebuild()
+        poll: asyncio.Task | None = None
+        try:
+            if self.live:
+                await self.provider.prime()                   # whatever has already been played today
+                poll = asyncio.get_running_loop().create_task(self.provider.run())
+            self.rebuild()
+            self.clock.start()
+            epoch = self.clock.epoch
+            stream = self.provider.stream_plays(after=self.clock.now())
+            async for play in stream:
+                if self.clock.epoch != epoch:
+                    epoch = self.clock.epoch
+                    self.rebuild()
+                    for s in list(self.sessions):
+                        s.rz_lock, s.rz_hold = None, 0.0      # drive numbering restarted with the rebuild
+                        await self.catch_up(s)
+                    if play.sim_time > self.clock.now() or play.play_id in self.deltas_by_play:
+                        continue
+                act, events = self.ingest(play)
                 for s in list(self.sessions):
-                    s.rz_lock, s.rz_hold = None, 0.0          # drive numbering restarted with the rebuild
-                    await self.catch_up(s)
-                if play.sim_time > self.clock.now() or play.play_id in self.deltas_by_play:
-                    continue
-            act, events = self.ingest(play)
-            for s in list(self.sessions):
-                await self.deliver(s, play, act, events.get(s.viewer or "", []))
+                    await self.deliver(s, play, act, events.get(s.viewer or "", []))
+        finally:
+            if poll:                                          # the day is over for this engine: stop polling ESPN
+                poll.cancel()
 
     async def ticker(self) -> None:
         while True:
@@ -579,7 +589,7 @@ class Engine:
         frame = {
             "type": "state", "mode": "ffb" if s.ffb else "nfl", "ffb_available": self.league is not None,
             "clock": {"label": f"WK{self.week} · {wall:%a %H:%M}".upper(), "sim": now, "duration": self.clock.duration,
-                      "speed": self.clock.speed, "paused": not self.clock.running, "auto": s.auto, "live": LIVE,
+                      "speed": self.clock.speed, "paused": not self.clock.running, "auto": s.auto, "live": self.live,
                       "redzone": s.redzone, "riding": self.rz_riding(s) and self.drives.get(s.focus or "").red_zone},
             "feeds": feeds, "active": self.active_card(s),
             "favs": sorted(s.favs), "teams": sorted(self.team_game),
@@ -655,7 +665,7 @@ class Engine:
         elif t == "auto":
             s.auto = not s.auto
             await s.send(self.state_frame(s))
-        elif t == "sim" and not LIVE:                         # nobody fast-forwards a real Sunday
+        elif t == "sim" and not self.live:                    # nobody fast-forwards a real Sunday
             a, v = m.get("action"), m.get("value")
             if a == "pause":
                 self.clock.pause() if self.clock.running else self.clock.start()
@@ -751,19 +761,22 @@ engine: Engine | None = None
 _by_ws: dict[WebSocket, Session] = {}
 
 
+def launch(e: Engine) -> list[asyncio.Task]:
+    """The tasks that play one engine out; cancel them all to retire it."""
+    tasks = [asyncio.create_task(e.run()), asyncio.create_task(e.ticker()), asyncio.create_task(e.league_pump())]
+    if e.chatter_kind == "reddit":
+        tasks.append(asyncio.create_task(RedditChatter(e.chatter, lambda: e.provider.games_at(e.clock.now())).run()))
+    return tasks
+
+
 async def start(hub) -> list[asyncio.Task]:                   # noqa: ANN001
     global engine
     if REEL:
         from .reel_console import ReelEngine
         engine = ReelEngine()
         return [asyncio.create_task(engine.run()), asyncio.create_task(engine.ticker())]
-    if not slate_available(SLATE_DIR):
-        raise RuntimeError("no slate — run scripts/fetch_nflverse.py then scripts/build_slate.py (or build_live.py)")
-    engine = Engine()
-    tasks = [asyncio.create_task(engine.run()), asyncio.create_task(engine.ticker()), asyncio.create_task(engine.league_pump())]
-    if CHATTER == "reddit":
-        tasks.append(asyncio.create_task(RedditChatter(engine.chatter, lambda: engine.provider.games_at(engine.clock.now())).run()))
-    return tasks
+    from .watch import run as watch                            # which day's engine is up, and when it changes
+    return [asyncio.create_task(watch())]
 
 
 async def on_connect(ws: WebSocket) -> None:

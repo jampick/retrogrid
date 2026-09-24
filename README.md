@@ -130,18 +130,6 @@ because the opponent has Bowers, the intended receiver.
 
 <sub>The Yahoo adapter is written and tested against fixtures, but I'm still waiting on Yahoo to approve API access. See <a href="https://github.com/jampick/retrogrid/issues/6">#6</a> and <a href="docs/YAHOO.md">docs/YAHOO.md</a>.</sub>
 
-### How the plays get drawn
-
-Real player tracking (the 10 Hz XY data) isn't public, so every diagram is
-built from the text of the play. A parser pulls out who did what, and a play
-grammar turns that into personnel, a formation, route families, and coverage
-lanes on kicks and punts. All 2,175 plays in the demo slate compile without
-falling back to a generic diagram. Plenty of them still look off, and `/plays`
-is the page I use to find those: it loops a random sample side by side and lets
-me flag the bad ones.
-
-<img alt="/plays: the grammar contact sheet, seeded-random plays looping side by side" src="https://raw.githubusercontent.com/jampick/retrogrid/main/docs/media/plays.png" width="100%">
-
 The full design is in [docs/DESIGN.md](docs/DESIGN.md).
 
 ## Install

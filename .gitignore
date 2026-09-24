@@ -9,3 +9,9 @@ __pycache__/
 dist/
 build/
 *.egg-info/
+
+# makepkg outputs
+packaging/arch/pkg/
+packaging/arch/src/
+packaging/arch/*.tar.gz
+packaging/arch/*.pkg.tar.*

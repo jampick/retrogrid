@@ -1,0 +1,42 @@
+# Maintainer: jampick <jampick@users.noreply.github.com>
+pkgname=retrogrid
+pkgver=0.1.1
+pkgrel=1
+pkgdesc="Cyberpunk NFL gameday console: every live game, the plays that matter as neon diagrams, follows the Omarchy theme"
+arch=('any')
+url="https://github.com/jampick/retrogrid"
+license=('MIT')
+# namcap flags python-websockets and python-pyarrow as "may not be needed": both
+# are pulled in one layer down. uvicorn refuses to serve /ws without a websocket
+# library (Arch's uvicorn does not depend on one), and pandas needs pyarrow to
+# read the nflverse parquet files.
+depends=('python' 'python-fastapi' 'uvicorn' 'python-websockets' 'python-pandas' 'python-pyarrow'
+         'python-pillow' 'python-numpy' 'python-httpx' 'python-platformdirs' 'hicolor-icon-theme')
+makedepends=('python-build' 'python-installer' 'python-wheel' 'python-setuptools')
+checkdepends=('python-pytest' 'python-pytest-asyncio')
+optdepends=('chromium: chromeless app window (any Chromium-family browser works)'
+            'omarchy: theme-set hook for an instant retune, see /usr/share/retrogrid')
+# The sdist is the whole source: built frontend (web/dist), the prebuilt SIM SUNDAY
+# slate, the full test suite, and the desktop entry, icon and theme hook installed
+# below. No node at build time. The GitHub Release asset is byte-identical to PyPI's.
+source=("$url/releases/download/v$pkgver/$pkgname-$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "$pkgname-$pkgver"
+  python -m build --wheel --no-isolation
+}
+
+check() {
+  cd "$pkgname-$pkgver"
+  python -m pytest -q -p no:cacheprovider
+}
+
+package() {
+  cd "$pkgname-$pkgver"
+  python -m installer --destdir="$pkgdir" dist/*.whl
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 packaging/arch/$pkgname.desktop "$pkgdir/usr/share/applications/$pkgname.desktop"
+  install -Dm644 packaging/arch/$pkgname.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/$pkgname.svg"
+  install -Dm755 scripts/omarchy-theme-hook.sh "$pkgdir/usr/share/$pkgname/omarchy-theme-hook.sh"
+}

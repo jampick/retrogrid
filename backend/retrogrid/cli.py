@@ -51,16 +51,24 @@ def find_browser() -> str | None:
     return next((p for p in APP_PATHS if Path(p).is_file()), None)
 
 
-def open_window(url: str, port: int, profile: Path) -> None:
+def open_window(url: str, port: int, profile: Path, server) -> None:
+    """Open the app window once the server answers; when the window closes, stop the server.
+
+    The Chromium process is ours (dedicated --user-data-dir), so it exits when its last
+    window does. That lets the desktop entry run without a terminal: the app window is
+    the only window, and closing it ends everything. The tab fallback has no process to
+    watch, so there the server stays up until Ctrl-C."""
     for _ in range(150):                                   # wait for the server, up to ~30s
         with socket.socket() as s:
             if s.connect_ex(("127.0.0.1", port)) == 0:
                 break
         time.sleep(0.2)
     if exe := find_browser():
-        subprocess.Popen([exe, f"--user-data-dir={profile}", "--no-first-run", "--disable-session-crashed-bubble",
-                          "--autoplay-policy=no-user-gesture-required", "--class=retrogrid", f"--app={url}"],
-                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen([exe, f"--user-data-dir={profile}", "--no-first-run", "--disable-session-crashed-bubble",
+                                 "--autoplay-policy=no-user-gesture-required", "--class=retrogrid", f"--app={url}"],
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        proc.wait()
+        server.should_exit = True
     else:
         webbrowser.open(url)
 
@@ -123,10 +131,12 @@ def serve(args: argparse.Namespace) -> int:
     url = f"http://{args.host}:{args.port}/"
     mode = {"live": "LIVE", "reel": "REEL"}.get(args.cmd, "SIM SUNDAY")
     print(f"RETRO//GRID {mode} -> {url}   (data: {paths.DATA})")
+    server = uvicorn.Server(uvicorn.Config("retrogrid.server:app", host=args.host, port=args.port,
+                                           log_level="warning" if not args.verbose else "info"))
     if not args.no_window:
         paths.DATA.mkdir(parents=True, exist_ok=True)
-        threading.Thread(target=open_window, args=(url, args.port, paths.DATA / "chrome-profile"), daemon=True).start()
-    uvicorn.run("retrogrid.server:app", host=args.host, port=args.port, log_level="warning" if not args.verbose else "info")
+        threading.Thread(target=open_window, args=(url, args.port, paths.DATA / "chrome-profile", server), daemon=True).start()
+    server.run()
     return 0
 
 

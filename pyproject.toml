@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "retrogrid"
 version = "0.1.1"
-description = "RETRO//GRID — a cyberpunk NFL gameday console: every live game, the plays that matter as neon tactical diagrams, with an opt-in fantasy layer"
+description = "RETRO//GRID — a retro NFL gameday console: every live game, the plays that matter as neon tactical diagrams, with an opt-in fantasy layer"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]

@@ -1,3 +1,5 @@
 # setuptools auto-includes tests/test*.py but not the support files the tests import.
 recursive-include tests *.py *.rss *.json *.csv *.parquet *.toml *.txt
+# What the Arch PKGBUILD installs besides the wheel, so a single sdist is the whole source.
+include packaging/arch/retrogrid.desktop packaging/arch/retrogrid.svg scripts/omarchy-theme-hook.sh
 global-exclude __pycache__ *.pyc

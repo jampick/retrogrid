@@ -7,6 +7,7 @@
 
 <p align="center">
   <a href="https://github.com/jampick/retrogrid/actions"><img alt="CI" src="https://github.com/jampick/retrogrid/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://pypi.org/project/retrogrid/"><img alt="PyPI" src="https://img.shields.io/pypi/v/retrogrid?color=22e0f0&label=pypi"></a>
   <img alt="Python 3.12+" src="https://img.shields.io/badge/python-3.12%2B-22e0f0">
   <img alt="Linux · macOS · Windows" src="https://img.shields.io/badge/linux%20%C2%B7%20macos%20%C2%B7%20windows-f85525">
   <img alt="MIT" src="https://img.shields.io/badge/license-MIT-faa968">
@@ -151,9 +152,6 @@ retrogrid                        # SIM SUNDAY: 2025 wk 15, 14 games. No download
 retrogrid live                   # today's real games off ESPN (pulls a few MB of rosters first)
 retrogrid reel                   # midweek: the big plays of the weeks already played, on a loop
 ```
-
-> The first PyPI release is tracked in [#2](https://github.com/jampick/retrogrid/issues/2).
-> Until it lands, run from a checkout (see [Develop](#develop)).
 
 Linux, macOS, Windows. It serves on `http://127.0.0.1:8082` and opens a
 chromeless window if a Chromium-family browser is installed, a normal tab if

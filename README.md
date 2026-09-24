@@ -1,7 +1,7 @@
 <h1 align="center">RETRO//GRID</h1>
 
 <p align="center">
-  <b>A cyberpunk NFL gameday console for your second monitor.</b><br>
+  <b>A retro NFL gameday console for your second monitor.</b><br>
   It watches every live game and draws the plays worth seeing as lo-res neon diagrams, with Reddit's game threads down the right side.
 </p>
 

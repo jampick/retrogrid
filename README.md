@@ -144,9 +144,14 @@ retrogrid reel                   # midweek: the big plays of the weeks already p
 Linux, macOS, Windows. It serves on `http://127.0.0.1:8082` and opens a
 chromeless window if a Chromium-family browser is installed, a normal tab if
 not (`--no-window` to open it yourself). `retrogrid paths` shows where data
-lives; `RETROGRID_DATA` moves it. On Omarchy, for an instant retune instead of
-the 1 s poll, install the optional hook:
-`omarchy hook install theme-set scripts/omarchy-theme-hook.sh`.
+lives; `RETROGRID_DATA` moves it. Closing the app window stops the server. On
+Omarchy, for an instant retune instead of the 1 s poll, install the optional
+hook: `omarchy hook install theme-set scripts/omarchy-theme-hook.sh`.
+
+At startup it asks GitHub once whether a newer release exists and, if so, puts
+one line above the key legend with the upgrade command for your kind of install
+(pacman or pip). It never installs anything. `RETROGRID_NO_UPDATE_CHECK=1`
+skips the request.
 
 Flags: `--league stub|yahoo` · `--favs "KC BUF"` · `--speed 15` · `--port N` ·
 `--chatter reddit|stub|off`. Data tools: `retrogrid fetch | build-slate |

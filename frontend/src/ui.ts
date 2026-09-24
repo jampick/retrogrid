@@ -4,7 +4,7 @@ import { palette } from "./palette";
 import { PixelLabel } from "./pixelfont";
 import { loadSprite, proceduralBust, tint, SP } from "./sprites";
 import type { Radio } from "./radio";
-import type { ActiveCard, ConsoleState, GhostInfo, Side } from "./types";
+import type { ActiveCard, ConsoleState, GhostInfo, Side, Update } from "./types";
 
 const $ = (id: string) => document.getElementById(id)!;
 const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]!));
@@ -214,6 +214,12 @@ export class Ui {
     if ($("keys").dataset.k !== k) { $("keys").dataset.k = k; $("keys").innerHTML = k; }
   }
   cycleText = "";
+
+  /** One line, once: a newer release exists and this is how this install gets it. */
+  update(u: Update): void {
+    $("update").title = `this is v${u.current}`;
+    $("update").innerHTML = `<span class="alert">v${esc(u.latest)} AVAILABLE</span> · <em>${esc(u.hint)}</em>`;
+  }
 
   private lineup(s: ConsoleState): void {
     if (s.mode === "nfl" || !s.matchup) { $("lineup").innerHTML = ""; return; }

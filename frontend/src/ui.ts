@@ -85,8 +85,10 @@ export class Ui {
     if (nfl) this.delta.set(s.matchup?.status ?? "", "hot");             // the game clock, not a fantasy margin
     else this.delta.set((d >= 0 ? "{" : "}") + pts(Math.abs(d)), d >= 0 ? "gain" : "them");
     $("clock").textContent = s.clock.label;
-    $("live").textContent = s.clock.paused ? "■ HOLD" : s.reel ? "▶ REEL" : "● ON AIR";
+    $("live").textContent = s.clock.paused ? "■ HOLD" : s.reel ? "▶ REEL" : s.clock.live ? "● ON AIR" : "▶ SIM";
+    $("live").title = `${s.gameday ?? ""}: pick LIVE or a past week [G]`;
     $("live").classList.toggle("held", s.clock.paused);
+    $("live").classList.toggle("sim", !s.clock.live && !s.reel && !s.clock.paused);
     if (s.reel) {                                                        // a rundown, not a clock: step through it
       $("transport").innerHTML = `<b data-d="-1" title="previous play [←]">◂ PREV</b> ${s.reel.index + 1}/${s.reel.total} <b data-d="1" title="next play [→]">NEXT ▸</b>`;
       $("transport").querySelectorAll<HTMLElement>("b[data-d]").forEach((b) => (b.onclick = () => this.h.skip(Number(b.dataset.d))));
@@ -207,6 +209,7 @@ export class Ui {
       s.reel.pregame ? "[B] TODAY'S FEED · OR CLICK IT" : "",
     ].filter(Boolean).join("<br>") : [
       "[T] THEME · [F] FOLLOW TEAMS",
+      `[G] GAME DAY: ${s.gameday ?? (s.clock.live ? "LIVE" : "SIM")}`,
       s.pregame ? "[B] LAST WEEK'S REEL WHILE YOU WAIT" : "",
       `[A] AUTO-DIRECT ${s.clock.auto ? "ON" : "OFF"} · [R] RED ZONE ${s.clock.redzone ? "ON" : "OFF"}`,
       "[M] RADIO · [H] OTHER BOOTH · [-][=] VOL · [N] MUTE CUES",

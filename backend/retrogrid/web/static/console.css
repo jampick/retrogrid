@@ -52,6 +52,8 @@ canvas.pxl { image-rendering: pixelated; display: block; filter: drop-shadow(0 0
 #clock { color: var(--ffb-hot); }
 #live { color: var(--ffb-alert); animation: blink 1.6s steps(1) infinite; text-shadow: 0 0 9px rgba(var(--ffb-alert-rgb), var(--glow)); }
 #live.held { animation: none; color: var(--ffb-dim); text-shadow: none; }
+#live { cursor: pointer; }
+#live.sim { animation: none; color: var(--ffb-hot); text-shadow: none; }
 #transport b { font-weight: 500; color: var(--ffb-dim); padding: 0 3px; cursor: pointer; }
 #transport b.on { color: var(--ffb-hot); }
 #scrub { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: rgba(var(--ffb-grid-rgb), .9); cursor: pointer; }

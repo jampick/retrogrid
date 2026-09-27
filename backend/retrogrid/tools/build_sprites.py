@@ -7,7 +7,7 @@ Output is *data, not colour*: a 96x96 PNG where
 The console palette-maps it at draw time, so one sprite serves every theme
 and both sides of a matchup.
 
-Usage: retrogrid sprites [--live] [--all] [--reel]    (default: rostered players only)
+Usage: retrogrid sprites [--live | --slate DIR] [--all] [--reel]    (default: rostered players only)
 """
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ import argparse
 import asyncio
 import colorsys
 import io
+from pathlib import Path
 
 import httpx
 import numpy as np
@@ -122,6 +123,7 @@ async def run(argv: list[str] | None = None) -> None:
     ap.add_argument("--live", action="store_true", help="rosters of today's LIVE league (data/live) instead of the sim slate")
     ap.add_argument("--all", action="store_true", help="every player who appears in the slate, not just rostered")
     ap.add_argument("--reel", action="store_true", help="the star of every play in the reel cache (data/reel)")
+    ap.add_argument("--slate", type=Path, help="rosters of this slate dir (a past-week sim) instead")
     args = ap.parse_args(argv)
     OUT.mkdir(parents=True, exist_ok=True)
     RAW.mkdir(parents=True, exist_ok=True)
@@ -132,7 +134,7 @@ async def run(argv: list[str] | None = None) -> None:
         directory = ReelDirectory(weeks)
         ids = {s.player_id for w in weeks for s in w.stars.values()}
     else:
-        slate_dir = paths.LIVE_SLATE if args.live else paths.DATA / "slate"
+        slate_dir = args.slate or (paths.LIVE_SLATE if args.live else paths.DATA / "slate")
         slate = load_slate(slate_dir)
         directory = NflversePlayerDirectory.from_data_dir(week=slate.week, season=slate.season)
         league = make_league(slate_dir, directory, slate.week, slate.season)

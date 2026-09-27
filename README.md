@@ -170,6 +170,7 @@ build-reel | sprites | yahoo-auth | find-stream` (each takes `--help`).
 |---|---|
 | `T` | theme |
 | `F` | follow teams |
+| `G` | GAME DAY: LIVE, or a sim of any finished Sunday this season or last. Clicking the ON AIR / SIM badge does the same. |
 | `A` | auto-direct |
 | `R` | RED ZONE |
 | `M` · `H` · `-` `=` | radio · the other booth · volume |
@@ -215,7 +216,11 @@ open windows when the answer moves, preferences intact: a server left up since
 Sunday rolls to Monday night once the Sunday axis runs out (4.5 h after the last
 kickoff), back to the sim on Tuesday, to the night game on Thursday. `retrogrid live`
 is the same without the sim fallback; `live --date` replays one day and never
-re-checks. Going live fetches this season's nflverse rosters/stats, and
+re-checks. `G` in the console (or a click on the ON AIR badge) picks a past Sunday
+instead: its slate is built on the spot from nflverse play-by-play into
+`<data>/sims/2026-wk02/` and so on (a few seconds, plus a 20 MB download the first
+time for a season), every open window swaps to it, and it stays up, the watcher
+standing aside, until LIVE is picked again. Going live fetches this season's nflverse rosters/stats, and
 `tools/build_live.py` drafts the synthetic league from the teams playing today
 (the whole week when fewer than 4 games are on, or with `--all-teams`). Plays
 come from ESPN's public scoreboard + summary feeds (`providers/espn.py`, no

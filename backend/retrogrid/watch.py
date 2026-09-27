@@ -13,6 +13,10 @@ Nobody has to remember a flag.
                      live  (`retrogrid live`)   today's games; a finished day rolls to the next one with games
                      sim   (`retrogrid sim`)    the shipped Sunday, ESPN never asked
                      hold  (`live --date`)      the day you asked for, no re-check
+
+The GAME DAY picker ([G] in the console) overrides all of that from inside:
+a past Sunday picked there is built on demand into <DATA>/sims/ and stays up,
+the watcher standing aside, until LIVE is picked again.
 """
 from __future__ import annotations
 
@@ -22,6 +26,7 @@ import os
 import sys
 import time
 from datetime import date, datetime
+from pathlib import Path
 from importlib import import_module
 from zoneinfo import ZoneInfo
 
@@ -33,6 +38,7 @@ from .providers.slate import DEFAULT_SLATE_DIR, load_slate, slate_available
 
 log = logging.getLogger("retrogrid.watch")
 ET = ZoneInfo("America/New_York")
+SIMS = paths.DATA / "sims"
 POLL = float(os.environ.get("RETROGRID_POLL", "300"))     # seconds between scoreboard checks; kickoffs are known days ahead
 STALE = 6 * 3600.0            # LIVE re-pulls this season's rosters/stats when older than this
 
@@ -132,7 +138,121 @@ async def swap(new, tasks: list[asyncio.Task]) -> list[asyncio.Task]:           
     return fresh
 
 
+# ── GAME DAY picker ──────────────────────────────────────────────────────────
+pinned: str | None = None         # a sim picked by hand ("sim:2026:2", "sim:shipped"); the watcher leaves it up
+busy: str | None = None           # the pick being built right now
+today_ids: set[str] | None = None  # the watcher's last answer, for the picker's LIVE row
+_tasks: list[asyncio.Task] = []
+_lock = asyncio.Lock()
+_weeks: dict[int, tuple[float, list[tuple[int, str]]]] = {}
+
+
+def finished_sundays(season: int) -> list[tuple[int, str]]:
+    """(week, date) of each regular-season Sunday in the play-by-play on disk
+    that is over, newest first. Cached per file mtime: the picker asks often."""
+    import pandas as pd
+    f = paths.NFLVERSE / f"play_by_play_{season}.parquet"
+    if not f.exists():
+        return []
+    mtime = f.stat().st_mtime
+    if season not in _weeks or _weeks[season][0] != mtime:
+        g = pd.read_parquet(f, columns=["week", "game_date", "season_type"]).drop_duplicates()
+        g = g[(g.season_type == "REG") & (pd.to_datetime(g.game_date).dt.dayofweek == 6) & (g.game_date < today_et())]
+        _weeks[season] = (mtime, sorted({(int(w), str(d)) for w, d in zip(g.week, g.game_date)}, reverse=True))
+    return _weeks[season][1]
+
+
+def sim_dir(season: int, week: int) -> Path:
+    return SIMS / f"{season}-wk{week:02d}"
+
+
+def gameday_options(engine) -> list[dict]:                    # noqa: ANN001
+    """Rows for the picker: LIVE, this season's finished Sundays, last season's, the shipped one."""
+    n = len(today_ids) if today_ids is not None else None
+    cur = pinned or ("live" if engine is not None and engine.live else "sim:shipped")
+    rows = [{"key": "live", "label": "LIVE · TODAY'S GAMES" if n is None else f"LIVE · {n} GAMES TODAY" if n else "LIVE · NO GAMES TODAY, WAITS FOR THE NEXT"}]
+    season = season_now()
+    for yr in (season, season - 1):
+        for week, day in finished_sundays(yr):
+            rows.append({"key": f"sim:{yr}:{week}", "label": f"SIM · {yr} WK {week} · {datetime.fromisoformat(day):%b %d}".upper()})
+    shipped = load_slate(paths.sim_slate())
+    rows.append({"key": "sim:shipped", "label": f"SIM SUNDAY · {shipped.season} WK {shipped.week} · SHIPPED"})
+    for r in rows:
+        r["current"] = r["key"] == cur
+    return rows
+
+
+def prepare_sim(season: int, week: int) -> Path:
+    """nflverse files for the season, then the slate and its sprites. Blocking; minutes the first time."""
+    out = sim_dir(season, week)
+    if not slate_available(out):
+        from .tools import fetch_nflverse
+        fetch_nflverse.DEST.mkdir(parents=True, exist_ok=True)
+        for name, url in fetch_nflverse.assets(season).items():
+            fetch_nflverse.fetch(name, url)
+        if rc := _tool("build_slate", ["--season", str(season), "--week", str(week), "--out", str(out)]):
+            raise RuntimeError(f"build_slate exit {rc}")
+        _tool("build_sprites", ["--slate", str(out)])
+    return out
+
+
+async def _say(frame: dict) -> None:
+    from . import console
+    for s in list(console._by_ws.values()):
+        try:
+            await s.send(frame)
+        except Exception:                                     # noqa: BLE001 — a closing socket is not our problem
+            pass
+
+
+async def choose(key: str) -> None:
+    """A pick from the GAME DAY picker, for every open window."""
+    global pinned, busy
+    from . import console
+    if busy or _lock.locked():
+        return
+    busy = key
+    await _say({"type": "gameday", "busy": key})
+    note = ""
+    try:
+        async with _lock:
+            if key == "live":
+                pinned = None
+                if mode() in ("sim", "hold"):
+                    os.environ["RETROGRID_MODE"] = "auto"     # hand the day back to the watcher
+                if not (console.engine and console.engine.live and console.engine.slate.date == today_et()):
+                    ids = await asyncio.to_thread(games_today)
+                    if ids:
+                        if rc := await asyncio.to_thread(prepare_live, None, False, True):
+                            raise RuntimeError(f"live slate not built (exit {rc})")
+                        await _put(console.Engine(live=True))
+                    else:
+                        note = "NO GAMES TODAY: THE WATCHER GOES LIVE AT THE NEXT ONE"
+            elif key == "sim:shipped" or key.startswith("sim:"):
+                if key == "sim:shipped":
+                    slate_dir = paths.sim_slate()
+                else:
+                    _, yr, wk = key.split(":")
+                    slate_dir = await asyncio.to_thread(prepare_sim, int(yr), int(wk))
+                pinned = key
+                await _put(console.Engine(live=False, slate_dir=slate_dir))
+    except Exception as exc:                                  # noqa: BLE001 — offline, a week nflverse lacks: keep what is up
+        log.warning("GAME DAY %s: %s", key, exc)
+        note = f"COULD NOT LOAD: {exc}"[:80].upper()
+    finally:
+        busy = None
+    await _say({"type": "gameday", "busy": None, "note": note, "options": gameday_options(console.engine)})
+
+
+async def _put(new) -> None:                                  # noqa: ANN001
+    global _tasks
+    _tasks = await swap(new, _tasks)
+    label = f"LIVE {new.slate.date}" if new.live else f"SIM {new.slate.season} WK {new.slate.week}"
+    print(f"RETRO//GRID -> {label}", file=sys.stderr)
+
+
 async def run() -> None:
+    global today_ids
     from . import console
     want_mode = mode()
     live = want_mode in ("live", "hold") or (want_mode == "auto" and os.environ.get("RETROGRID_LIVE") == "1")
@@ -140,27 +260,33 @@ async def run() -> None:
         raise RuntimeError("no live slate — `retrogrid live` builds one")
     if not live and not slate_available(DEFAULT_SLATE_DIR):
         raise RuntimeError("no slate — run scripts/fetch_nflverse.py then scripts/build_slate.py (or build_live.py)")
-    tasks = await swap(console.Engine(live=live), [])
+    await _put(console.Engine(live=live))
+    if console.engine.live and console.engine.slate.date == today_et():
+        today_ids = {g.id for g in console.engine.slate.games}
     try:
-        while want_mode in ("auto", "live"):
+        while True:
             await asyncio.sleep(POLL)
+            want_mode = mode()
+            if want_mode in ("sim", "hold"):
+                continue
             today = today_et()
-            want = decide(want_mode, console.engine, today, await asyncio.to_thread(games_today))
+            today_ids = await asyncio.to_thread(games_today)
+            if pinned or _lock.locked():                      # a sim picked by hand stays up until LIVE is picked
+                continue
+            want = decide(want_mode, console.engine, today, today_ids)
             if want is None:
                 continue
-            try:
-                if want == "live":
-                    if rc := await asyncio.to_thread(prepare_live, today):
-                        log.warning("live slate for %s not built (exit %d); trying again in %.0fs", today, rc, POLL)
-                        continue
-                new = console.Engine(live=want == "live")
-            except Exception as exc:                          # noqa: BLE001 — offline, half-fetched data: keep what is up
-                log.warning("could not switch to %s: %s", want, exc)
-                continue
-            tasks = await swap(new, tasks)
-            games = ", ".join(f"{g.away}@{g.home}" for g in new.slate.games)
-            print(f"RETRO//GRID -> {'LIVE ' + new.slate.date + ': ' + games if new.live else 'SIM SUNDAY'}", file=sys.stderr)
-        await asyncio.Event().wait()                          # sim / hold: this engine is the whole show
+            async with _lock:
+                try:
+                    if want == "live":
+                        if rc := await asyncio.to_thread(prepare_live, today):
+                            log.warning("live slate for %s not built (exit %d); trying again in %.0fs", today, rc, POLL)
+                            continue
+                    new = console.Engine(live=want == "live")
+                except Exception as exc:                      # noqa: BLE001 — offline, half-fetched data: keep what is up
+                    log.warning("could not switch to %s: %s", want, exc)
+                    continue
+                await _put(new)
     finally:
-        for t in tasks:
+        for t in _tasks:
             t.cancel()

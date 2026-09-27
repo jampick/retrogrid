@@ -25,6 +25,6 @@ pkgbase = retrogrid
 	optdepends = chromium: chromeless app window (any Chromium-family browser works)
 	optdepends = omarchy: theme-set hook for an instant retune, see /usr/share/retrogrid
 	source = https://github.com/jampick/retrogrid/releases/download/v0.1.2/retrogrid-0.1.2.tar.gz
-	sha256sums = SKIP
+	sha256sums = dfdc2296ba17771da7db381f97a7122c466be8427d4db10a4fd1bebce8cd93ba
 
 pkgname = retrogrid

@@ -1,6 +1,6 @@
 # Maintainer: jampick <jampick@users.noreply.github.com>
 pkgname=retrogrid
-pkgver=0.1.1
+pkgver=0.1.2
 pkgrel=1
 pkgdesc="Cyberpunk NFL gameday console: every live game, the plays that matter as neon diagrams, follows the Omarchy theme"
 arch=('any')

@@ -6,7 +6,7 @@ Picks the regular-season Sunday with the most games, then writes to the data dir
     plays.jsonl      one PlayRow per line, sim_time = real wall-clock offset
     draft_pool.json  per-player fantasy production, for the synthetic league
 
-    retrogrid build-slate [--week N]
+    retrogrid build-slate [--season 2025] [--week N] [--out DIR]
 """
 from __future__ import annotations
 
@@ -14,6 +14,7 @@ import argparse
 import json
 import sys
 from dataclasses import asdict
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -235,7 +236,7 @@ def defence_points(tm: pd.DataFrame, allowed: pd.Series) -> pd.Series:
     )
 
 
-def build_pool(pbp: pd.DataFrame, slate: pd.DataFrame, week: int) -> list[dict[str, Any]]:
+def build_pool(pbp: pd.DataFrame, slate: pd.DataFrame, week: int, season: int = SEASON) -> list[dict[str, Any]]:
     from retrogrid.providers.directory import TEAM_NAMES
 
     slate_games = set(slate.game_id)
@@ -244,7 +245,7 @@ def build_pool(pbp: pd.DataFrame, slate: pd.DataFrame, week: int) -> list[dict[s
     scrimmage = slate[slate.play_type.isin(["pass", "run", "field_goal", "extra_point"])]
     active_ids = set(pd.unique(scrimmage[id_cols].to_numpy().ravel())) - {None, np.nan}
 
-    st = pd.read_parquet(SRC / f"stats_player_week_{SEASON}.parquet")
+    st = pd.read_parquet(SRC / f"stats_player_week_{season}.parquet")
     st = st[(st.season_type == "REG") & st.position.isin(["QB", "RB", "WR", "TE", "K"])].copy()
     st["pts"] = player_points(st)
     pre = st[st.week < week].groupby("player_id").agg(pre_points=("pts", "sum"), pre_games=("pts", "size"))
@@ -260,7 +261,7 @@ def build_pool(pbp: pd.DataFrame, slate: pd.DataFrame, week: int) -> list[dict[s
             "active": pid in active_ids,
         })
 
-    tm = pd.read_parquet(SRC / f"stats_team_week_{SEASON}.parquet")
+    tm = pd.read_parquet(SRC / f"stats_team_week_{season}.parquet")
     tm = tm[tm.season_type == "REG"].copy()
     finals = pbp.drop_duplicates("game_id").set_index("game_id")[["home_team", "home_score", "away_score"]]
     joined = tm.join(finals, on="game_id")
@@ -284,10 +285,13 @@ def build_pool(pbp: pd.DataFrame, slate: pd.DataFrame, week: int) -> list[dict[s
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--season", type=int, default=SEASON)
     ap.add_argument("--week", type=int, default=None, help="force a week instead of auto-picking")
+    ap.add_argument("--out", type=Path, default=OUT, help="slate dir to write (default: the data dir's slate/)")
     args = ap.parse_args(argv)
+    out = args.out
 
-    pbp_path = SRC / f"play_by_play_{SEASON}.parquet"
+    pbp_path = SRC / f"play_by_play_{args.season}.parquet"
     if not pbp_path.exists():
         print("missing nflverse data — run `retrogrid fetch` first", file=sys.stderr)
         return 1
@@ -296,18 +300,18 @@ def main(argv: list[str] | None = None) -> int:
     slate = pbp[(pbp.week == week) & (pbp.game_date == date)]
 
     plays, games, t0 = build_plays(slate)
-    pool = build_pool(pbp, slate, week)
+    pool = build_pool(pbp, slate, week, args.season)
     duration = max(g["end"] for g in games) + TAIL_SECONDS
 
-    OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / SLATE_FILE).write_text(json.dumps({
-        "season": SEASON, "week": week, "date": date, "start_utc": t0.isoformat(),
+    out.mkdir(parents=True, exist_ok=True)
+    (out / SLATE_FILE).write_text(json.dumps({
+        "season": args.season, "week": week, "date": date, "start_utc": t0.isoformat(),
         "duration": round(duration, 3), "games": games,
     }, indent=2))
-    with (OUT / PLAYS_FILE).open("w") as fh:
+    with (out / PLAYS_FILE).open("w") as fh:
         for p in plays:
             fh.write(json.dumps(asdict(p), separators=(",", ":")) + "\n")
-    (OUT / POOL_FILE).write_text(json.dumps(pool, indent=1))
+    (out / POOL_FILE).write_text(json.dumps(pool, indent=1))
 
     print(f"slate: week {week}, {date}, {len(games)} games, {len(plays)} plays "
           f"(of {len(slate)} raw rows), {duration / 3600:.2f} h, pool {len(pool)}")

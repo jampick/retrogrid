@@ -418,6 +418,7 @@ class PregameReel(ReelEngine):
         f = super().state_frame(s)
         f["feeds"] = self.host.feed_rows(s)                # today's games, PRE, where the viewer can click back to them
         f["clock"]["label"] = self.host.wall_label(self.host.clock.now())
+        f["gameday"] = self.host.gameday_label()
         if "reel" in f:
             f["reel"]["pregame"] = self.host.kickoff_label()
         return f

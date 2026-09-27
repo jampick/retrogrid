@@ -17,6 +17,7 @@ import os
 import re
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from fastapi import WebSocket
@@ -91,9 +92,9 @@ class Engine:
     """One slate, played out: the shipped Sunday on the sim clock, or one real
     day (live=True) on the wall clock with ESPN filling the plays in."""
 
-    def __init__(self, live: bool | None = None) -> None:
+    def __init__(self, live: bool | None = None, slate_dir: Path | None = None) -> None:
         self.live = LIVE if live is None else live
-        self.slate_dir = paths.LIVE_SLATE if self.live else DEFAULT_SLATE_DIR
+        self.slate_dir = slate_dir or (paths.LIVE_SLATE if self.live else DEFAULT_SLATE_DIR)
         self.chatter_kind = CHATTER or ("reddit" if self.live else "stub")
         self.slate = load_slate(self.slate_dir)
         if self.slate_dir == paths.BUNDLED_SLATE:             # the shipped sim carries its own directory: no downloads
@@ -640,8 +641,12 @@ class Engine:
             "favs": sorted(s.favs), "teams": sorted(self.team_game),
             "chatter": self.chatter.recent(s.focus), "audio": self.audio.for_game(s.focus),
             "pregame": self.reel is not None and self.waiting(),        # the reel is there to go back to [B]
+            "gameday": self.gameday_label(),
         }
         return {**frame, **(self.ffb_layer(s, now, live) if s.ffb else self.nfl_layer(s, now, games.get(s.focus or "")))}
+
+    def gameday_label(self) -> str:
+        return f"LIVE · {self.slate.date}" if self.live else f"SIM · {self.slate.season} WK {self.week}"
 
     def wall_label(self, now: float) -> str:
         wall = (self._t0 + timedelta(seconds=now)).astimezone(ET)
@@ -889,7 +894,13 @@ async def on_connect(ws: WebSocket) -> None:
 
 async def on_message(ws: WebSocket, msg: dict) -> None:
     s = _by_ws.get(ws)
-    if engine and s:
+    if engine and s and msg.get("type") == "gameday" and not REEL:     # the GAME DAY picker [G]: above any one engine
+        from . import watch
+        if isinstance(msg.get("pick"), str):
+            asyncio.create_task(watch.choose(msg["pick"]))
+        else:
+            await s.send({"type": "gameday", "busy": watch.busy, "options": watch.gameday_options(engine)})
+    elif engine and s:
         await engine.handle(s, msg)
 
 

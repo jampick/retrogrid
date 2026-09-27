@@ -49,3 +49,19 @@ def test_thursday_night_is_thursday_in_eastern_time():
             "status": {"type": {"name": "STATUS_SCHEDULED"}, "period": 0, "displayClock": "0:00"}}]}]}
     assert game_ids_on(board, "2026-09-24") == {"2026_03_ATL_GB"}
     assert game_ids_on(board, "2026-09-25") == set()
+
+
+def test_game_day_picker_lists_finished_sundays_newest_first(tmp_path, monkeypatch):
+    import pandas as pd
+    from retrogrid import paths, watch
+    pd.DataFrame({
+        "week": [1, 1, 2, 2, 3, 3],
+        "game_date": ["2026-09-10", "2026-09-13", "2026-09-20", "2026-09-21", "2026-09-24", "2026-09-27"],
+        "season_type": ["REG"] * 6,
+    }).to_parquet(tmp_path / "play_by_play_2026.parquet")
+    monkeypatch.setattr(paths, "NFLVERSE", tmp_path)
+    monkeypatch.setattr(watch, "today_et", lambda: "2026-09-27")
+    monkeypatch.setattr(watch, "_weeks", {})
+    # Thursday and Monday games are not Sundays; today's Sunday is still being played
+    assert watch.finished_sundays(2026) == [(2, "2026-09-20"), (1, "2026-09-13")]
+    assert watch.finished_sundays(2019) == []

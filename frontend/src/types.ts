@@ -102,6 +102,7 @@ export interface ConsoleState {
   active: ActiveCard | null;
   reel?: ReelState;
   pregame?: boolean;    // live, before kickoff, and the reel is there to go back to [B]
+  gameday?: string;     // "LIVE · 2026-09-27" or "SIM · 2026 WK 2": what the GAME DAY picker [G] has up
 }
 
 export interface Keyframe { t: number; x: number; y: number; z?: number }   // z: ball height, yards
@@ -143,4 +144,6 @@ export interface Update { latest: string; current: string; hint: string }
 export interface HelloFrame { type: "hello"; system: Theme | null; themes: Theme[]; update: Update | null }
 export interface ThemeFrame { type: "theme"; system: Theme }
 export interface UpdateFrame extends Update { type: "update" }
-export type Frame = ConsoleState | PlayFrame | BannerFrame | HelloFrame | ThemeFrame | UpdateFrame | ReelCard;
+/** The GAME DAY picker's rows, and word of a pick being loaded or failing. */
+export interface GamedayFrame { type: "gameday"; busy: string | null; note?: string; options?: { key: string; label: string; current: boolean }[] }
+export type Frame = ConsoleState | PlayFrame | BannerFrame | HelloFrame | ThemeFrame | UpdateFrame | ReelCard | GamedayFrame;

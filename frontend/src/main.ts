@@ -106,6 +106,15 @@ function themePicker(): void {
   for (const t of themes) items.push({ key: t.slug, label: t.name + (t.mode === "light" ? " ◻" : ""), roles: t.roles, current: choice === t.slug });
   openPicker("THEME", items, choose);
 }
+// the server knows which weeks are on disk: ask, and open when the rows come back
+let gamedayAsked = false, gamedayMsg = "", gamedayMsgTimer = 0;
+function gamedayPicker(): void { gamedayAsked = true; send({ type: "gameday" }); }
+function gamedayHint(msg: string, hold = 0): void {
+  gamedayMsg = msg; clearTimeout(gamedayMsgTimer);
+  if (hold) gamedayMsgTimer = window.setTimeout(() => gamedayHint(""), hold);
+  fieldHint();
+}
+function fieldHint(): void { field.hint = gamedayMsg || (state?.pregame && !state.reel ? "PRESS B: LAST WEEK'S REEL" : ""); }
 function viewerPicker(): void {
   if (!state) return;
   openPicker("WHO AM I", state.viewers.map((v) => ({ key: v.team_key, label: `${v.owner} · ${v.name}`, current: v.team_key === state!.viewer?.team_key })),
@@ -204,7 +213,7 @@ function onFrame(f: Frame): void {
       state = { ...f, mode: f.mode ?? "ffb", ffb_available: f.ffb_available ?? true, favs: f.favs ?? [], teams: f.teams ?? [],
                 chatter: f.chatter ?? [], audio: f.audio ?? null };
       ui.render(state); ui.renderRadio(radio, state);
-      field.hint = state.pregame && !state.reel ? "PRESS B: LAST WEEK'S REEL" : "";
+      fieldHint();
       ghosts.set("you", f.ghosts.you); ghosts.set("them", f.ghosts.them);
       break;
     }
@@ -213,6 +222,14 @@ function onFrame(f: Frame): void {
       if (f.settled || f.alert) { queue.length = 0; present(f); }     // catch-up, tapped or auto-directed
       else if (field.finished || replayAt >= 0) present(f);           // live always pre-empts a replay
       else { queue.push(f); while (queue.length > 2) queue.shift(); }
+      break;
+    case "gameday":
+      if (f.busy) gamedayHint(`LOADING ${f.busy.replace("sim:shipped", "SIM SUNDAY").replace(/^sim:(\d+):(\d+)$/, "SIM $1 WK $2").toUpperCase()} ...`);
+      else gamedayHint(f.note ?? "", f.note ? 8000 : 0);
+      if (gamedayAsked && f.options && !f.busy) {
+        gamedayAsked = false;
+        openPicker("GAME DAY", f.options, (k) => send({ type: "gameday", pick: k }));
+      }
       break;
     case "reel_card":
       queue.length = 0; reelCard(f);
@@ -274,6 +291,7 @@ window.addEventListener("keydown", (e) => {
   const k = e.key.toLowerCase();
   if (k === "t") themePicker();
   else if (k === "f") favPicker();
+  else if (k === "g") gamedayPicker();
   else if (k === "v" && state?.mode === "ffb") viewerPicker();
   else if (k === "x" && state?.ffb_available) { const on = state.mode !== "ffb"; localStorage.setItem("ffb.layer", on ? "1" : "0"); send({ type: "ffb", on }); }
   else if (k === "tab") { e.preventDefault(); if (state?.mode === "ffb") { ui.rail = ui.rail === "lineup" ? "chatter" : "lineup"; localStorage.setItem("ffb.rail", ui.rail); ui.render(state); } }
@@ -298,6 +316,7 @@ window.addEventListener("keydown", (e) => {
   else if (k === "escape") hideBanner();
 });
 $("clockbox").addEventListener("dblclick", themePicker);
+$("live").addEventListener("click", gamedayPicker);
 
 palette.subscribe(layout);
 cycleLabel();

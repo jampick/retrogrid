@@ -20,7 +20,7 @@ optdepends=('chromium: chromeless app window (any Chromium-family browser works)
 # slate, the full test suite, and the desktop entry, icon and theme hook installed
 # below. No node at build time. The GitHub Release asset is byte-identical to PyPI's.
 source=("$url/releases/download/v$pkgver/$pkgname-$pkgver.tar.gz")
-sha256sums=('SKIP')
+sha256sums=('dfdc2296ba17771da7db381f97a7122c466be8427d4db10a4fd1bebce8cd93ba')
 
 build() {
   cd "$pkgname-$pkgver"

@@ -3,6 +3,7 @@ import { banner, bannerVisible, boot, hideBanner, retune, sting, toggleMute } fr
 import { Ghosts } from "./ghosts";
 import { palette } from "./palette";
 import { Radio } from "./radio";
+import { Setup } from "./setup";
 import type { ConsoleState, Frame, PlayFrame, ReelCard, Theme, Threat } from "./types";
 import { Ui } from "./ui";
 
@@ -47,6 +48,7 @@ const ui = new Ui({
   reelJump: (i) => send({ type: "reel_jump", index: i }),
 });
 
+const setup = new Setup();
 const radio = new Radio();
 radio.onchange = () => ui.renderRadio(radio, state);
 let favs: string[] = JSON.parse(localStorage.getItem("ffb.favs") ?? "[]");
@@ -231,6 +233,10 @@ function onFrame(f: Frame): void {
         openPicker("GAME DAY", f.options, (k) => send({ type: "gameday", pick: k }));
       }
       break;
+    case "league":                         // the setup screen changed the league; the engine is rebuilding
+      gamedayHint(f.reloading ? "LOADING YOUR LEAGUE ..." : f.error ? "YAHOO: SEE [Y]" : "", f.reloading ? 0 : f.error ? 8000 : 0);
+      if (!f.reloading) { if (f.name) localStorage.setItem("ffb.layer", "1"); setup.reloaded(f.error ?? null); }
+      break;
     case "reel_card":
       queue.length = 0; reelCard(f);
       break;
@@ -281,6 +287,10 @@ function frame(now: number): void {
 
 window.addEventListener("resize", layout);
 window.addEventListener("keydown", (e) => {
+  if (setup.open) {                       // typing keys into a form: no hotkeys
+    if (e.key === "Escape") setup.close();
+    return;
+  }
   if (pickerOpen()) {
     if (e.key === "Escape") closePicker();
     else if (e.key === "ArrowDown" || e.key === "j") movePicker(1);
@@ -293,6 +303,7 @@ window.addEventListener("keydown", (e) => {
   else if (k === "f") favPicker();
   else if (k === "g") gamedayPicker();
   else if (k === "v" && state?.mode === "ffb") viewerPicker();
+  else if (k === "y" || (k === "x" && state && !state.ffb_available)) { closePicker(); void setup.show(); }
   else if (k === "x" && state?.ffb_available) { const on = state.mode !== "ffb"; localStorage.setItem("ffb.layer", on ? "1" : "0"); send({ type: "ffb", on }); }
   else if (k === "tab") { e.preventDefault(); if (state?.mode === "ffb") { ui.rail = ui.rail === "lineup" ? "chatter" : "lineup"; localStorage.setItem("ffb.rail", ui.rail); ui.render(state); } }
   else if (k === "m") radio.toggle(state?.audio ?? null);

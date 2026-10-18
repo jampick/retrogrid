@@ -84,6 +84,7 @@ export interface ConsoleState {
   type: "state";
   mode: "nfl" | "ffb";                // nfl: real scoreboard + ACTION; ffb: the fantasy layer on top
   ffb_available: boolean;             // a league is configured server-side
+  league_error?: string | null;       // a league is set up but Yahoo said no: why, in words
   clock: { label: string; sim: number; duration: number; speed: number; paused: boolean; auto: boolean; live: boolean;
            redzone?: boolean; riding?: boolean };      // RED ZONE mode on · committed to a drive inside the 20
   viewer: { team_key: string; owner: string } | null;
@@ -146,4 +147,5 @@ export interface ThemeFrame { type: "theme"; system: Theme }
 export interface UpdateFrame extends Update { type: "update" }
 /** The GAME DAY picker's rows, and word of a pick being loaded or failing. */
 export interface GamedayFrame { type: "gameday"; busy: string | null; note?: string; options?: { key: string; label: string; current: boolean }[] }
-export type Frame = ConsoleState | PlayFrame | BannerFrame | HelloFrame | ThemeFrame | UpdateFrame | ReelCard | GamedayFrame;
+export interface LeagueFrame { type: "league"; reloading: boolean; error?: string | null; name?: string | null }
+export type Frame = ConsoleState | PlayFrame | BannerFrame | HelloFrame | ThemeFrame | UpdateFrame | ReelCard | GamedayFrame | LeagueFrame;

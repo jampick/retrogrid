@@ -155,7 +155,8 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("--port", type=int, default=int(os.environ.get("RETROGRID_PORT", "8082")))
         p.add_argument("--host", default="127.0.0.1")
         p.add_argument("--no-window", action="store_true", help="serve only; open the URL yourself")
-        p.add_argument("--league", choices=("stub", "yahoo"), help="turn the fantasy layer on")
+        p.add_argument("--league", choices=("off", "stub", "yahoo"),
+                       help="fantasy layer: the Yahoo league set up in the console [Y] loads by itself; off, or stub for the demo league")
         p.add_argument("--favs", help='teams you follow, e.g. "KC BUF"')
         p.add_argument("--chatter", choices=("reddit", "stub", "off"))
         p.add_argument("-v", "--verbose", action="store_true")

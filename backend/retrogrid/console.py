@@ -92,6 +92,8 @@ class Engine:
     """One slate, played out: the shipped Sunday on the sim clock, or one real
     day (live=True) on the wall clock with ESPN filling the plays in."""
 
+    league_error: str | None = None                           # why the configured league is not up, in words
+
     def __init__(self, live: bool | None = None, slate_dir: Path | None = None) -> None:
         self.live = LIVE if live is None else live
         self.slate_dir = slate_dir or (paths.LIVE_SLATE if self.live else DEFAULT_SLATE_DIR)
@@ -101,8 +103,8 @@ class Engine:
             self.directory = NflversePlayerDirectory.from_snapshot(paths.BUNDLED_DIRECTORY)
         else:
             self.directory = NflversePlayerDirectory.from_data_dir(week=self.slate.week, season=self.slate.season)
-        self.league = make_league(self.slate_dir, self.directory, self.slate.week, self.slate.season,
-                                  seed=int(os.environ.get("RETROGRID_SEED", "1")))
+        self.league, self.league_error = make_league(self.slate_dir, self.directory, self.slate.week, self.slate.season,
+                                                     seed=int(os.environ.get("RETROGRID_SEED", "1")))
         self.clock = SimClock(self.slate.duration, speed=float(os.environ.get("RETROGRID_SPEED", "4")),
                               start_at=float(os.environ.get("RETROGRID_START", "420")))
         if os.environ.get("RETROGRID_PROSE") == "1":          # rehearse the live path: prose is the only source
@@ -174,11 +176,13 @@ class Engine:
                     base[pid] = pts
         return base
 
-    async def league_pump(self, every: float = 300.0) -> None:
-        """Lineup changes and late swaps; official points for drift."""
+    async def league_pump(self, every: float = 300.0, live_every: float = 120.0) -> None:
+        """Lineup changes and late swaps; official points for drift; Yahoo's
+        projection and win %, which move with the games, so faster while any are on."""
         refresh = getattr(self.league, "refresh", None) if self.league else None
         while refresh is not None:
-            await asyncio.sleep(every)
+            on = any(g.status in ("live", "half") for g in self.provider.games_at(self.clock.now()))
+            await asyncio.sleep(live_every if on else every)
             try:
                 await asyncio.to_thread(refresh)
             except Exception as e:                            # noqa: BLE001 — keep the last good league
@@ -634,6 +638,7 @@ class Engine:
 
         frame = {
             "type": "state", "mode": "ffb" if s.ffb else "nfl", "ffb_available": self.league is not None,
+            "league_error": self.league_error,
             "clock": {"label": self.wall_label(now), "sim": now, "duration": self.clock.duration,
                       "speed": self.clock.speed, "paused": not self.clock.running, "auto": s.auto, "live": self.live,
                       "redzone": s.redzone, "riding": self.rz_riding(s) and self.drives.get(s.focus or "").red_zone},

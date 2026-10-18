@@ -1,15 +1,27 @@
 # Yahoo Fantasy integration (Phase 8, league side)
 
-**Status 2026-09-20: adapter built and tested against Yahoo-shaped fixtures;
-never yet run against the real API.** The fixtures were written from the
-documented response shape, so expect the first real run to surface a parsing
-surprise or two — every raw response lands in `data/yahoo/raw/` for that reason.
+**Status 2026-10-18:** working on a real 12-team league since 2026-10-07, and
+since #26 anyone can connect their own league from the console with `Y`
+(README, "Connecting your Yahoo league"). This file is the developer's view.
 
-**Blocked 2026-09-20:** app created, OAuth consent + token work, but every
-Fantasy endpoint answers 403 "This application is not authorized to perform
-this action". Since 2026-07-22 Yahoo requires a reviewed application at
-https://sports.yahoo.com/developer/access/ (give it our Client ID) before any
-app may read the Fantasy API. Nothing to fix on our side until that is approved.
+History, since it explains the setup screen's wording: from 2026-07-22 Yahoo
+only serves the Fantasy API to reviewed apps. My first app got 403 "This
+application is not authorized to perform this action" on every Fantasy
+endpoint until I applied at https://sports.yahoo.com/developer/access/. After
+approval (2026-10-03) Yahoo asked for a freshly created app's Client ID and
+enabled it on 2026-10-07. So there is no shared app: each user makes their own,
+and a client secret inside a public package wouldn't stay secret anyway.
+
+## Files
+
+Under `<data>/yahoo/` (`retrogrid paths`), all chmod 600:
+`app.json` (client id, secret, redirect URI, written by the setup screen;
+`.env` wins when it sets `YAHOO_CLIENT_ID`/`YAHOO_CLIENT_SECRET`), `token.json`,
+`league.json` (league key, name, season, your team), and `raw/` (every response,
+for replay). Code: `providers/yahoo_setup.py` (keys, sign-in, league list and
+choice, failures in words), `setup_api.py` (`/api/league/*`, refused unless the
+request comes from the console's own page), `watch.reload_league` (rebuilds the
+engine around the new league), `frontend/src/setup.ts`.
 
 ## Run it
 
@@ -17,7 +29,7 @@ app may read the Fantasy API. Nothing to fix on our side until that is approved.
 # .env (gitignored)
 YAHOO_CLIENT_ID=...
 YAHOO_CLIENT_SECRET=...
-RETROGRID_LEAGUE=yahoo             # or export it per run
+# RETROGRID_LEAGUE=yahoo           # not needed once league.json exists; off turns it off
 # YAHOO_REDIRECT_URI=https://localhost:8443/callback   (default: oob)
 
 retrogrid yahoo-auth             # once: sign in, pick the league

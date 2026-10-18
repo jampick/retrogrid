@@ -85,7 +85,7 @@ def test_conflicting_fg_tiers_are_reported():
 @pytest.fixture(scope="module")
 def league(client: YahooClient) -> YahooLeagueProvider:
     directory = NflversePlayerDirectory.from_data_dir(week=WEEK, season=SEASON)
-    return YahooLeagueProvider(client, directory, week=WEEK, season=SEASON)
+    return YahooLeagueProvider(client, directory, week=WEEK, season=SEASON, league_key=LK)
 
 
 @needs_nflverse

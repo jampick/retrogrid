@@ -137,7 +137,7 @@ async def run(argv: list[str] | None = None) -> None:
         slate_dir = args.slate or (paths.LIVE_SLATE if args.live else paths.DATA / "slate")
         slate = load_slate(slate_dir)
         directory = NflversePlayerDirectory.from_data_dir(week=slate.week, season=slate.season)
-        league = make_league(slate_dir, directory, slate.week, slate.season)
+        league, _ = make_league(slate_dir, directory, slate.week, slate.season)
     if args.reel:
         pass
     elif league is not None:

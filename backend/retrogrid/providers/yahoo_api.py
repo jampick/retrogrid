@@ -31,6 +31,7 @@ AUTH_URL = "https://api.login.yahoo.com/oauth2/request_auth"
 TOKEN_URL = "https://api.login.yahoo.com/oauth2/get_token"
 YAHOO_DIR = paths.DATA / "yahoo"
 TOKEN_FILE = YAHOO_DIR / "token.json"
+APP_FILE = YAHOO_DIR / "app.json"
 RAW_DIR = YAHOO_DIR / "raw"
 EXPIRY_MARGIN = 120.0              # refresh this many seconds before the hour is up
 
@@ -110,12 +111,27 @@ def _load_env_file(path: Path) -> None:
             os.environ.setdefault(m.group(1), m.group(2).strip("'\""))
 
 
-def credentials() -> tuple[str, str]:
+def app_keys() -> tuple[str, str, str] | None:
+    """(client_id, secret, redirect_uri): the environment / .env first, then the
+    app.json the console's setup screen writes."""
     load_env()
-    cid, secret = os.environ.get("YAHOO_CLIENT_ID"), os.environ.get("YAHOO_CLIENT_SECRET")
-    if not cid or not secret:
-        raise YahooError("YAHOO_CLIENT_ID / YAHOO_CLIENT_SECRET not set — put them in .env (see docs/YAHOO.md)")
-    return cid, secret
+    if os.environ.get("YAHOO_CLIENT_ID") and os.environ.get("YAHOO_CLIENT_SECRET"):
+        return (os.environ["YAHOO_CLIENT_ID"], os.environ["YAHOO_CLIENT_SECRET"],
+                os.environ.get("YAHOO_REDIRECT_URI", "oob"))
+    try:
+        app = json.loads(APP_FILE.read_text())
+    except (OSError, ValueError):
+        return None
+    if app.get("client_id") and app.get("client_secret"):
+        return app["client_id"], app["client_secret"], app.get("redirect_uri") or "oob"
+    return None
+
+
+def credentials() -> tuple[str, str]:
+    keys = app_keys()
+    if keys is None:
+        raise YahooError("no Yahoo app keys: connect a league in the console [Y], or set YAHOO_CLIENT_ID / YAHOO_CLIENT_SECRET in .env")
+    return keys[0], keys[1]
 
 
 class YahooAuth:
@@ -126,7 +142,7 @@ class YahooAuth:
     def _load(self) -> dict[str, Any]:
         if self._token is None:
             if not self.token_file.is_file():
-                raise YahooError("no Yahoo token — run scripts/yahoo_auth.py once")
+                raise YahooError("no Yahoo token: sign in from the console [Y] or `retrogrid yahoo-auth`")
             self._token = json.loads(self.token_file.read_text())
         return self._token
 
@@ -154,7 +170,7 @@ class YahooAuth:
     def refresh(self) -> None:
         token = self._load()
         self.exchange({"grant_type": "refresh_token", "refresh_token": token["refresh_token"],
-                       "redirect_uri": os.environ.get("YAHOO_REDIRECT_URI", "oob")})
+                       "redirect_uri": (app_keys() or ("", "", "oob"))[2]})
         log.info("yahoo access token refreshed")
 
     def access_token(self) -> str:

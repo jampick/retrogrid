@@ -124,9 +124,9 @@ NEON palette and the stock Omarchy themes, which ship in the package.
 
 ### Fantasy layer
 
-This part is off unless you ask for it. Start with `--league stub` (a made-up
-12-team league) or `--league yahoo`, press `X`, and the same console switches
-to your matchup. The score bar becomes your fantasy score against your
+This part is off until you connect a league. Press `Y` in the console to hook
+up your Yahoo league (below), or start with `--league stub` for a made-up
+12-team league to try it on. Then `X` switches the same console to your matchup. The score bar becomes your fantasy score against your
 opponent's, the right rail becomes both lineups, and ACTION turns into THREATS,
 ranked by how many points a play moved your week. Players on the field are
 coloured by who rosters them. In the shot below Pickett's interception shows up
@@ -134,7 +134,31 @@ because the opponent has Bowers, the intended receiver.
 
 <img alt="Fantasy layer: matchup score bar, lineup rail, threats, and an interception on the field" src="https://raw.githubusercontent.com/jampick/retrogrid/main/docs/media/fantasy.png" width="100%">
 
-<sub>The Yahoo adapter is written and tested against fixtures, but I'm still waiting on Yahoo to approve API access. See <a href="https://github.com/jampick/retrogrid/issues/6">#6</a> and <a href="docs/YAHOO.md">docs/YAHOO.md</a>.</sub>
+#### Connecting your Yahoo league
+
+Press `Y`. The setup screen takes you through three steps and nothing has to
+go in a terminal or a config file:
+
+1. **Keys.** Yahoo only lets reviewed apps read fantasy leagues, so each person
+   makes their own (free, read-only). Ask for Fantasy API access at
+   [sports.yahoo.com/developer/access](https://sports.yahoo.com/developer/access/),
+   then create an app at
+   [developer.yahoo.com/apps/create](https://developer.yahoo.com/apps/create/)
+   as a *Confidential* client with *Fantasy Sports: Read* and the redirect URI
+   `https://localhost:8443/callback`. If Yahoo asks for the new app's Client ID
+   to finish the access request, send it. Mine took a few days to be switched
+   on. Paste the Client ID and secret into the console.
+2. **Sign in.** The console opens Yahoo's consent page. After you allow it,
+   Yahoo sends you to `https://localhost:8443/callback?code=...`, which won't
+   load. Copy that address and paste it back.
+3. **League.** Pick one. The console reloads around it with the fantasy layer
+   on, and from then on plain `retrogrid` loads it by itself.
+
+The keys and token stay in the data dir (`retrogrid paths`), in `yahoo/`,
+chmod 600. If Yahoo says no later (token revoked, network down) the console
+keeps running as a plain NFL monitor and `Y` says what went wrong.
+`--league off` skips the league for one run. The command-line route
+(`.env` + `retrogrid yahoo-auth`) still works; see [docs/YAHOO.md](docs/YAHOO.md).
 
 The full design is in [docs/DESIGN.md](docs/DESIGN.md).
 
@@ -160,7 +184,7 @@ one line above the key legend with the upgrade command for your kind of install
 (pacman or pip). It never installs anything. `RETROGRID_NO_UPDATE_CHECK=1`
 skips the request.
 
-Flags: `--league stub|yahoo` · `--favs "KC BUF"` · `--speed 15` · `--port N` ·
+Flags: `--league off|stub|yahoo` · `--favs "KC BUF"` · `--speed 15` · `--port N` ·
 `--chatter reddit|stub|off`. Data tools: `retrogrid fetch | build-slate |
 build-reel | sprites | yahoo-auth | find-stream` (each takes `--help`).
 
@@ -177,6 +201,7 @@ build-reel | sprites | yahoo-auth | find-stream` (each takes `--help`).
 | `N` | mute alert cues |
 | `Enter` | view the alert in the banner |
 | `C` · `[` `]` · `/` | auto-replay in dead time · step through recent plays · back to live |
+| `Y` | connect, switch or sign out of your Yahoo league |
 | `X` | fantasy layer, then `V` who-am-I · `L` threat scope · `Tab` lineup/chatter |
 | `Space` · `1` to `4` · `←` `→` | SIM only: hold · rate 1×/4×/15×/60× · skip 5 min |
 | `Space` · `←` `→` | REEL: hold · previous / next play. Click a row in the rundown or the finals to jump. |
@@ -202,8 +227,8 @@ A checkout keeps its data in `./data`; the shipped bundle lives in
 compiled and looping side by side, filterable by family. `R` reroll · `S`
 finished diagrams · click to zoom · in zoom `F`/`N` flag a bad play (with a
 note) into `data/grammar_flags.json`, the worklist for the next grammar pass.
-Env: `RETROGRID_LEAGUE` (unset = NFL monitor · `stub` = synthetic 12-team league ·
-`yahoo` = docs/YAHOO.md), `RETROGRID_FAVS="KC BUF"` (default followed teams),
+Env: `RETROGRID_LEAGUE` (unset = the Yahoo league if one is set up, else NFL
+monitor · `off` · `stub` = synthetic 12-team league · `yahoo` = docs/YAHOO.md), `RETROGRID_FAVS="KC BUF"` (default followed teams),
 `RETROGRID_CHATTER` (`stub` canned crowd, default in SIM · `reddit`, default in
 LIVE · `off`), `RETROGRID_START` (sim seconds), `RETROGRID_SPEED`, `RETROGRID_SEED`,
 `RETROGRID_PROSE=1` (rehearse the live path: every play rebuilt from its
@@ -277,7 +302,7 @@ only links to it.
 | 6 Scoring + threat ranking | working |
 | 7 Polish | open |
 | 8 ESPN live plays | working (first pass) |
-| 8 Yahoo league adapter, hosting | needs credentials |
+| 8 Yahoo league adapter, in-console setup ([#26](https://github.com/jampick/retrogrid/issues/26)) | working; tested live on week 6 |
 | REEL: highlight show of finished weeks ([#11](https://github.com/jampick/retrogrid/issues/11)) | working (first pass); the fantasy-swings segment waits on a real league |
 
 `pytest` runs 209 tests.

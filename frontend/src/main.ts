@@ -32,11 +32,25 @@ let redzone = (q.get("rz") ?? localStorage.getItem("ffb.redzone")) === "1";
 
 const send = (m: object) => ws?.readyState === 1 && ws.send(JSON.stringify(m));
 
+// A game picked by hand (a feed, a player, a threat, the banner) takes the radio with it;
+// AUTO-DIRECT cuts never do. The retune waits for the state frame that carries the new game's audio.
+let radioWant: string | null = null;
+function pickGame(id: string): void { radioWant = id; send({ type: "focus_game", game_id: id }); }
+function pickPlay(id: string, gameId?: string): void {
+  radioWant = gameId ?? state?.threats.find((t) => t.play_id === id)?.game_id ?? null;
+  send({ type: "focus_play", play_id: id });
+}
+function radioFollow(): void {
+  if (!radioWant || state?.feeds.find((f) => f.focused)?.game_id !== radioWant) return;
+  radioWant = null;                                      // landed: a game with no stations leaves the radio where it was
+  if (radio.state !== "off" && state.audio && radio.game?.game_id !== state.audio.game_id) radio.tune(state.audio);
+}
+
 const field = new Field($("field") as HTMLCanvasElement);
 const ghosts = new Ghosts($("ghosts") as HTMLCanvasElement);
 const ui = new Ui({
-  focusGame: (id) => send({ type: "focus_game", game_id: id }),
-  focusPlay: (id) => send({ type: "focus_play", play_id: id }),
+  focusGame: pickGame,
+  focusPlay: (id) => pickPlay(id),
   toggleScope: () => send({ type: "scope", scope: state?.scope === "matchup" ? "league" : "matchup" }),
   speed: (n) => send({ type: "sim", action: "speed", value: n }),
   pause: () => send({ type: "sim", action: "pause" }),
@@ -215,6 +229,7 @@ function onFrame(f: Frame): void {
       // an older server (no NFL layer) sends none of these: it is the fantasy console, nothing more
       state = { ...f, mode: f.mode ?? "ffb", ffb_available: f.ffb_available ?? true, favs: f.favs ?? [], teams: f.teams ?? [],
                 chatter: f.chatter ?? [], audio: f.audio ?? null };
+      radioFollow();
       ui.render(state); ui.renderRadio(radio, state);
       fieldHint();
       ghosts.set("you", f.ghosts.you); ghosts.set("them", f.ghosts.them);
@@ -243,7 +258,7 @@ function onFrame(f: Frame): void {
       break;
     case "banner":
       pendingThreat = f.threat;
-      banner(f.threat, state?.feeds.find((g) => g.game_id === f.threat.game_id)?.label ?? "", () => send({ type: "focus_play", play_id: f.threat.play_id }));
+      banner(f.threat, state?.feeds.find((g) => g.game_id === f.threat.game_id)?.label ?? "", () => pickPlay(f.threat.play_id, f.threat.game_id));
       break;
   }
 }
@@ -324,7 +339,7 @@ window.addEventListener("keydown", (e) => {
   else if (k === "]" || k === ".") replay(1);
   else if (k === "\\" || k === "/") backToLive();
   else if (k === "n") sting(toggleMute() ? "hurt" : "help");
-  else if (k === "enter" && bannerVisible() && pendingThreat) { send({ type: "focus_play", play_id: pendingThreat.play_id }); hideBanner(); }
+  else if (k === "enter" && bannerVisible() && pendingThreat) { pickPlay(pendingThreat.play_id, pendingThreat.game_id); hideBanner(); }
   else if (k === "escape") hideBanner();
 });
 $("clockbox").addEventListener("dblclick", themePicker);

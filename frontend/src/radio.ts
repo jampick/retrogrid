@@ -1,6 +1,7 @@
 // RADIO: the focused game's flagship-station call, best effort (backend providers/audio.py).
-// It tunes to the game in focus when switched on and then *stays* there while the
-// view roams — AUTO-DIRECT cutting the commentary every big play would be unbearable.
+// It tunes to the game in focus when switched on and follows any game picked by hand
+// (main.ts radioFollow), but *stays* put while AUTO-DIRECT roams: cutting the commentary
+// every big play would be unbearable.
 
 import Hls from "hls.js";
 import type { GameAudio, StreamInfo } from "./types";

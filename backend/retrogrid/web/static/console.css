@@ -85,6 +85,8 @@ h2 em { font-style: normal; order: 2; letter-spacing: .12em; cursor: pointer; }
 #lineup .pts { text-align: right; font-variant-numeric: tabular-nums; }
 #lineup .tn { text-align: right; }
 #lineup .lose { opacity: .62; text-shadow: none; }
+#lineup span[data-g] { cursor: pointer; }
+#lineup span[data-g]:hover { color: var(--ffb-hot); }
 #lineup .idle { opacity: .45; }
 #lineup .lose.idle { opacity: .38; }
 #lineup li.total { margin-top: 10px; padding-top: 8px; position: relative; }
@@ -220,8 +222,10 @@ h2 em { font-style: normal; order: 2; letter-spacing: .12em; cursor: pointer; }
 :root[data-mini="1"] #keys, :root[data-mini="1"] #update, :root[data-mini="1"] #boot { display: none; }
 
 /* ── NFL base layer: chatter rail, radio, follow marks ──────────────── */
-:root:not([data-rail="lineup"]) #sec-lineup, :root:not([data-rail="chatter"]) #sec-chatter, :root:not([data-rail="league"]) #sec-league { display: none; }
+/* the focused game's crowd stays under the lineup and the league board: it fills whatever room they leave */
+:root:not([data-rail="lineup"]) #sec-lineup, :root:not([data-rail="league"]) #sec-league { display: none; }
 #sec-chatter { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+:root[data-mode="ffb"]:not([data-rail="chatter"]) #sec-chatter { min-height: 90px; }
 #chatter { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 9px;
   -webkit-mask-image: linear-gradient(transparent, #000 22%); mask-image: linear-gradient(transparent, #000 22%); }
 #chatter li { display: flex; flex-direction: column; gap: 1px; flex: none; }
@@ -236,7 +240,6 @@ h2 em { font-style: normal; order: 2; letter-spacing: .12em; cursor: pointer; }
 #threats li span:nth-child(3).dim { font-size: 10.5px; }
 :root[data-mode="nfl"] #scope { cursor: default; }
 #keys { margin-top: 0; }
-:root[data-rail="lineup"] #radio, :root[data-rail="league"] #radio { margin-top: auto; }
 
 /* ── the fantasy layer on a real Sunday (#27) ───────────────────────── */
 #tugsub {

@@ -701,17 +701,20 @@ class Engine:
 
     def player_game(self, pid: str | None, games: dict[str, Game]) -> dict:
         """Where a starter's game stands: pre (with kickoff, UTC), live (quarter and
-        clock), done, or bye. Teams off today's slate are looked up in the week's schedule."""
+        clock), done, or bye, plus its game_id when it is on today's slate. Teams off
+        today's slate are looked up in the week's schedule."""
         pl = self.directory.player(pid) if pid else None
         if pl is None:
             return {"state": "none", "at": ""}
         g = games.get(self.team_game.get(pl.team, ""))
         if g is not None:
             if g.status == "pre":
-                return {"state": "pre", "at": (self._t0 + timedelta(seconds=g.kickoff)).isoformat()}
-            if g.status == "final":
-                return {"state": "done", "at": "FINAL"}
-            return {"state": "live", "at": "HALF" if g.status == "half" else f"Q{g.quarter} {g.clock}" if g.quarter <= 4 else f"OT {g.clock}"}
+                st = {"state": "pre", "at": (self._t0 + timedelta(seconds=g.kickoff)).isoformat()}
+            elif g.status == "final":
+                st = {"state": "done", "at": "FINAL"}
+            else:
+                st = {"state": "live", "at": "HALF" if g.status == "half" else f"Q{g.quarter} {g.clock}" if g.quarter <= 4 else f"OT {g.clock}"}
+            return {**st, "game_id": g.id}                      # on today's slate: a click on the row puts this game on screen
         kick = self.schedule.get(pl.team)
         if kick is None:
             return {"state": "bye", "at": "BYE"} if self.schedule else {"state": "none", "at": ""}

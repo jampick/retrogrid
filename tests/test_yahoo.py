@@ -135,3 +135,31 @@ class TestProvider:
 def test_fixture_files_are_raw_shaped():
     raw = json.loads((FIXTURES / f"league_{LK}_scoreboard_week_2.json").read_text())
     assert "count" in raw["fantasy_content"]["league"][1]["scoreboard"]["0"]["matchups"]
+
+
+@needs_nflverse
+def test_points_come_per_team_when_the_league_call_drops_them(client: YahooClient):
+    """Real Yahoo (2026 week 6) ignores /stats on the league-wide roster call; the
+    per-team call has the points, so the provider asks each team instead."""
+    import copy
+    full = client.get(f"league/{LK}/teams/roster;week={WEEK}/players/stats;type=week;week={WEEK}")
+    teams = {t["team_key"]: t for t in many(full["league"]["teams"], "team")}
+
+    class LikeYahoo:
+        calls = 0
+
+        def get(self, path: str):
+            if path.startswith("team/"):                      # team/<key>/roster;week=N/players/stats...
+                return {"team": teams[path.split("/")[1]]}
+            data = copy.deepcopy(client.get(path))
+            for t in many((data.get("league") or {}).get("teams"), "team"):
+                for p in many(t["roster"]["players"], "player"):
+                    p.pop("player_points", None)
+            return data
+
+    directory = NflversePlayerDirectory.from_data_dir(week=WEEK, season=SEASON)
+    want = YahooLeagueProvider(client, directory, week=WEEK, season=SEASON, league_key=LK)
+    got = YahooLeagueProvider(LikeYahoo(), directory, week=WEEK, season=SEASON, league_key=LK)      # type: ignore[arg-type]
+    assert any(want.official_points(t.key, WEEK) for t in want.league().teams)
+    for t in want.league().teams:
+        assert got.official_points(t.key, WEEK) == want.official_points(t.key, WEEK)

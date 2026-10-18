@@ -5,7 +5,7 @@ import { palette } from "./palette";
 import { Radio } from "./radio";
 import { Setup } from "./setup";
 import type { ConsoleState, Frame, PlayFrame, ReelCard, Theme, Threat } from "./types";
-import { Ui } from "./ui";
+import { RAILS, Ui } from "./ui";
 
 const q = new URLSearchParams(location.search);
 const MINI = q.get("mini") === "1";
@@ -46,6 +46,7 @@ const ui = new Ui({
   cycle: () => toggleCycle(),
   skip: (d) => send({ type: "sim", action: "skip", value: d }),
   reelJump: (i) => send({ type: "reel_jump", index: i }),
+  viewer: (k) => { localStorage.setItem("ffb.viewer", k); send({ type: "viewer", team_key: k }); },
 });
 
 const setup = new Setup();
@@ -305,7 +306,7 @@ window.addEventListener("keydown", (e) => {
   else if (k === "v" && state?.mode === "ffb") viewerPicker();
   else if (k === "y" || (k === "x" && state && !state.ffb_available)) { closePicker(); void setup.show(); }
   else if (k === "x" && state?.ffb_available) { const on = state.mode !== "ffb"; localStorage.setItem("ffb.layer", on ? "1" : "0"); send({ type: "ffb", on }); }
-  else if (k === "tab") { e.preventDefault(); if (state?.mode === "ffb") { ui.rail = ui.rail === "lineup" ? "chatter" : "lineup"; localStorage.setItem("ffb.rail", ui.rail); ui.render(state); } }
+  else if (k === "tab") { e.preventDefault(); if (state?.mode === "ffb") { ui.rail = RAILS[(RAILS.indexOf(ui.rail) + 1) % RAILS.length]; localStorage.setItem("ffb.rail", ui.rail); ui.render(state); } }
   else if (k === "m") radio.toggle(state?.audio ?? null);
   else if (k === "h") radio.swap();
   else if (k === "-" || k === "=") radio.nudge(k === "=" ? 0.1 : -0.1);

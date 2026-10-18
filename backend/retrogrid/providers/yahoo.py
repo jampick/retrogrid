@@ -160,6 +160,7 @@ class YahooLeagueProvider:
         self.viewer: str | None = None                        # the logged-in user's team
         self._official: dict[str, dict[str, float]] = {}
         self._team_official: dict[str, float] = {}
+        self._outlook: dict[str, dict[str, float | None]] = {}
         self._load_league()
         self.refresh()
         rep = self.join.report
@@ -192,9 +193,13 @@ class YahooLeagueProvider:
             log.warning("yahoo roster+stats call failed (%s) — rosters only, no official points", e)
             teams = self.client.get(base)
         board = self.client.get(f"league/{self.league_key}/scoreboard;week={self.week}")
+        team_list = many((teams.get("league") or {}).get("teams"), "team")
+        points = self._team_points([t["team_key"] for t in team_list]) if not any(
+            (p.get("player_points") or {}).get("total") not in (None, "")
+            for t in team_list for p in many((t.get("roster") or {}).get("players"), "player")) else {}
 
         fantasy_teams, rosters, official, viewer = [], {}, {}, None
-        for t in many((teams.get("league") or {}).get("teams"), "team"):
+        for t in team_list:
             key = t["team_key"]
             managers = many(t.get("managers"), "manager")
             owner = next((m.get("nickname") for m in managers if m.get("nickname")), "?")
@@ -207,18 +212,23 @@ class YahooLeagueProvider:
                 pos = str((p.get("selected_position") or {}).get("position") or "BN")
                 slots.append(RosterSlot(slot="BN" if pos in BENCH_SLOTS else SLOT_NAMES.get(pos, pos), player_id=pid))
                 total = (p.get("player_points") or {}).get("total")
+                if total in (None, ""):
+                    total = points.get(str(p.get("player_key")))
                 if total not in (None, ""):
                     pts[pid] = float(total)
             rosters[key] = Roster(team_key=key, week=self.week, slots=slots)
             official[key] = pts
 
-        matchups, team_official = [], {}
+        matchups, team_official, outlook = [], {}, {}
         for m in many((board.get("league") or {}).get("scoreboard", {}).get("matchups"), "matchup"):
             pair = many(m.get("teams"), "team")
             for t in pair:
                 total = (t.get("team_points") or {}).get("total")
                 if total not in (None, ""):
                     team_official[t["team_key"]] = float(total)
+                proj, win = (t.get("team_projected_points") or {}).get("total"), t.get("win_probability")
+                outlook[t["team_key"]] = {"proj": float(proj) if proj not in (None, "") else None,
+                                          "win": float(win) if win not in (None, "") else None}
             if len(pair) == 2:
                 matchups.append(Matchup(week=self.week, a=pair[0]["team_key"], b=pair[1]["team_key"]))
         if not fantasy_teams or not matchups:
@@ -231,8 +241,28 @@ class YahooLeagueProvider:
         self._league = League(key=self.league_key, name=str(self._meta.get("name", self.league_key)),
                               scoring_rules=dict(self._rules), teams=[t for t in fantasy_teams if t.key in paired])
         self._rosters, self._official = rosters, official
-        self._matchups, self._team_official = matchups, team_official
+        self._matchups, self._team_official, self._outlook = matchups, team_official, outlook
         self.viewer = viewer if viewer in paired else None
+
+    def _team_points(self, team_keys: list[str]) -> dict[str, str]:
+        """player_key -> Yahoo's points this week. The league-wide roster call drops its
+        /stats sub-resource (seen on a real league, week 6 of 2026); only the per-team
+        call carries points, so ask each team, a few at a time. Best effort."""
+        from concurrent.futures import ThreadPoolExecutor
+        path = "team/{}/roster;week={}/players/stats;type=week;week={}"
+
+        def one(k: str) -> dict[str, str]:
+            got = self.client.get(path.format(k, self.week, self.week))
+            return {str(p.get("player_key")): (p.get("player_points") or {}).get("total")
+                    for p in many(((got.get("team") or {}).get("roster") or {}).get("players"), "player")}
+        out: dict[str, str] = {}
+        try:
+            with ThreadPoolExecutor(max_workers=6) as pool:
+                for part in pool.map(one, team_keys):
+                    out.update(part)
+        except Exception as e:                                # noqa: BLE001 — official points are a seed and a check
+            log.warning("yahoo per-team points unavailable (%s)", e)
+        return out
 
     # --------------------------------------------------------------- contract
 
@@ -256,6 +286,10 @@ class YahooLeagueProvider:
         return dict(self._official.get(team_key, {}))
 
     # ----------------------------------------------------------------- extras
+
+    def outlook(self, team_key: str) -> dict[str, float | None] | None:
+        """Yahoo's projected total and win probability (0-1) for the week, as of the last refresh."""
+        return self._outlook.get(team_key)
 
     def official_total(self, team_key: str) -> float | None:
         """Yahoo's own starter total for the week (drift checks)."""

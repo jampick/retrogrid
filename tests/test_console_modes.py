@@ -17,7 +17,7 @@ def _engine(monkeypatch, league: str):
 
 @needs_slate
 def test_nfl_mode_needs_no_league(monkeypatch):
-    console, e = _engine(monkeypatch, "")
+    console, e = _engine(monkeypatch, "off")
     assert e.league is None and e.hub is None and not e.boards
     s = console.Session(ws=None, favs={"KC"})
     s.focus = e.pick_focus(s)
@@ -37,7 +37,7 @@ def test_nfl_mode_needs_no_league(monkeypatch):
 
 @needs_slate
 def test_followed_team_takes_focus(monkeypatch):
-    console, e = _engine(monkeypatch, "")
+    console, e = _engine(monkeypatch, "off")
     team = next(t for t, g in e.team_game.items() if g in e.last_by_game)
     s = console.Session(ws=None, favs={team})
     assert e.pick_focus(s) == e.team_game[team]
@@ -55,3 +55,20 @@ def test_ffb_layer_is_opt_in_per_session(monkeypatch):
     assert f_on["mode"] == "ffb" and f_on["lineup"] and f_on["viewers"] and f_on["ffb_available"]
     assert f_off["mode"] == "nfl" and f_off["lineup"] == [] and f_off["ffb_available"]
     assert f_on["chatter"] is not None and f_on["audio"]                  # the base layer stays underneath
+
+
+@needs_slate
+def test_ffb_frame_says_who_has_played_and_shows_the_league(monkeypatch):
+    console, e = _engine(monkeypatch, "stub")
+    s = console.Session(ws=None, viewer=e.default_viewer, ffb=True)
+    f = e.state_frame(s)
+    states = {c["game"]["state"] for r in f["lineup"] for c in (r["you"], r["them"])}
+    assert states <= {"pre", "live", "done", "none"} and states & {"live", "done"}      # 5400 s in: early games on
+    pre = [c for r in f["lineup"] for c in (r["you"], r["them"]) if c["game"]["state"] == "pre"]
+    assert all(c["game"]["at"].startswith(e.slate.date[:4]) for c in pre)           # an ISO kickoff for the client to localise
+    you = f["matchup"]["you"]
+    assert you["left"] == sum(r["you"]["game"]["state"] in ("pre", "live") for r in f["lineup"])
+    assert you["proj"] is None and you["win"] is None                                  # the stub league has no Yahoo outlook
+    board = f["league_board"]
+    assert len(board) == len(e.league.matchups(e.week)) and board[0]["mine"] and board[0]["a"]["team_key"] == s.viewer
+    assert board[0]["a"]["points"] == f["matchup"]["you"]["points"]

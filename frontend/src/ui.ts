@@ -4,7 +4,7 @@ import { palette } from "./palette";
 import { PixelLabel } from "./pixelfont";
 import { loadSprite, proceduralBust, tint, SP } from "./sprites";
 import type { Radio } from "./radio";
-import type { ActiveCard, ConsoleState, GhostInfo, Side, Update } from "./types";
+import type { ActiveCard, ConsoleState, GhostInfo, LineupCell, MatchupSide, Side, Update } from "./types";
 
 const $ = (id: string) => document.getElementById(id)!;
 const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]!));
@@ -24,6 +24,19 @@ export interface UiHandlers {
   cycle(): void;
   skip(dir: number): void;
   reelJump(index: number): void;
+  viewer(teamKey: string): void;
+}
+
+export type Rail = "lineup" | "league" | "chatter";
+export const RAILS: Rail[] = ["lineup", "league", "chatter"];
+
+/** "1:25P" today, "MON" another day: when a player still to play kicks off, in local time. */
+function kickoff(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  if (d.toDateString() !== new Date().toDateString()) return d.toLocaleDateString(undefined, { weekday: "short" }).toUpperCase().slice(0, 3);
+  const h = d.getHours(), m = d.getMinutes();
+  return `${h % 12 || 12}${m ? ":" + String(m).padStart(2, "0") : ""}${h < 12 ? "A" : "P"}`;
 }
 
 export class Ui {
@@ -40,7 +53,7 @@ export class Ui {
   private bustKey = "";
   private seenThreats = new Set<string>();
   private seenChatter = new Set<string>();
-  rail: "lineup" | "chatter" = localStorage.getItem("ffb.rail") === "chatter" ? "chatter" : "lineup";   // ffb mode only
+  rail: Rail = RAILS.find((r) => r === localStorage.getItem("ffb.rail")) ?? "lineup";   // ffb mode only
   private state: ConsoleState | null = null;
 
   constructor(private h: UiHandlers) {
@@ -70,7 +83,7 @@ export class Ui {
     if (root.dataset.mode !== s.mode) { root.dataset.mode = s.mode; this.logo.set(s.mode === "ffb" ? "RETRO//GRID" : "RETRO//GRID"); }
     root.dataset.rail = s.mode === "ffb" ? this.rail : "chatter";
     root.dataset.reel = s.reel ? "1" : "0";
-    this.status(s); this.feeds(s); this.threats(s); this.lineup(s); this.chatter(s); this.keys(s);
+    this.status(s); this.feeds(s); this.threats(s); this.lineup(s); this.league(s); this.chatter(s); this.keys(s);
     this.ghostTag(this.gtYou, s.ghosts.you); this.ghostTag(this.gtThem, s.ghosts.them);
     this.active(s.active);
   }
@@ -84,6 +97,7 @@ export class Ui {
     const d = you.points - them.points;
     if (nfl) this.delta.set(s.matchup?.status ?? "", "hot");             // the game clock, not a fantasy margin
     else this.delta.set((d >= 0 ? "{" : "}") + pts(Math.abs(d)), d >= 0 ? "gain" : "them");
+    $("tugsub").innerHTML = nfl || s.reel ? "" : this.outlook(you, them);
     $("clock").textContent = s.clock.label;
     $("live").textContent = s.clock.paused ? "■ HOLD" : s.reel ? "▶ REEL" : s.clock.live ? "● ON AIR" : "▶ SIM";
     $("live").title = `${s.gameday ?? ""}: pick LIVE or a past week [G]`;
@@ -104,6 +118,18 @@ export class Ui {
     $("transport").querySelectorAll<HTMLElement>("b[data-r]").forEach((b) => (b.onclick = () => this.h.speed(Number(b.dataset.r))));
     ($("scrub").firstElementChild as HTMLElement).style.width = `${(100 * s.clock.sim) / Math.max(1, s.clock.duration)}%`;
     this.tug(you.points, them.points);
+  }
+
+  /** Under the tug bar: players still to play, and Yahoo's projection and win % when it has them. */
+  private outlook(you: MatchupSide, them: MatchupSide): string {
+    const side = (m: MatchupSide, mine: boolean) => {
+      const bits = [m.left !== undefined ? `${m.left} LEFT` : "", m.proj != null ? `PROJ ${pts(m.proj)}` : "",
+        m.win != null ? `WIN ${Math.round(m.win * 100)}%` : ""].filter(Boolean);
+      return esc((mine ? bits.reverse() : bits).join(" · "));
+    };
+    const a = side(you, true), b = side(them, false);
+    if (!a && !b) return "";
+    return `<span class="you">${a}</span>${you.proj != null || you.win != null ? `<span class="src">YAHOO</span>` : `<span class="src">·</span>`}<span class="them">${b}</span>`;
   }
 
   /** Tug-of-war bar: LED segments, your light pushing against theirs. */
@@ -215,7 +241,7 @@ export class Ui {
       "[M] RADIO · [H] OTHER BOOTH · [-][=] VOL · [N] MUTE CUES",
       s.clock.live ? "" : "[SPACE] HOLD · [1-4] RATE · [←→] SKIP",
       `[C] AUTO-REPLAY <span id="cycle">${this.cycleText}</span> · [ [ ] ] STEP · [/] BACK`,
-      s.ffb_available ? `[X] FANTASY LAYER ${ffb ? "ON" : "OFF"} · [Y] LEAGUE` + (ffb ? " · [V] VIEWER · [L] SCOPE · [TAB] LINEUP/CHATTER" : "")
+      s.ffb_available ? `[X] FANTASY LAYER ${ffb ? "ON" : "OFF"} · [Y] LEAGUE` + (ffb ? " · [V] VIEWER · [L] SCOPE · [TAB] LINEUP/LEAGUE/CHATTER" : "")
         : s.league_error ? `<span class="them">[Y] YAHOO LEAGUE NOT LOADED: SEE WHY</span>` : `<span class="hot">[Y] FANTASY: CONNECT YOUR YAHOO LEAGUE</span>`,
     ].filter(Boolean).join("<br>");
     if ($("keys").dataset.k !== k) { $("keys").dataset.k = k; $("keys").innerHTML = k; }
@@ -230,19 +256,46 @@ export class Ui {
 
   private lineup(s: ConsoleState): void {
     if (s.mode === "nfl" || !s.matchup) { $("lineup").innerHTML = ""; return; }
+    // a player's game decides how bright the row is: to play (dim, kickoff where the points go), on now (●), done
+    const st = (c: LineupCell) => c.game ? ({ pre: "pre", bye: "pre", live: "lv", done: "done", none: "" } as const)[c.game.state] : (c.live ? "lv" : "idle");
+    const score = (c: LineupCell, side: "you" | "them", lose: boolean) => {
+      const g = c.game;
+      if (g && (g.state === "pre" || g.state === "bye") && !c.points) return `<span class="pts when" title="${esc(g.state === "pre" ? new Date(g.at).toLocaleString() : "bye week")}">${esc(g.state === "pre" ? kickoff(g.at) : "BYE")}</span>`;
+      return `<span class="pts ${side} ${lose ? "lose" : ""}" title="${esc(g?.at && g.state === "live" ? g.at : "")}">${pts(c.points)}</span>`;
+    };
     const rows = s.lineup.map((r) => {
       const yl = r.you.points >= r.them.points;
       return `<li><span class="slot">${r.slot}</span>
-        <span class="you ${yl ? "" : "lose"} ${r.you.live ? "" : "idle"}">${esc(r.you.name)}</span>
-        <span class="pts you ${yl ? "" : "lose"}">${pts(r.you.points)}</span><span></span>
-        <span class="pts them ${yl ? "lose" : ""}">${pts(r.them.points)}</span>
-        <span class="tn them ${yl ? "lose" : ""} ${r.them.live ? "" : "idle"}">${esc(r.them.name)}</span>
+        <span class="you ${yl ? "" : "lose"} ${st(r.you)}">${esc(r.you.name)}</span>
+        ${score(r.you, "you", !yl)}<span></span>${score(r.them, "them", yl)}
+        <span class="tn them ${yl ? "lose" : ""} ${st(r.them)}">${esc(r.them.name)}</span>
         <span class="them">${r.losing ? "⚠" : ""}</span></li>`;
     });
     const { you, them } = s.matchup;
-    rows.push(`<li class="total"><span class="slot">TOT</span><span></span><span class="pts you">${pts(you.points)}</span><span></span>
-      <span class="pts them">${pts(them.points)}</span><span></span><span></span></li>`);
+    const left = (m: MatchupSide) => (m.left !== undefined ? `<span class="left">${m.left} LEFT</span>` : "<span></span>");
+    rows.push(`<li class="total"><span class="slot">TOT</span>${left(you)}<span class="pts you">${pts(you.points)}</span><span></span>
+      <span class="pts them">${pts(them.points)}</span><span class="tn">${left(them)}</span><span></span></li>`);
     $("lineup").innerHTML = rows.join("");
+  }
+
+  /** LEAGUE rail: every matchup on our live numbers. A click watches that one as its first team. */
+  private league(s: ConsoleState): void {
+    const board = s.mode === "ffb" ? s.league_board ?? [] : [];
+    $("league-wk").textContent = s.clock.label.split(" · ")[0];
+    $("leagueboard").innerHTML = board.map((r) => {
+      const lead = r.a.points >= r.b.points;
+      const share = r.a.points + r.b.points > 0 ? (100 * r.a.points) / (r.a.points + r.b.points) : 50;
+      const [ca, cb] = r.mine ? ["you", "them"] : [lead ? "lead" : "trail", lead ? "trail" : "lead"];
+      const bar = r.mine ? `linear-gradient(90deg, var(--ffb-you) ${share}%, var(--ffb-them) ${share}%)`
+        : `linear-gradient(90deg, rgba(var(--ffb-dim-rgb), ${lead ? .8 : .3}) ${share}%, rgba(var(--ffb-dim-rgb), ${lead ? .3 : .8}) ${share}%)`;
+      const tip = (t: typeof r.a) => esc(`${t.name} · ${t.owner}${t.win != null ? ` · Yahoo win ${Math.round(t.win * 100)}%` : ""}`);
+      const win = (t: typeof r.a) => (t.win != null ? `${Math.round(t.win * 100)}%` : "");
+      return `<li data-t="${esc(r.a.team_key)}" class="${r.mine ? "mine" : ""}">
+        <span class="na ${ca}" title="${tip(r.a)}">${esc(r.a.name)}</span><span class="w">${win(r.a)}</span><span class="pts ${ca}">${pts(r.a.points)}</span>
+        <span class="nb ${cb}" title="${tip(r.b)}">${esc(r.b.name)}</span><span class="w">${win(r.b)}</span><span class="pts ${cb}">${pts(r.b.points)}</span>
+        <i class="bar" style="background:${bar};opacity:${r.mine ? .8 : .5}"></i></li>`;
+    }).join("");
+    $("leagueboard").querySelectorAll<HTMLElement>("li[data-t]").forEach((li) => (li.onclick = () => this.h.viewer(li.dataset.t!)));
   }
 
   private ghostTag(tag: { name: PixelLabel; meta: PixelLabel; pts: PixelLabel }, g: GhostInfo | null): void {

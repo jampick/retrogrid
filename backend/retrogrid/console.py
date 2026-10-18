@@ -35,6 +35,7 @@ from .providers.league import default_viewer, make_league
 from .scoring import DEFAULT_RULES, ActionBoard, ActionEvent, LeagueIndex, MatchupBoard, ScoringState, ThreatEvent, ThreatHub
 from .scoring.action import HOT_THRESHOLD
 from .scoring.engine import statline_text
+from .scoring.matchup import starter_total
 from .scoring.drive import DriveTracker
 from .sim.clock import SimClock
 
@@ -50,6 +51,20 @@ FAVS = [t for t in os.environ.get("RETROGRID_FAVS", "").upper().replace(",", " "
 
 _PREFIX = re.compile(r"^(\(\d*:?\d+\)\s*)?(\((Shotgun|No Huddle|No Huddle, Shotgun)\)\s*)*", re.I)
 _JERSEY = re.compile(r"\b\d{1,2}-(?=[A-Z][\w']*\.)")
+
+
+def week_schedule(season: int, week: int) -> dict[str, str]:
+    """NFL team -> kickoff (UTC ISO) for the whole week, off ESPN. A live slate is
+    one day, so a lineup's Thursday and Monday players need this to say whether
+    they have played. Best effort: {} offline."""
+    import httpx
+    from .providers.espn import SITE, scoreboard_games
+    try:
+        board = httpx.get(f"{SITE}/scoreboard", params={"seasontype": 2, "week": week, "dates": season}, timeout=8.0).json()
+        return {t: g["kickoff_utc"] for g in scoreboard_games(board) for t in (g["home"], g["away"])}
+    except Exception as e:                                    # noqa: BLE001
+        log.warning("week %d schedule unavailable: %s", week, e)
+        return {}
 
 
 def _air_estimator():
@@ -130,6 +145,7 @@ class Engine:
         self.hub: ThreatHub | None = None
         self.boards: dict[str, MatchupBoard] = {}
         self.load_league()
+        self.schedule = week_schedule(self.slate.season, self.week) if hasattr(self.league, "league_key") else {}
         self.recent: dict[str, list[tuple[float, float]]] = {}
         self.aux: dict[str, dict[str, float]] = {}
         self.plays_by_id = {p.play_id: p for p in self.slate.plays}
@@ -683,21 +699,72 @@ class Engine:
             "ghosts": {"you": self.heat_pick(s, "you", g.away, now), "them": self.heat_pick(s, "them", g.home, now)} if g else {"you": None, "them": None},
         }
 
+    def player_game(self, pid: str | None, games: dict[str, Game]) -> dict:
+        """Where a starter's game stands: pre (with kickoff, UTC), live (quarter and
+        clock), done, or bye. Teams off today's slate are looked up in the week's schedule."""
+        pl = self.directory.player(pid) if pid else None
+        if pl is None:
+            return {"state": "none", "at": ""}
+        g = games.get(self.team_game.get(pl.team, ""))
+        if g is not None:
+            if g.status == "pre":
+                return {"state": "pre", "at": (self._t0 + timedelta(seconds=g.kickoff)).isoformat()}
+            if g.status == "final":
+                return {"state": "done", "at": "FINAL"}
+            return {"state": "live", "at": "HALF" if g.status == "half" else f"Q{g.quarter} {g.clock}" if g.quarter <= 4 else f"OT {g.clock}"}
+        kick = self.schedule.get(pl.team)
+        if kick is None:
+            return {"state": "bye", "at": "BYE"} if self.schedule else {"state": "none", "at": ""}
+        when = datetime.fromisoformat(kick.replace("Z", "+00:00"))
+        if when < self._t0:
+            return {"state": "done", "at": "FINAL"}
+        return {"state": "pre", "at": when.isoformat()}
+
+    def league_board(self, s: Session) -> list[dict]:
+        """Every matchup this week on our live numbers, the viewer's first."""
+        rows = []
+        for m in self.league.matchups(self.week):
+            side = []
+            for k in (m.a, m.b):
+                o = self.outlook(k)
+                side.append({"team_key": k, "name": self.teams[k].name, "owner": self.teams[k].owner,
+                             "points": round(starter_total(self.rosters[k], self.state), 1), "win": o.get("win")})
+            if s.viewer == m.b or (s.viewer != m.a and self.default_viewer == m.b):     # your own team leads its row, so a click comes home
+                side.reverse()
+            rows.append({"a": side[0], "b": side[1], "mine": s.viewer in (m.a, m.b)})
+        return sorted(rows, key=lambda r: not r["mine"])
+
+    def outlook(self, team_key: str) -> dict:
+        get = getattr(self.league, "outlook", None)
+        return (get(team_key) if get else None) or {}
+
     def ffb_layer(self, s: Session, now: float, live) -> dict:                    # noqa: ANN001
         snap = self.boards[s.viewer].snapshot()
         opp = self.opponent[s.viewer]
+        games = {g.id: g for g in self.provider.games_at(now)}
+        gy = {r.you.player_id: self.player_game(r.you.player_id, games) for r in snap.rows}
+        gt = {r.them.player_id: self.player_game(r.them.player_id, games) for r in snap.rows}
         lineup = [{
             "slot": r.slot,
-            "you": {"player_id": r.you.player_id, "name": self.name(r.you.player_id), "points": round(r.you.points, 1), "live": live(r.you.player_id)},
-            "them": {"player_id": r.them.player_id, "name": self.name(r.them.player_id), "points": round(r.them.points, 1), "live": live(r.them.player_id)},
+            "you": {"player_id": r.you.player_id, "name": self.name(r.you.player_id), "points": round(r.you.points, 1),
+                    "live": live(r.you.player_id), "game": gy[r.you.player_id]},
+            "them": {"player_id": r.them.player_id, "name": self.name(r.them.player_id), "points": round(r.them.points, 1),
+                     "live": live(r.them.player_id), "game": gt[r.them.player_id]},
             "losing": r.losing,
         } for r in snap.rows]
+
+        def left(side: dict) -> int:
+            return sum(g["state"] in ("pre", "live") for g in side.values())
+        oy, ot = self.outlook(s.viewer), self.outlook(opp)
         return {
             "viewer": {"team_key": s.viewer, "owner": self.teams[s.viewer].owner},
             "viewers": [{"team_key": t.key, "owner": t.owner, "name": t.name} for t in self.teams.values()],
-            "matchup": {"you": {"name": f"{self.teams[s.viewer].owner} · {self.teams[s.viewer].name}", "points": round(snap.you_total, 1)},
-                        "them": {"name": f"{self.teams[opp].name} · {self.teams[opp].owner}", "points": round(snap.them_total, 1)},
+            "matchup": {"you": {"name": f"{self.teams[s.viewer].owner} · {self.teams[s.viewer].name}", "points": round(snap.you_total, 1),
+                                "left": left(gy), "proj": oy.get("proj"), "win": oy.get("win")},
+                        "them": {"name": f"{self.teams[opp].name} · {self.teams[opp].owner}", "points": round(snap.them_total, 1),
+                                 "left": left(gt), "proj": ot.get("proj"), "win": ot.get("win")},
                         "status": ""},
+            "league_board": self.league_board(s),
             "threats": [self.threat_dict(e) for e in self.hub.board(s.viewer).top(12, now, s.scope) if abs(e.delta_points) >= 0.5 or e.lead_change][:7],
             "scope": s.scope, "lineup": lineup,
             "ghosts": {"you": self.heat_pick(s, "you", s.viewer, now), "them": self.heat_pick(s, "them", opp, now)},

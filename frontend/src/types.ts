@@ -58,7 +58,11 @@ export interface ReelTag { week: number; number: string; rank: number; score: nu
 /** What a highlight loses when it leaves its game: shown before the snap. */
 export interface ReelCard { type: "reel_card"; segment: string; number: string; week: number; label: string; score: string; clock: string; situation: string; seconds: number }
 
-export interface LineupCell { player_id: string; name: string; points: number; live: boolean }
+export interface PlayerGame { state: "pre" | "live" | "done" | "bye" | "none"; at: string }   // pre: kickoff, UTC ISO
+export interface LineupCell { player_id: string; name: string; points: number; live: boolean; game?: PlayerGame }
+export interface MatchupSide { name: string; points: number; left?: number; proj?: number | null; win?: number | null }
+export interface BoardTeam { team_key: string; name: string; owner: string; points: number; win: number | null }
+export interface BoardRow { a: BoardTeam; b: BoardTeam; mine: boolean }
 export interface LineupRow { slot: string; you: LineupCell; them: LineupCell; losing: boolean }
 
 export interface GhostInfo { player_id: string; name: string; meta: string; points: number; heat: number; sprite: string | null }
@@ -90,7 +94,8 @@ export interface ConsoleState {
   viewer: { team_key: string; owner: string } | null;
   viewers: { team_key: string; owner: string; name: string }[];
   // ffb: fantasy matchup. nfl: the focused game, away on the left — null with nothing in focus.
-  matchup: { you: { name: string; points: number }; them: { name: string; points: number }; status: string } | null;
+  matchup: { you: MatchupSide; them: MatchupSide; status: string } | null;
+  league_board?: BoardRow[];          // ffb: every matchup this week, the viewer's first
   favs: string[];
   teams: string[];                    // every team on the slate
   chatter: ChatterLine[];             // focused game, oldest first

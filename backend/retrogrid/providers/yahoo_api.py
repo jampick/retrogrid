@@ -182,7 +182,13 @@ class YahooAuth:
 # ── client ────────────────────────────────────────────────────────────────
 
 def slug(path: str) -> str:
-    return re.sub(r"[^A-Za-z0-9.]+", "_", path).strip("_")
+    """The cache file name for a path. A long one (a dozen team keys) keeps a
+    readable head and ends in a hash, under the 255-byte name limit."""
+    out = re.sub(r"[^A-Za-z0-9.]+", "_", path).strip("_")
+    if len(out) > 180:
+        import hashlib
+        out = f"{out[:120]}_{hashlib.sha1(out.encode()).hexdigest()[:16]}"
+    return out
 
 
 class YahooClient:

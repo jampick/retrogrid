@@ -132,6 +132,13 @@ ranked by how many points a play moved your week. Players on the field are
 coloured by who rosters them. In the shot below Pickett's interception shows up
 because the opponent has Bowers, the intended receiver.
 
+On a real league it also tells you where the week stands. Each lineup row
+shows whether that player is still to play (with kickoff in your local time),
+on the field now (●), or done. Under the score bar are players left on each
+side plus Yahoo's projection and win %, refreshed every two minutes while
+games are on. `Tab` cycles the right rail through LINEUP, LEAGUE (every
+matchup in your league, live; click one to watch it as that team) and CHATTER.
+
 <img alt="Fantasy layer: matchup score bar, lineup rail, threats, and an interception on the field" src="https://raw.githubusercontent.com/jampick/retrogrid/main/docs/media/fantasy.png" width="100%">
 
 #### Connecting your Yahoo league
@@ -202,7 +209,7 @@ build-reel | sprites | yahoo-auth | find-stream` (each takes `--help`).
 | `Enter` | view the alert in the banner |
 | `C` · `[` `]` · `/` | auto-replay in dead time · step through recent plays · back to live |
 | `Y` | connect, switch or sign out of your Yahoo league |
-| `X` | fantasy layer, then `V` who-am-I · `L` threat scope · `Tab` lineup/chatter |
+| `X` | fantasy layer, then `V` who-am-I · `L` threat scope · `Tab` lineup / league / chatter |
 | `Space` · `1` to `4` · `←` `→` | SIM only: hold · rate 1×/4×/15×/60× · skip 5 min |
 | `Space` · `←` `→` | REEL: hold · previous / next play. Click a row in the rundown or the finals to jump. |
 | `B` | before kickoff: last week's reel, or today's feed |

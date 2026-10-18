@@ -220,7 +220,7 @@ h2 em { font-style: normal; order: 2; letter-spacing: .12em; cursor: pointer; }
 :root[data-mini="1"] #keys, :root[data-mini="1"] #update, :root[data-mini="1"] #boot { display: none; }
 
 /* ── NFL base layer: chatter rail, radio, follow marks ──────────────── */
-:root[data-rail="chatter"] #sec-lineup, :root[data-rail="lineup"] #sec-chatter { display: none; }
+:root:not([data-rail="lineup"]) #sec-lineup, :root:not([data-rail="chatter"]) #sec-chatter, :root:not([data-rail="league"]) #sec-league { display: none; }
 #sec-chatter { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 #chatter { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 9px;
   -webkit-mask-image: linear-gradient(transparent, #000 22%); mask-image: linear-gradient(transparent, #000 22%); }
@@ -236,7 +236,36 @@ h2 em { font-style: normal; order: 2; letter-spacing: .12em; cursor: pointer; }
 #threats li span:nth-child(3).dim { font-size: 10.5px; }
 :root[data-mode="nfl"] #scope { cursor: default; }
 #keys { margin-top: 0; }
-:root[data-rail="lineup"] #radio { margin-top: auto; }
+:root[data-rail="lineup"] #radio, :root[data-rail="league"] #radio { margin-top: auto; }
+
+/* ── the fantasy layer on a real Sunday (#27) ───────────────────────── */
+#tugsub {
+  position: absolute; left: 50%; bottom: 5px; transform: translateX(-50%); white-space: nowrap;
+  font-size: 9.5px; letter-spacing: .14em; display: flex; gap: 14px;
+}
+#tugsub:empty { display: none; }
+#tugsub .src { color: rgba(var(--ffb-dim-rgb), .7); }
+#lineup .pre { opacity: .45; }
+#lineup .done { opacity: .72; }
+#lineup .lose.done { opacity: .5; }
+#lineup .pts.when { font-size: 10px; opacity: .55; color: var(--ffb-dim); text-shadow: none; letter-spacing: .04em; }
+#lineup .lv::before, #lineup .tn.lv::after {
+  content: "●"; font-size: 7px; vertical-align: 2px; color: var(--ffb-alert); text-shadow: 0 0 6px rgba(var(--ffb-alert-rgb), var(--glow));
+  animation: blink 1.6s steps(1) infinite;
+}
+#lineup .lv::before { margin-right: 5px; }
+#lineup .tn.lv::before { content: none; }
+#lineup .tn.lv::after { margin-left: 5px; }
+#lineup li.total .left { font-size: 10px; color: var(--ffb-dim); }
+#leagueboard li { display: grid; grid-template-columns: 1fr 4ch 6ch; column-gap: 10px; row-gap: 1px; padding: 6px 0 8px; cursor: pointer; white-space: nowrap; position: relative; }
+#leagueboard li span { overflow: hidden; text-overflow: ellipsis; }
+#leagueboard li .pts { text-align: right; font-variant-numeric: tabular-nums; }
+#leagueboard li .w { text-align: right; font-size: 10px; color: rgba(var(--ffb-dim-rgb), .8); align-self: center; }
+#leagueboard li .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; }
+#leagueboard li:not(.mine) .lead { color: var(--ffb-hot); }
+#leagueboard li:not(.mine) .trail { opacity: .55; }
+#leagueboard li:hover .na, #leagueboard li:hover .nb { color: var(--ffb-hot); }
+#leagueboard li.mine { margin-bottom: 10px; }
 :root[data-mini="1"] #radio { display: none; }
 
 /* RED ZONE: the toggle, lit while a drive inside the 20 has the screen; RZ chip on any feed that is in there */
@@ -263,3 +292,17 @@ h2 em { font-style: normal; order: 2; letter-spacing: .12em; cursor: pointer; }
 #chatter li.seg { cursor: pointer; padding: 4px 0; flex-direction: row; gap: 8px; align-items: baseline; }
 #chatter li.seg .src { width: 10px; }
 #chatter li.seg em { font-style: normal; font-size: 10.5px; margin-left: 6px; }
+
+/* ── half a side monitor (#29): the matchup gets its own row, the rails give the field room ── */
+@media (max-width: 1200px) {
+  #console { grid-template-columns: 250px 1fr 340px; grid-template-rows: auto 1fr 96px; }
+  #status { flex-wrap: wrap; row-gap: 2px; column-gap: 18px; padding: 8px 16px 20px; }
+  #tug { order: 3; flex-basis: 100%; gap: 10px; }
+  #tug .owner { max-width: 24ch; }
+  #delta { margin-left: auto; min-width: 0; }
+  #clockbox { min-width: 0; }
+  aside { padding: 14px 14px; gap: 16px; }
+  #active { grid-template-columns: 72px auto 1fr auto; column-gap: 14px; padding: 0 16px; }
+  #active canvas.bust { width: 72px; height: 72px; }
+  #ghosts, .ghost-tag { display: none; }            /* no margin left beside the field for the holograms to stand in */
+}

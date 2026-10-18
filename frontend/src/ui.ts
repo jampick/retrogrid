@@ -265,10 +265,11 @@ export class Ui {
     };
     const rows = s.lineup.map((r) => {
       const yl = r.you.points >= r.them.points;
+      const go = (c: LineupCell) => (c.game?.game_id ? ` data-g="${esc(c.game.game_id)}" title="watch ${esc(c.name)}'s game"` : "");
       return `<li><span class="slot">${r.slot}</span>
-        <span class="you ${yl ? "" : "lose"} ${st(r.you)}">${esc(r.you.name)}</span>
+        <span class="you ${yl ? "" : "lose"} ${st(r.you)}"${go(r.you)}>${esc(r.you.name)}</span>
         ${score(r.you, "you", !yl)}<span></span>${score(r.them, "them", yl)}
-        <span class="tn them ${yl ? "lose" : ""} ${st(r.them)}">${esc(r.them.name)}</span>
+        <span class="tn them ${yl ? "lose" : ""} ${st(r.them)}"${go(r.them)}>${esc(r.them.name)}</span>
         <span class="them">${r.losing ? "⚠" : ""}</span></li>`;
     });
     const { you, them } = s.matchup;
@@ -276,6 +277,7 @@ export class Ui {
     rows.push(`<li class="total"><span class="slot">TOT</span>${left(you)}<span class="pts you">${pts(you.points)}</span><span></span>
       <span class="pts them">${pts(them.points)}</span><span class="tn">${left(them)}</span><span></span></li>`);
     $("lineup").innerHTML = rows.join("");
+    $("lineup").querySelectorAll<HTMLElement>("span[data-g]").forEach((el) => (el.onclick = () => this.h.focusGame(el.dataset.g!)));
   }
 
   /** LEAGUE rail: every matchup on our live numbers. A click watches that one as its first team. */

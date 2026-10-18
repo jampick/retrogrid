@@ -58,7 +58,7 @@ export interface ReelTag { week: number; number: string; rank: number; score: nu
 /** What a highlight loses when it leaves its game: shown before the snap. */
 export interface ReelCard { type: "reel_card"; segment: string; number: string; week: number; label: string; score: string; clock: string; situation: string; seconds: number }
 
-export interface PlayerGame { state: "pre" | "live" | "done" | "bye" | "none"; at: string }   // pre: kickoff, UTC ISO
+export interface PlayerGame { state: "pre" | "live" | "done" | "bye" | "none"; at: string; game_id?: string }   // pre: kickoff, UTC ISO; game_id: on today's slate
 export interface LineupCell { player_id: string; name: string; points: number; live: boolean; game?: PlayerGame }
 export interface MatchupSide { name: string; points: number; left?: number; proj?: number | null; win?: number | null }
 export interface BoardTeam { team_key: string; name: string; owner: string; points: number; win: number | null }

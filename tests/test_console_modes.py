@@ -66,6 +66,9 @@ def test_ffb_frame_says_who_has_played_and_shows_the_league(monkeypatch):
     assert states <= {"pre", "live", "done", "none"} and states & {"live", "done"}      # 5400 s in: early games on
     pre = [c for r in f["lineup"] for c in (r["you"], r["them"]) if c["game"]["state"] == "pre"]
     assert all(c["game"]["at"].startswith(e.slate.date[:4]) for c in pre)           # an ISO kickoff for the client to localise
+    slate = set(e.team_game.values())
+    on_slate = [c for r in f["lineup"] for c in (r["you"], r["them"]) if c["game"]["state"] != "none"]
+    assert on_slate and all(c["game"]["game_id"] in slate for c in on_slate)      # a click on the row focuses that game
     you = f["matchup"]["you"]
     assert you["left"] == sum(r["you"]["game"]["state"] in ("pre", "live") for r in f["lineup"])
     assert you["proj"] is None and you["win"] is None                                  # the stub league has no Yahoo outlook

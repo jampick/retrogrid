@@ -1,0 +1,20 @@
+{
+ "fantasy_content": {
+  "xml:lang": "en-US",
+  "yahoo:uri": "/fantasy/v2/users;use_login=1/games;game_keys=461/teams",
+  "users": {
+   "0": {
+    "user": [
+     {"guid": "G"},
+     {"games": {"0": {"game": [
+       {"game_key": "461", "name": "Football", "code": "nfl", "season": "2026"},
+       {"teams": {"0": {"team": [[{"team_key": "461.l.777.t.1"}, {"team_id": "1"}, {"name": "Gridiron Ghosts"}, {"is_owned_by_current_login": 1}, [], {}], null]}, "count": 1}}
+     ]}, "count": 1}}
+    ]
+   },
+   "count": 1
+  },
+  "time": "30ms",
+  "copyright": "x"
+ }
+}

@@ -59,6 +59,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+from .setup_api import router as setup_router            # noqa: E402
+app.include_router(setup_router)
+
 
 @app.middleware("http")
 async def revalidate_bundles(request, call_next):             # noqa: ANN001, ANN201

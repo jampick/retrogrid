@@ -163,6 +163,47 @@ h2 em { font-style: normal; order: 2; letter-spacing: .12em; cursor: pointer; }
 #picker li .sw { margin-left: auto; display: flex; gap: 2px; }
 #picker li .sw i { width: 9px; height: 9px; display: block; }
 
+/* ── [Y] yahoo setup ────────────────────────────────────────────────── */
+#setup {
+  position: absolute; z-index: 31; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: min(640px, calc(100% - 32px)); max-height: calc(100% - 120px); overflow-y: auto;
+  padding: 18px 24px 20px; background: rgba(var(--ffb-rail-rgb), .97); user-select: text; cursor: auto;
+  box-shadow: 0 0 0 1px rgba(var(--ffb-dim-rgb), .35), 0 0 60px rgba(var(--ffb-you-rgb), calc(var(--glow) * .3));
+}
+#setup nav { display: flex; gap: 22px; margin: 2px 0 14px; font-size: 11px; }
+#setup nav b { font-weight: 500; color: rgba(var(--ffb-dim-rgb), .7); }
+#setup nav b.on { color: var(--ffb-alert); }
+#setup nav b.done { color: var(--ffb-gain); }
+#setup .copy { text-transform: none; letter-spacing: .02em; color: var(--ffb-hot); opacity: .86; line-height: 1.55; }
+#setup .copy p, #setup .copy li { margin-bottom: 7px; }
+#setup ol { padding-left: 20px; list-style: decimal; }
+#setup i { font-style: normal; color: var(--ffb-you); }
+#setup a { color: var(--ffb-you); text-decoration: none; border-bottom: 1px dotted rgba(var(--ffb-you-rgb), .6); cursor: pointer; }
+#setup code { color: var(--ffb-alert); cursor: copy; }
+#setup code.copied::after { content: "  copied"; color: var(--ffb-gain); }
+#setup form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; margin: 14px 0 6px; }
+#setup form[data-form=signin] { grid-template-columns: 1fr auto; }
+#setup label { display: flex; flex-direction: column; gap: 5px; font-size: 10.5px; letter-spacing: .2em; }
+#setup input {
+  font: inherit; letter-spacing: .03em; text-transform: none; color: var(--ffb-hot); background: rgba(var(--ffb-grid-rgb), .55);
+  border: 0; border-bottom: 1px solid rgba(var(--ffb-dim-rgb), .7); padding: 6px 8px; outline: none; width: 100%;
+}
+#setup input:focus { border-bottom-color: var(--ffb-you); box-shadow: 0 6px 14px -10px rgba(var(--ffb-you-rgb), var(--glow)); }
+#setup button, #setup a.btn {
+  font: inherit; letter-spacing: .14em; color: var(--ffb-bg); background: var(--ffb-you); border: 0; padding: 6px 14px; cursor: pointer;
+  display: inline-block; box-shadow: 0 0 14px rgba(var(--ffb-you-rgb), calc(var(--glow) * .6));
+}
+#setup button:hover, #setup a.btn:hover { background: var(--ffb-hot); }
+#setup .note { margin-top: 12px; text-transform: none; letter-spacing: .03em; }
+#setup .small { font-size: 10.5px; margin-top: 10px; }
+#setup ul.leagues { margin: 10px 0; }
+#setup ul.leagues li { display: grid; grid-template-columns: 1fr auto; column-gap: 12px; padding: 7px 10px; cursor: pointer; }
+#setup ul.leagues li .you { grid-column: 1 / 3; font-size: 11px; }
+#setup ul.leagues li:hover, #setup ul.leagues li.cur { background: rgba(var(--ffb-grid-rgb), .6); }
+#setup .league { margin: 4px 0 12px; }
+#setup .big { font-size: 18px; letter-spacing: .12em; }
+@media (max-width: 700px) { #setup form { grid-template-columns: 1fr; } }
+
 /* ── boot ───────────────────────────────────────────────────────────── */
 #boot { position: absolute; inset: 0; z-index: 40; background: var(--ffb-bg); display: grid; place-items: center; pointer-events: none; }
 #boot pre { font: inherit; color: var(--ffb-you); line-height: 1.9; text-shadow: 0 0 9px rgba(var(--ffb-you-rgb), var(--glow)); }

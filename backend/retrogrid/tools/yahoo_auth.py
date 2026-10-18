@@ -22,12 +22,12 @@ from datetime import date
 from urllib.parse import parse_qs, urlencode, urlparse
 
 from ..providers.yahoo import LEAGUE_FILE, list_leagues
-from ..providers.yahoo_api import AUTH_URL, YahooAuth, YahooClient, YahooError, credentials
+from ..providers.yahoo_api import AUTH_URL, YahooAuth, YahooClient, YahooError, app_keys, credentials
 
 
 def sign_in(auth: YahooAuth) -> None:
     cid, _ = credentials()
-    redirect = os.environ.get("YAHOO_REDIRECT_URI", "oob")
+    redirect = (app_keys() or ("", "", "oob"))[2]
     url = f"{AUTH_URL}?{urlencode({'client_id': cid, 'redirect_uri': redirect, 'response_type': 'code'})}"
     print(f"\nOpen this, approve read access:\n\n  {url}\n")
     webbrowser.open(url)

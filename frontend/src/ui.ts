@@ -215,7 +215,8 @@ export class Ui {
       "[M] RADIO · [H] OTHER BOOTH · [-][=] VOL · [N] MUTE CUES",
       s.clock.live ? "" : "[SPACE] HOLD · [1-4] RATE · [←→] SKIP",
       `[C] AUTO-REPLAY <span id="cycle">${this.cycleText}</span> · [ [ ] ] STEP · [/] BACK`,
-      s.ffb_available ? `[X] FANTASY LAYER ${ffb ? "ON" : "OFF"}` + (ffb ? " · [V] VIEWER · [L] SCOPE · [TAB] LINEUP/CHATTER" : "") : "",
+      s.ffb_available ? `[X] FANTASY LAYER ${ffb ? "ON" : "OFF"} · [Y] LEAGUE` + (ffb ? " · [V] VIEWER · [L] SCOPE · [TAB] LINEUP/CHATTER" : "")
+        : s.league_error ? `<span class="them">[Y] YAHOO LEAGUE NOT LOADED: SEE WHY</span>` : `<span class="hot">[Y] FANTASY: CONNECT YOUR YAHOO LEAGUE</span>`,
     ].filter(Boolean).join("<br>");
     if ($("keys").dataset.k !== k) { $("keys").dataset.k = k; $("keys").innerHTML = k; }
   }

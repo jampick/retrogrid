@@ -127,8 +127,9 @@ async def swap(new, tasks: list[asyncio.Task]) -> list[asyncio.Task]:           
     old, console.engine = console.engine, new
     fresh = console.launch(new)
     for ws, s in list(console._by_ws.items()):
+        arrived = new.league is not None and getattr(old, "league", None) is None      # a league was just connected: show it
         ns = console.Session(ws, s.viewer if s.viewer in new.teams else new.default_viewer,
-                             ffb=s.ffb and new.league is not None, favs=set(s.favs), auto=s.auto, redzone=s.redzone)
+                             ffb=(s.ffb or arrived) and new.league is not None, favs=set(s.favs), auto=s.auto, redzone=s.redzone)
         console._by_ws[ws] = ns
         await new.attach(ns)
     if old is not None:
@@ -242,6 +243,31 @@ async def choose(key: str) -> None:
     finally:
         busy = None
     await _say({"type": "gameday", "busy": None, "note": note, "options": gameday_options(console.engine)})
+
+
+async def reload_league() -> None:
+    """The setup screen changed the league (picked, signed out, forgotten): build the
+    same day again around it and swap it in. Yahoo is slow, so off the loop."""
+    global busy
+    from . import console
+    if console.engine is None or not hasattr(console.engine, "slate") or _lock.locked():
+        return
+    busy = "league"
+    await _say({"type": "league", "reloading": True})
+    try:
+        async with _lock:
+            old = console.engine
+            new = await asyncio.to_thread(console.Engine, old.live, old.slate_dir)
+            await _put(new)
+        if new.league is not None:                            # a new league's players have no sprites yet: draw them behind the show
+            asyncio.create_task(asyncio.to_thread(_tool, "build_sprites", ["--slate", str(new.slate_dir)]))
+    except Exception as exc:                                  # noqa: BLE001 — keep what is up
+        log.warning("league reload failed: %s", exc)
+    finally:
+        busy = None
+    e = console.engine
+    await _say({"type": "league", "reloading": False, "error": getattr(e, "league_error", None),
+                "name": e.league.league().name if getattr(e, "league", None) else None})
 
 
 async def _put(new) -> None:                                  # noqa: ANN001

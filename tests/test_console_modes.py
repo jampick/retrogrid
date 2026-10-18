@@ -58,6 +58,21 @@ def test_ffb_layer_is_opt_in_per_session(monkeypatch):
 
 
 @needs_slate
+def test_ffb_ghosts_follow_the_focused_game(monkeypatch):
+    console, e = _engine(monkeypatch, "stub")
+    s = console.Session(ws=None, viewer=e.default_viewer, ffb=True)
+    team = lambda pid: e.directory.player(pid).team if e.directory.player(pid) else pid.removeprefix("DEF-")
+    mine = [sl.player_id for sl in e.rosters[s.viewer].starters()]
+    s.focus = e.team_game[team(mine[0])]
+    g = e.state_frame(s)["ghosts"]["you"]
+    assert g and e.team_game.get(team(g["player_id"])) == s.focus          # one of mine in this game is the hologram
+    empty = next((gid for gid in set(e.team_game.values()) if all(e.team_game.get(team(p)) != gid for p in mine)), None)
+    if empty:
+        s.focus = empty
+        assert e.state_frame(s)["ghosts"]["you"]["player_id"] in mine     # none of mine here: hottest anywhere
+
+
+@needs_slate
 def test_ffb_frame_says_who_has_played_and_shows_the_league(monkeypatch):
     console, e = _engine(monkeypatch, "stub")
     s = console.Session(ws=None, viewer=e.default_viewer, ffb=True)

@@ -583,11 +583,21 @@ class Engine:
 
     def heat_pick(self, s: Session, side: str, key: str | None, now: float) -> dict | None:
         """The hologram for one flank. `key` is a fantasy roster — or, with no
-        fantasy layer, an NFL team: that side's hottest hand in the focused game."""
+        fantasy layer, an NFL team: that side's hottest hand in the focused game.
+        A roster's starters in the focused game come first; with none there, its
+        hottest starter anywhere."""
         from .models import RosterSlot
         if key is None:
             return None
-        pool = self.rosters[key].starters() if s.ffb else [RosterSlot("", pid) for pid in sorted(self.by_team.get(key, ()))]
+        if s.ffb:
+            pool = self.rosters[key].starters()
+            def team(pid: str) -> str:
+                pl = self.directory.player(pid)
+                return pl.team if pl else pid.removeprefix("DEF-")
+            here = [sl for sl in pool if s.focus and self.team_game.get(team(sl.player_id)) == s.focus]
+            pool = here or pool
+        else:
+            pool = [RosterSlot("", pid) for pid in sorted(self.by_team.get(key, ()))]
         best, best_score, best_slot = None, -1.0, ""
         for slot in pool:
             score = sum(abs(pts) * 0.5 ** ((now - t) / RECENT_HALF_LIFE) for t, pts in self.recent.get(slot.player_id, []) if t <= now)
